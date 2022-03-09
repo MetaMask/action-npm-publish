@@ -1,5 +1,5 @@
-name: 'NPM Publish'
-description: 'NPM Publish the release'
+name: 'Publish to npm'
+description: 'Publish the release to npm'
 inputs:
   npm-token:
     description: 'The token used for npm publishing. Publishing to npm will be skipped if omitted.'
