@@ -49,13 +49,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: cache-build
     steps:
-      - uses: actions/checkout@v2
-      - name: Get Node.js version
-        id: nvm
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-      - uses: actions/setup-node@v2
-        with:
-          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
       - uses: actions/cache@v2
         id: restore-build
         with:
@@ -65,5 +58,4 @@ jobs:
         uses: rickycodes/action-npm-publish@c561c6562c3f8c24cd6372b526a5feb138506332
         with:
           npm-token: ${{ secrets.NPM_TOKEN }}
-
 ```
