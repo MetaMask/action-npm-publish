@@ -1,0 +1,15 @@
+name: 'Publish to npm'
+description: 'Publish the release to npm'
+inputs:
+  npm-token:
+    description: 'The token used for npm publishing. Publishing to npm will be skipped if omitted.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - id: Publish
+      shell: bash
+      run: ${{ github.action_path }}/scripts/npm-publish.sh
+      env:
+        NPM_TOKEN: ${{ inputs.npm-token }}
