@@ -9,5 +9,5 @@ if [[ -z $NPM_TOKEN ]]; then
   exit 1
 fi
 
-npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
 npm publish
