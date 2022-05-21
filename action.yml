@@ -2,7 +2,7 @@ name: 'Publish to npm'
 description: 'Publish the release to npm'
 inputs:
   npm-token:
-    description: 'The token used for npm publishing. Publishing to npm will be skipped if omitted.'
+    description: 'The token used for npm publishing. If omitted the action will perform a --dry-run publish.'
     required: false
 
 runs:
