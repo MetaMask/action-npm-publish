@@ -2,7 +2,7 @@
 
 ## Description
 
-GitHub action to publish an npm module with a provided `npm-token`.
+GitHub action to publish an npm module with a provided `npm-token`. If the `npm-token` is omitted the action will perform a dry run npm publish by default.
 
 ## Usage
 
@@ -48,12 +48,23 @@ jobs:
         with:
           path: ./*
           key: ${{ github.sha }}
-
-  publish-npm:
-    # use a github actions environment
-    evironment: publish
+  publish-npm-dry-run:
     runs-on: ubuntu-latest
     needs: cache-build
+    steps:
+      - uses: actions/cache@v2
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+      - name: Publish
+        # omitting npm-token will perform a dry run publish
+        uses: MetaMask/action-npm-publish@v1
+  publish-npm:
+    # use a github actions environment
+    environment: publish
+    runs-on: ubuntu-latest
+    needs: publish-npm-dry-run
     steps:
       - uses: actions/cache@v2
         id: restore-build
