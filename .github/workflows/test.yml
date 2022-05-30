@@ -1,0 +1,14 @@
+name: test
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - run: |
+          npm install
+          yarn lint:eslint
+          npm test
