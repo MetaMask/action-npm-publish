@@ -6,6 +6,6 @@ set -o pipefail
 
 ./config_set.sh
 
-./detect.sh
+./monorepo.sh
 
 ./publish.sh
