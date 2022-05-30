@@ -1,0 +1,27 @@
+name: test-monorepo
+on:
+  push:
+    branches: main
+  pull_request:
+jobs:
+  checkout_publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: MetaMask/snaps-skunkworks
+          ref: v0.16.0
+          path: skunkworks
+      - uses: actions/checkout@v3
+        with:
+          path: action-npm-publish
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+      - name: Setup, Build, Publish
+        run: |
+          cd skunkworks
+          npm config set ignore-scripts true
+          yarn plugin import workspace-tools
+          yarn install
+          ../action-npm-publish/scripts/main.sh

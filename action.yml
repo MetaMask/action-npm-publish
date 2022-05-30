@@ -10,6 +10,6 @@ runs:
   steps:
     - id: Publish
       shell: bash
-      run: ${{ github.action_path }}/scripts/npm-publish.sh
+      run: ${{ github.action_path }}/scripts/main.sh
       env:
         NPM_TOKEN: ${{ inputs.npm-token }}
