@@ -10,5 +10,5 @@ if [[ -z $NPM_TOKEN ]]; then
   exit 0
 fi
 
-npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
+#TODO: detect if module has been published
 npm publish
