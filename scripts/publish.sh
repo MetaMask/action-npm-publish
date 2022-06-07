@@ -10,5 +10,5 @@ if [[ -z $NPM_TOKEN ]]; then
   exit 0
 fi
 
-#TODO: detect if module has been published
+# TODO: detect if module has been published
 npm publish
