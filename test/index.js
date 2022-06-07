@@ -46,7 +46,7 @@ test('should error when token is invalid', async t => {
 
 test('should correctly set NPM token', async t => {
   await new Promise(resolve => {
-    exec(`NPM_TOKEN=${FAKE} ./scripts/config_set.sh`, error => {
+    exec(`NPM_TOKEN=${FAKE} ./scripts/config_set.sh`, () => {
       resolve();
     });
   });
