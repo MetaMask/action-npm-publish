@@ -1,4 +1,3 @@
-const { resolve } = require('path');
 const { exec } = require('child_process');
 const { test } = require('tapzero');
 const package = require('../package.json');
