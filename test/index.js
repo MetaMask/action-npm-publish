@@ -56,8 +56,8 @@ test('should correctly set NPM token', async t => {
   });
 
   await new Promise((resolve, reject) => {
-    exec("cat ~/.npmrc", (_, stdout) => {
-      console.log(_);
+    exec("cat ~/.npmrc", (error, stdout) => {
+      if (error) reject();
       t.equal(stdout.includes(FAKE), true);
       resolve();
     });
