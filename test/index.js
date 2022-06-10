@@ -17,8 +17,9 @@ test('should only have one devDependency from now until forever', async t => {
 });
 
 test('should not error when performing a dry-run publish', async t => {
-  await new Promise(resolve => {
+  await new Promise((resolve, reject) => {
     exec("./scripts/publish.sh", error => {
+      if (error) reject();
       t.equal(error, null);
       resolve();
     });
@@ -26,8 +27,9 @@ test('should not error when performing a dry-run publish', async t => {
 });
 
 test('correct version should appear in dry-run output', async t => {
-  await new Promise(resolve => {
-    exec("./scripts/publish.sh", (_, __, stderr) => {
+  await new Promise((resolve, reject) => {
+    exec("./scripts/publish.sh", (error, __, stderr) => {
+      if (error) reject();
       const { version } = package;
       t.equal(stderr.includes(version), true);
       resolve();
@@ -36,8 +38,9 @@ test('correct version should appear in dry-run output', async t => {
 });
 
 test('should error when token is invalid', async t => {
-  await new Promise(resolve => {
+  await new Promise((resolve, reject) => {
     exec(`NPM_TOKEN=${FAKE} ./scripts/publish.sh`, error => {
+      if (!error) reject();
       t.equal(error.code, 1);
       resolve();
     });
@@ -45,14 +48,16 @@ test('should error when token is invalid', async t => {
 });
 
 test('should correctly set NPM token', async t => {
-  await new Promise(resolve => {
-    exec(`NPM_TOKEN=${FAKE} ./scripts/config_set.sh`, () => {
+  await new Promise((resolve, reject) => {
+    exec(`NPM_TOKEN=${FAKE} ./scripts/config_set.sh`, error => {
+      if (error) reject();
       resolve();
     });
   });
 
-  await new Promise(resolve => {
+  await new Promise((resolve, reject) => {
     exec("cat ~/.npmrc", (_, stdout) => {
+      console.log(_);
       t.equal(stdout.includes(FAKE), true);
       resolve();
     });
