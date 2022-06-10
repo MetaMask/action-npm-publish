@@ -4,8 +4,10 @@ set -x
 set -e
 set -o pipefail
 
-./config_set.sh
+script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
-./monorepo.sh
+"${script_path}"/config_set.sh
 
-./publish.sh
+"${script_path}"/monorepo.sh
+
+"${script_path}"/publish.sh
