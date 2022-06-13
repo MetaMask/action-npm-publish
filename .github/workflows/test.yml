@@ -11,5 +11,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: npm install
-      - run: npm t
+      - run: |
+        npm install
+        yarn lint:eslint
+        npm t

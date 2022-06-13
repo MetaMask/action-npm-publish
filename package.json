@@ -1,6 +1,8 @@
 {
   "name": "action-npm-publish",
   "scripts": {
+    "lint:eslint": "eslint . --cache --ext js,ts",
+    "lint:fix": "yarn lint:eslint --fix",
     "test": "node test/index.js"
   },
   "license": "MIT",
@@ -13,6 +15,15 @@
     "node": "^14.0.0"
   },
   "devDependencies": {
+    "@metamask/eslint-config": "^9.0.0",
+    "@metamask/eslint-config-nodejs": "^9.0.0",
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsdoc": "^39.3.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.6.2",
     "tapzero": "^0.6.1"
   }
 }
