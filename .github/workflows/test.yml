@@ -12,6 +12,6 @@ jobs:
         with:
           node-version: 14
       - run: |
-        npm install
-        yarn lint:eslint
-        npm t
+          npm install
+          yarn lint:eslint
+          npm t
