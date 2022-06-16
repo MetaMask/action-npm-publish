@@ -1,0 +1,14 @@
+name: test
+on:
+  push:
+    branches: main
+  pull_request:
+jobs:
+  checkout_babel_and_publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+          repository: babel/babel
+      - name: Publish
+        # omitting npm-token will perform a dry run publish
+        uses: MetaMask/action-npm-publish@32f3613e89c90fa53279a01589bdfe0ecf9ce33f
