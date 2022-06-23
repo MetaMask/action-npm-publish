@@ -1,8 +1,5 @@
 name: test-polyrepo
-on:
-  push:
-    branches: main
-  pull_request:
+on: [push]
 jobs:
   checkout_publish:
     runs-on: ubuntu-20.04

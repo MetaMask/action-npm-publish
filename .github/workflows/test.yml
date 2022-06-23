@@ -1,8 +1,5 @@
 name: test
-on:
-  push:
-    branches: main
-  pull_request:
+on: [push]
 jobs:
   test:
     runs-on: ubuntu-20.04
