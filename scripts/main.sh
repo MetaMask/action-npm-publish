@@ -12,7 +12,8 @@ fi
 
 if [[ "$(jq 'has("workspaces")' package.json)" == "true" ]]; then
   echo "Notice: workspaces detected. Treating as monorepo."
-  npm exec -c "${script_path}"/publish.sh --workspaces
+  # npm exec -c "$script_path/publish.sh" --workspaces
+  npm exec -c "npm publish --dry-run" --workspaces
   exit 0
 fi
 
