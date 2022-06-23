@@ -12,9 +12,7 @@ fi
 
 if [[ "$(jq 'has("workspaces")' package.json)" == "true" ]]; then
   echo "Notice: workspaces detected. Treating as monorepo."
-  # yarn workspaces foreach --no-private --verbose exec "${script_path}"/publish.sh
-  # try npm instead
-  npm exec -wc "${script_path}"/publish.sh
+  npm exec -c "${script_path}"/publish.sh --workspaces
   exit 0
 fi
 
