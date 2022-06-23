@@ -21,7 +21,7 @@ jobs:
       - name: Setup, Build, Publish
         run: |
           cd skunkworks
-          npm config set ignore-scripts true
+          npm config set scripts-prepend-node-path auto
           yarn plugin import workspace-tools
           yarn install
           ../action-npm-publish/scripts/main.sh
