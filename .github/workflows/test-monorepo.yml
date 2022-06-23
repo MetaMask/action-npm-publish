@@ -20,6 +20,8 @@ jobs:
           node -v
           yarn -v
           cd skunkworks
-          npm config set ignore-scripts true
+          yarn policies set-version
+          node -v
+          yarn -v
           yarn install
           ../action-npm-publish/scripts/main.sh
