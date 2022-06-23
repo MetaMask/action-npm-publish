@@ -20,8 +20,8 @@ jobs:
           node -v
           yarn -v
           cd skunkworks
+          yarn policies set-version 3.2.1
           yarn install --frozen-lockfile
-          yarn policies set-version
           node -v
           yarn -v
           ../action-npm-publish/scripts/main.sh
