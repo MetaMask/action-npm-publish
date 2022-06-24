@@ -17,6 +17,7 @@ jobs:
           node -v
           yarn -v
           cd skunkworks
+          npm config set ignore-scripts true
           yarn install --immutable
           node -v
           yarn -v
