@@ -12,6 +12,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: action-npm-publish
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 12
       - name: Setup, Build, Publish
         run: |
           cd controllers
