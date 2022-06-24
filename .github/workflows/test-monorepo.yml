@@ -7,18 +7,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
-          ref: v0.16.0
+          ref: 2befb570c72fddd577410b0193982332eed0fc41
           path: skunkworks
       - uses: actions/checkout@v3
         with:
           path: action-npm-publish
       - name: Setup, Build, Publish
         run: |
-          node -v
-          yarn -v
           cd skunkworks
-          npm config set ignore-scripts true
           yarn install --immutable
-          node -v
-          yarn -v
           ../action-npm-publish/scripts/main.sh
