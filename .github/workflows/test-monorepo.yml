@@ -7,14 +7,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
-          ref: v0.16.3
+          ref: v0.16.0
           path: skunkworks
       - uses: actions/checkout@v3
         with:
           path: action-npm-publish
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
       - name: Setup, Build, Publish
         run: |
           node -v
