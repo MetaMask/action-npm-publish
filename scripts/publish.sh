@@ -13,7 +13,7 @@ fi
 # check param, if it's set (monorepo) we check if it's published before proceeding
 if [[ -n "$1" ]]; then
   # check if module is published
-  LATEST_PACKAGE_VERSION=$(npm view . version || echo "")
+  LATEST_PACKAGE_VERSION=$(npm view . version --workspaces=false || echo "")
   CURRENT_PACKAGE_VERSION=$(jq --raw-output .version package.json)
 
   if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
