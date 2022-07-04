@@ -17,7 +17,7 @@ if [[ -n "$1" ]]; then
   CURRENT_PACKAGE_VERSION=$(jq --raw-output .version package.json)
 
   if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
-    echo "Notice: This module is already published at this version. aborting publish."
+    echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. aborting publish."
     exit 0
   fi
 fi
