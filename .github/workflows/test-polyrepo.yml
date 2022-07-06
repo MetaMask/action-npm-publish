@@ -1,0 +1,24 @@
+name: test-polyrepo
+on: [push]
+jobs:
+  checkout_publish_controllers_dry_run:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: MetaMask/controllers
+          ref: v30.0.0
+          path: controllers
+      - uses: actions/checkout@v3
+        with:
+          path: action-npm-publish
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 12
+      - name: Setup, Build, Publish
+        shell: bash
+        run: |
+          cd controllers
+          yarn setup
+          yarn build
+          ../action-npm-publish/scripts/main.sh

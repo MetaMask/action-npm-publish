@@ -1,0 +1,20 @@
+name: test-monorepo
+on: [push]
+jobs:
+  checkout_publish_skunkworks_dry_run:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: MetaMask/snaps-skunkworks
+          ref: 2befb570c72fddd577410b0193982332eed0fc41
+          path: skunkworks
+      - uses: actions/checkout@v3
+        with:
+          path: action-npm-publish
+      - name: Setup, Build, Publish
+        run: |
+          cd skunkworks
+          yarn install --immutable
+          yarn plugin import workspace-tools
+          ../action-npm-publish/scripts/main.sh
