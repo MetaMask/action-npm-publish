@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "action-npm-publish",
   "scripts": {
     "lint:eslint": "eslint . --cache --ext js,ts",
