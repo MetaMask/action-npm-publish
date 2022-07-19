@@ -1,6 +1,7 @@
 name: test-monorepo
 on: [push]
 jobs:
+  # test npm publish dry-run
   checkout_publish_skunkworks_dry_run:
     runs-on: ubuntu-20.04
     steps:
@@ -18,7 +19,8 @@ jobs:
           yarn install --immutable
           yarn plugin import workspace-tools
           ../action-npm-publish/scripts/main.sh
-  checkout_publish_skunkworks_dry_run_skip:
+  # test npm publish publish skip
+  checkout_publish_skunkworks_skip:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
