@@ -19,7 +19,7 @@ jobs:
           yarn install --immutable
           yarn plugin import workspace-tools
           ../action-npm-publish/scripts/main.sh
-  # test npm publish publish skip
+  # test that publishing is skipped when attempting to republish the current version
   checkout_publish_skunkworks_skip:
     runs-on: ubuntu-20.04
     steps:
