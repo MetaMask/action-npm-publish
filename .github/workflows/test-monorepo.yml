@@ -25,11 +25,11 @@ jobs:
     steps:
       - name: Get Latest Release Tag
         id: latestrelease
-        run: echo "::set-output name=releasetag::$(curl -s https://api.github.com/repos/MetaMask/snaps-skunkworks/releases/latest | jq .tag_name | sed 's/\"//g')"
+        run: echo "::set-output name=releasetag::$(npm view MetaMask/snaps-skunkworks version --workspaces=false)"
       - uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
-          ref: ${{ steps.latestrelease.outputs.releasetag }}
+          ref: v${{ steps.latestrelease.outputs.releasetag }}
           path: skunkworks
       - uses: actions/checkout@v3
         with:
