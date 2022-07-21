@@ -19,14 +19,17 @@ jobs:
           yarn install --immutable
           yarn plugin import workspace-tools
           ../action-npm-publish/scripts/main.sh
-  # test that publishing is skipped when attempting to republish the current version
+  # test that publishing is skipped when attempting to republish the latest version
   checkout_publish_skunkworks_skip:
     runs-on: ubuntu-20.04
     steps:
+      - name: Get Latest Release Tag
+        id: latestrelease
+        run: echo "::set-output name=releasetag::$(curl -s https://api.github.com/repos/MetaMask/snaps-skunkworks/releases/latest | jq .tag_name | sed 's/\"//g')"
       - uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
-          ref: v0.18.1
+          ref: ${{ steps.latestrelease.outputs.releasetag }}
           path: skunkworks
       - uses: actions/checkout@v3
         with:
