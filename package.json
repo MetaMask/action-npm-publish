@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "action-npm-publish",
   "scripts": {
     "lint:eslint": "eslint . --cache --ext js,ts",
@@ -12,7 +13,7 @@
     "test": "test"
   },
   "engines": {
-    "node": "^14.0.0"
+    "node": "^16.0.0"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^9.0.0",
