@@ -4,6 +4,15 @@ inputs:
   npm-token:
     description: 'The token used for npm publishing. If omitted the action will perform a dry run npm publish.'
     required: false
+  announce:
+    description: 'Whether to announce the dry run output into a Slack channel'
+    default: true
+  channel-id:
+    description: 'Channel id re: above Slack `announce`'
+    required: false
+  slack-message:
+    description: 'Channel message re: above Slack `announce`'
+    required: false
 
 runs:
   using: 'composite'
