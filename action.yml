@@ -6,12 +6,9 @@ inputs:
     required: false
   announce:
     description: 'Whether to announce the dry run output into a Slack channel'
-    default: true
+    default: false
   channel-id:
     description: 'Channel id re: above Slack `announce`'
-    required: false
-  slack-message:
-    description: 'Channel message re: above Slack `announce`'
     required: false
 
 runs:
@@ -22,3 +19,12 @@ runs:
       run: ${{ github.action_path }}/scripts/main.sh
       env:
         NPM_TOKEN: ${{ inputs.npm-token }}
+    - name: Post to a Slack channel
+      id: slack
+      if: ${{ inputs.announce }} == 'true' && ${{ inputs.channel-id }}
+      uses: slackapi/slack-github-action@v1.22.0
+      with:
+        channel-id: ${{ inputs.channel-id }}
+        slack-message: 'A deployment is awaiting review and deployment at: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
