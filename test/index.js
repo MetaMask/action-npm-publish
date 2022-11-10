@@ -44,7 +44,7 @@ test('correct version should appear in dry-run output', async (t) => {
 
 test('should error when token is invalid', async (t) => {
   await new Promise((resolve, reject) => {
-    exec(`NPM_TOKEN=${FAKE} ./scripts/main.sh`, (error) => {
+    exec(`YARN_NPM_AUTH_TOKEN=${FAKE} ./scripts/main.sh`, (error) => {
       if (!error) {
         reject(new Error(INVALID_TOKEN));
       }
