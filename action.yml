@@ -1,8 +1,11 @@
 name: 'Publish to npm'
 description: 'Publish the release to npm'
 inputs:
+  npm-registry:
+    description: 'The URL of the NPM registry that Yarn commands will use to access and publish packages.'
+    required: false
   npm-token:
-    description: 'The token used for npm publishing. If omitted the action will perform a dry run npm publish.'
+    description: 'The auth token associated with the registry that Yarn commands will use to access and publish packages. If omitted, the action will perform a dry-run publish.'
     required: false
 
 runs:
@@ -12,4 +15,5 @@ runs:
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
+        YARN_NPM_REGISTRY_SERVER: ${{ inputs.npm-registry }}
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
