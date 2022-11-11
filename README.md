@@ -1,86 +1,41 @@
 # action-npm-publish
 
-## Description
+This is a GitHub action that handles publishing to NPM for a project that represents a single package (in the case of a polyrepo) or a collection of packages (in the case of a monorepo).
 
-GitHub action to publish an npm module with a provided `npm-token`. If the `npm-token` is omitted the action will perform a dry run npm publish by default.
+- For a polyrepo project, the action will publish the package using its current version as per `package.json`.
 
-This action assumes that Yarn is installed and that the package is using Yarn v3. It may fail for other Yarn versions or other package managers.
+- For a monorepo, the action will publish each workspace package (the set of packages matched via the `workspaces` field in `package.json`, recursively) using its current version as per `package.json`. (Any package which has already been published at its current version will be skipped.)
 
-If your package has a `prepack` script and is using the `node-modules` linker, you will need to ensures that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
+**This action assumes that Yarn is installed and that the package is using Yarn v3.** It may fail for other Yarn versions or other package managers.
+
+If your project is configured to use the `node-modules` linker and defines a `prepack` script for any releasable packages, you will need to ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
 
 ## Usage
 
-Pass your token to the action:
+### Quick start
+
+If you're in a hurry, take a look at the [`publish-release` workflow](https://github.com/MetaMask/metamask-module-template/blob/main/.github/workflows/publish-release.yml) from the [module template](https://github.com/MetaMask/metamask-module-template), which uses this action to publish appropriate packages whenever a release commit is merged, once in dry-run mode and once in "real" mode. (A release commit is a commit that changes the version of the primary package within the project, whether that is the sole package in the case of a polyrepo package, or the root package in the case of a monorepo.) Note that in order to use this workflow file in your project, you will need to create an `npm-publish` environment via your repository's settings and set the `NPM_TOKEN` secret within this environment to the authentication token for the MetaMask organization on `npmjs.com`.
+
+### Publish mode
+
+Add the following to a job's list of steps. This requires that you set the `NPM_TOKEN` secret in your repository's settings to an appropriate NPM authentication token:
 
 ```yaml
-- name: Publish
-  uses: MetaMask/action-npm-publish@v1
+- uses: MetaMask/action-npm-publish@v2
   with:
     npm-token: ${{ secrets.NPM_TOKEN }}
 ```
 
-To publish an npm module whenever a release PR is merged, you could do something like this:
+### Dry run mode
+
+If you omit `npm-token`, then packages will be prepared for publishing, but no publishing will actually occur:
 
 ```yaml
-name: Publish to npm
-
-on:
-  pull_request:
-    types: [closed]
-
-jobs:
-  cache-build:
-    permissions:
-      contents: write
-    if: |
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'release/')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-      - run: |
-          yarn install
-          yarn build
-      - uses: actions/cache@v2
-        id: restore-build
-        with:
-          path: |
-            ./dist
-            ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
-  publish-npm-dry-run:
-    runs-on: ubuntu-latest
-    needs: cache-build
-    steps:
-      - uses: actions/cache@v2
-        id: restore-build
-        with:
-          path: |
-            ./dist
-            ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
-      - name: Publish
-        # omitting npm-token will perform a dry run publish
-        uses: MetaMask/action-npm-publish@v1
-  publish-npm:
-    # use a github actions environment
-    environment: publish
-    runs-on: ubuntu-latest
-    needs: publish-npm-dry-run
-    steps:
-      - uses: actions/cache@v2
-        id: restore-build
-        with:
-          path: |
-            ./dist
-            ./node_modules/.yarn-state.yml
-          key: ${{ github.sha }}
-      - name: Publish
-        uses: MetaMask/action-npm-publish@v1
-        with:
-          npm-token: ${{ secrets.NPM_TOKEN }}
+- uses: MetaMask/action-npm-publish@v2
 ```
+
+## API
+
+### Inputs
+
+- **`npm-token`** _(optional)_. The auth token associated with the registry that Yarn commands will use to access and publish packages. If omitted, the action will perform a dry-run publish.
