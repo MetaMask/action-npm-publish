@@ -7,8 +7,8 @@ inputs:
   announce:
     description: 'Whether to announce a deployment into a Slack channel'
     default: false
-  channel-id:
-    description: 'Channel id re: above Slack `announce`'
+  slack-webhook-url:
+    description: 'Slack Webhook URL'
     required: false
 
 runs:
@@ -21,7 +21,7 @@ runs:
         NPM_TOKEN: ${{ inputs.npm-token }}
     - name: Post to a Slack channel
       id: slack
-      if: ${{ inputs.announce }} == 'true' && ${{ inputs.channel-id }}
+      if: ${{ inputs.announce }} == 'true' && ${{ inputs.slack-webhook-url }}
       uses: slackapi/slack-github-action@v1.22.0
       with:
         # For posting a rich message using Block Kit
@@ -39,5 +39,5 @@ runs:
             ]
           }
       env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
