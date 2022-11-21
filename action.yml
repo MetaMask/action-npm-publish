@@ -24,7 +24,20 @@ runs:
       if: ${{ inputs.announce }} == 'true' && ${{ inputs.channel-id }}
       uses: slackapi/slack-github-action@v1.22.0
       with:
-        channel-id: ${{ inputs.channel-id }}
-        slack-message: 'A deployment is awaiting review and deployment at: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+        # For posting a rich message using Block Kit
+        payload: |
+          {
+            "text": "A deployment is awaiting review and deployment at: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "A deployment is awaiting review and deployment at: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/"
+                }
+              }
+            ]
+          }
       env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
