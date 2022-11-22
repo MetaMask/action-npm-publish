@@ -6,9 +6,9 @@ set -o pipefail
 
 if [[ -z $NPM_TOKEN ]]; then
   echo "Notice: NPM_TOKEN environment variable not set. Running 'npm publish --dry-run'."
-  DRY_RUN_OUTPUT=$(npm publish --dry-run)
-  echo "$DRY_RUN_OUTPUT"
-  echo "$DRY_RUN_OUTPUT" >> "$GITHUB_OUTPUT"
+  npm publish --dry-run
+  # echo "$DRY_RUN_OUTPUT"
+  # echo "$DRY_RUN_OUTPUT" >> "$GITHUB_OUTPUT"
   exit 0
 fi
 
