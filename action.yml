@@ -27,13 +27,24 @@ runs:
         # For posting a rich message using Block Kit
         payload: |
           {
-            "text": "A deployment is awaiting review and deployment at: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
+            "text": "A deployment is awaiting review :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "A deployment is awaiting review and deployment at: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/"
+                  "text": "A deployment is awaiting review :rocket:"
+                },
+                "accessory": {
+                  "type": "button",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "Review",
+                    "emoji": true
+                  },
+                  "value": "review_deploy",
+                  "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
+                  "action_id": "button-action"
                 }
               }
             ]
