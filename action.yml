@@ -15,7 +15,7 @@ runs:
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
-        NPM_TOKEN: ${{ inputs.npm-token }}
+        YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
     - id: name-version
       shell: bash
       if: inputs.slack-webhook-url != ''
