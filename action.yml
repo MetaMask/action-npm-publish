@@ -17,6 +17,7 @@ runs:
       env:
         NPM_TOKEN: ${{ inputs.npm-token }}
     - id: name-version
+      shell: bash
       run: |
         echo "NAME_VERSION=$(jq '.name + "@" + .version' package.json)" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
