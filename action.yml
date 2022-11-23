@@ -21,7 +21,7 @@ runs:
       run: |
         NAME_VERSION=$(jq '.name + "@" + .version' package.json)
         echo "$NAME_VERSION"
-        echo "$NAME_VERSION" >> "$GITHUB_OUTPUT"
+        echo "NAME_VERSION=$NAME_VERSION" >> "$GITHUB_OUTPUT"
     - shell: bash
       run: |
         echo "$NAME_VERSION"
