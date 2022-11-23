@@ -4,9 +4,9 @@ set -x
 set -e
 set -o pipefail
 
-if [[ -z $NPM_TOKEN ]]; then
-  echo "Notice: NPM_TOKEN environment variable not set. Running 'npm publish --dry-run'."
-  npm publish --dry-run
+if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
+  echo "Notice: 'npm-token' not set. Running 'yarn pack --dry-run'."
+  yarn pack --dry-run
   exit 0
 fi
 
@@ -22,4 +22,4 @@ if [[ -n "$1" ]]; then
   fi
 fi
 
-npm publish
+yarn npm publish
