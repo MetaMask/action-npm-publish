@@ -18,6 +18,7 @@ runs:
         NPM_TOKEN: ${{ inputs.npm-token }}
     - id: name-version
       shell: bash
+      if: inputs.slack-webhook-url != ''
       run: |
         NAME_VERSION=$(jq --raw-output '.name + "@" + .version' package.json)
         echo "NAME_VERSION=$NAME_VERSION" >> "$GITHUB_OUTPUT"
