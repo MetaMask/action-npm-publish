@@ -19,10 +19,14 @@ runs:
     - id: name-version
       shell: bash
       run: |
-        echo "NAME_VERSION=$(jq '.name + "@" + .version' ${{ github.action_path }}/package.json)" >> "$GITHUB_OUTPUT"
+        NAME_VERSION=$(jq '.name + "@" + .version' package.json)
+        echo "$NAME_VERSION"
+        echo "$NAME_VERSION" >> "$GITHUB_OUTPUT"
     - shell: bash
       run: |
-        echo ${{ steps.name-version.NAME_VERSION }}
+        echo "$NAME_VERSION"
+      env:
+        NAME_VERSION: ${{ steps.name-version.NAME_VERSION }}
     - name: Post to a Slack channel
       id: slack
       if: inputs.slack-webhook-url != ''
@@ -30,13 +34,13 @@ runs:
       with:
         payload: |
           {
-            "text": "`${{ steps.name-version.NAME_VERSION }}` is awaiting review :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
+            "text": "`$NAME_VERSION` is awaiting review :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "`${{ steps.name-version.NAME_VERSION }}` is awaiting review :rocket:"
+                  "text": "`$NAME_VERSION` is awaiting review :rocket:"
                 },
                 "accessory": {
                   "type": "button",
@@ -55,3 +59,4 @@ runs:
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        NAME_VERSION: ${{ steps.name-version.NAME_VERSION }}
