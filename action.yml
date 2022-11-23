@@ -19,10 +19,13 @@ runs:
     - id: name-version
       shell: bash
       run: |
-        echo "NAME_VERSION=$(jq '.name + "@" + .version' package.json)" >> "$GITHUB_OUTPUT"
+        echo "NAME_VERSION=$(jq '.name + "@" + .version' ${{ github.action_path }}/package.json)" >> "$GITHUB_OUTPUT"
+    - shell: bash
+      run: |
+        echo ${{ steps.name-version.NAME_VERSION }}
     - name: Post to a Slack channel
       id: slack
-      if: ${{ inputs.slack-webhook-url }}
+      if: inputs.slack-webhook-url != ''
       uses: slackapi/slack-github-action@v1.22.0
       with:
         payload: |
