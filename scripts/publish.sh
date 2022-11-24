@@ -6,7 +6,7 @@ set -o pipefail
 
 if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
   echo "Notice: 'npm-token' not set. Running 'yarn pack --dry-run'."
-  yarn pack --dry-run
+  npm publish --dry-run
   exit 0
 fi
 
