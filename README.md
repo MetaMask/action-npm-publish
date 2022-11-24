@@ -36,7 +36,7 @@ If you omit `npm-token`, then packages will be prepared for publishing, but no p
 
 ### Slack announce
 
-You can optionally send deployment announcements to Slack by providing an `slack-webhook-url`:
+You can optionally send deployment announcements to Slack by providing a `slack-webhook-url` input:
 
 ```yaml
 - uses: MetaMask/action-npm-publish@v2
