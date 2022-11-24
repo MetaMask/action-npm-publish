@@ -34,8 +34,22 @@ If you omit `npm-token`, then packages will be prepared for publishing, but no p
 - uses: MetaMask/action-npm-publish@v2
 ```
 
+### Slack announce
+
+You can optionally send deployment announcements to Slack by providing an `slack-webhook-url`:
+
+```yaml
+- uses: MetaMask/action-npm-publish@v2
+  with:
+    slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+```
+
+![image](https://user-images.githubusercontent.com/675259/203841602-124d537d-7476-4263-a17c-6d05b68c37d0.png)
+
 ## API
 
 ### Inputs
 
 - **`npm-token`** _(optional)_. The auth token associated with the registry that Yarn commands will use to access and publish packages. If omitted, the action will perform a dry-run publish.
+
+- **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration. 
