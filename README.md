@@ -52,4 +52,4 @@ You can optionally send deployment announcements to Slack by providing an `slack
 
 - **`npm-token`** _(optional)_. The auth token associated with the registry that Yarn commands will use to access and publish packages. If omitted, the action will perform a dry-run publish.
 
-- **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration. 
+- **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to a Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration. 
