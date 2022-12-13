@@ -11,8 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use Yarn for publishing rather than npm ([#6](https://github.com/MetaMask/action-npm-publish/pull/6))
 
 ## [1.2.0]
-### Changed
-- monorepo ([#5](https://github.com/MetaMask/action-npm-publish/pull/5))
+### Added
+- Add support for monorepos ([#5](https://github.com/MetaMask/action-npm-publish/pull/5))
 
 ## [1.1.0]
 ### Changed
