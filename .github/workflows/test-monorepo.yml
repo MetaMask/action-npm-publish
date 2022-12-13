@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Get Latest Version from npm
         id: latestrelease
-        run: echo "::set-output name=releasever::$(npm view MetaMask/snaps-skunkworks version --workspaces=false)"
+        run: echo "releasever=$(npm view MetaMask/snaps-skunkworks version --workspaces=false)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
@@ -39,4 +39,4 @@ jobs:
           cd skunkworks
           yarn install --immutable
           yarn plugin import workspace-tools
-          NPM_TOKEN=test ../action-npm-publish/scripts/main.sh
+          NPM_TOKEN="test" ../action-npm-publish/scripts/main.sh
