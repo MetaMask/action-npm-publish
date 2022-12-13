@@ -15,8 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for monorepos ([#5](https://github.com/MetaMask/action-npm-publish/pull/5))
 
 ## [1.1.0]
-### Changed
-- Add `--dry-run` ([#4](https://github.com/MetaMask/action-publish-release/pull/4))
+### Added
+- Add ability to execute in dry-run mode by omitting `npm-token` ([#4](https://github.com/MetaMask/action-publish-release/pull/4))
 
 ## [1.0.0]
 ### Changed
