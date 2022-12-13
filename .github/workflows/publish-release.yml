@@ -32,4 +32,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Update shorthand major version tag
-        run: ./scripts/update-major-version-tag.sh ${{ steps.publish-release.outputs.release-version }}
+        run: ./scripts/update-major-version-tag.sh \
+          ${{ steps.publish-release.outputs.release-version }}
