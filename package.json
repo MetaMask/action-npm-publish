@@ -6,8 +6,16 @@
     "lint:fix": "yarn lint:eslint --fix",
     "test": "node test/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MetaMask/action-npm-publish.git"
+  },
   "license": "MIT",
-  "version": "1.1.0",
+  "bugs": {
+    "url": "https://github.com/MetaMask/action-npm-publish/issues"
+  },
+  "homepage": "https://github.com/MetaMask/action-npm-publish#readme",
+  "version": "2.0.0",
   "main": "index.js",
   "directories": {
     "test": "test"
