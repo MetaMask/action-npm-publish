@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0]
 ### Changed
-- Use Yarn for publishing rather than npm ([#6](https://github.com/MetaMask/action-npm-publish/pull/6))
+- **BREAKING:** Require Yarn v3 ([#10](https://github.com/MetaMask/action-npm-publish/pull/10))
+  - If your project is using NPM or Yarn v1, you will need to upgrade it to Yarn v3.
+  - If your package has a `prepack` script and is using the `node-modules` linker, you will need to ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked.
+- Use Yarn for publishing rather than npm ([#10](https://github.com/MetaMask/action-npm-publish/pull/10))
 
 ## [1.2.0]
 ### Added
