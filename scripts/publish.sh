@@ -22,4 +22,8 @@ if [[ -n "$1" ]]; then
   fi
 fi
 
-yarn npm publish
+if [[ "$(yarn --version)" =~ "1" ]]; then
+  npm_config__auth=$YARN_NPM_AUTH_TOKEN yarn publish
+else
+  yarn npm publish
+fi
