@@ -7,10 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [2.1.0]
-### Uncategorized
+### Added
 - Add release workflows ([#15](https://github.com/MetaMask/action-npm-publish/pull/15))
-- Feature/slack announce ([#9](https://github.com/MetaMask/action-npm-publish/pull/9))
-- Bring README up to date ([#12](https://github.com/MetaMask/action-npm-publish/pull/12))
+- Add support for Slack notification when release is pending approval ([#9](https://github.com/MetaMask/action-npm-publish/pull/9))
 
 ## [2.0.0]
 ### Changed
