@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0]
 ### Added
-- Add release workflows ([#15](https://github.com/MetaMask/action-npm-publish/pull/15))
 - Add support for Slack notification when release is pending approval ([#9](https://github.com/MetaMask/action-npm-publish/pull/9))
 
 ## [2.0.0]
