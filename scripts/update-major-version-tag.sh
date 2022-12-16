@@ -17,15 +17,13 @@ git config user.name github-actions
 git config user.email github-actions@github.com
 
 if git show-ref --tags "$MAJOR_VERSION_TAG" --quiet; then
-  echo "Tag ${MAJOR_VERSION_TAG} exists, attempting to delete it."
-  git tag --delete "$MAJOR_VERSION_TAG"
-  git push --delete origin "$MAJOR_VERSION_TAG"
+  echo "Tag ${MAJOR_VERSION_TAG} exists, attempting to replace it."
 else 
   echo "Tag ${MAJOR_VERSION_TAG} does not exist, creating it from scratch."
 fi
 
-git tag "$MAJOR_VERSION_TAG" HEAD
-git push --tags
+git tag -f "$MAJOR_VERSION_TAG" HEAD
+git push --force-with-lease origin "$MAJOR_VERSION_TAG"
 echo "Updated shorthand major version tag."
 
 echo "MAJOR_VERSION_TAG=$MAJOR_VERSION_TAG" >> "$GITHUB_OUTPUT"
