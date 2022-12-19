@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.1]
 ### Fixed
-- Revert Slack accounce feature ([#22](https://github.com/MetaMask/action-npm-publish/pull/22))
+- Revert Slack announce feature ([#22](https://github.com/MetaMask/action-npm-publish/pull/22))
   - The Slack announce feature used the action `slackapi/slack-github-action`. This caused failures in repositories/organizations that use an Action allowlist, unless that action was explicitly allowed. This has been temporarily reverted so that we can properly document this requirement, and make it a breaking change.
 
 ## [2.1.0]
