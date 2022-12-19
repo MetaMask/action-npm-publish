@@ -4,9 +4,6 @@ inputs:
   npm-token:
     description: 'The token used for npm publishing. If omitted the action will perform a dry run npm publish.'
     required: false
-  slack-webhook-url:
-    description: 'Slack Webhook URL'
-    required: false
 
 runs:
   using: 'composite'
@@ -16,30 +13,3 @@ runs:
       run: ${{ github.action_path }}/scripts/main.sh
       env:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
-    - id: name-version
-      shell: bash
-      if: inputs.slack-webhook-url != ''
-      run: |
-        NAME_VERSION=$(jq --raw-output '.name + "@" + .version' package.json)
-        echo "NAME_VERSION=$NAME_VERSION" >> "$GITHUB_OUTPUT"
-    - name: Post to a Slack channel
-      id: slack
-      if: inputs.slack-webhook-url != ''
-      uses: slackapi/slack-github-action@v1.22.0
-      with:
-        payload: |
-          {
-            "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|Click to review>"
-                }
-              }
-            ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
