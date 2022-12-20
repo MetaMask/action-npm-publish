@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [3.0.0]
+### Changed
+- **BREAKING:** Restore Slack notification feature ([#9](https://github.com/MetaMask/action-npm-publish/pull/9), [#22](https://github.com/MetaMask/action-npm-publish/pull/22), [#23](https://github.com/MetaMask/action-npm-publish/pull/23), [#24](https://github.com/MetaMask/action-npm-publish/pull/24))
+  - The action depends upon `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. You may need to update repository or organization settings to allow this action to run.
 
 ## [2.1.1]
 ### Fixed
