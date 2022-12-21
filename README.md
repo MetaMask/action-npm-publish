@@ -6,9 +6,14 @@ This is a GitHub action that handles publishing to NPM for a project that repres
 
 - For a monorepo, the action will publish each workspace package (the set of packages matched via the `workspaces` field in `package.json`, recursively) using its current version as per `package.json`. (Any package which has already been published at its current version will be skipped.)
 
+
+## Requirements
+
 **This action assumes that Yarn is installed and that the package is using Yarn v3.** It may fail for other Yarn versions or other package managers.
 
 If your project is configured to use the `node-modules` linker and defines a `prepack` script for any releasable packages, you will need to ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
+
+This action depends upon the action `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. This action is authored by a Marketplace "verified creator". If your repository or organization restricts which actions can be used and does not allow Marketplace verified creators by default, ensure that this action is listed as an allowed action.
 
 ## Usage
 
