@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0]
+### Added
+- Add optional npm-tag parameter to action ([#30](https://github.com/MetaMask/action-npm-publish/pull/30))
+
 ## [3.0.0]
 ### Changed
 - **BREAKING:** Restore Slack notification feature ([#9](https://github.com/MetaMask/action-npm-publish/pull/9), [#22](https://github.com/MetaMask/action-npm-publish/pull/22), [#23](https://github.com/MetaMask/action-npm-publish/pull/23), [#24](https://github.com/MetaMask/action-npm-publish/pull/24))
@@ -39,7 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v2.1.1...v3.0.0
 [2.1.1]: https://github.com/MetaMask/action-npm-publish/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v2.0.0...v2.1.0
