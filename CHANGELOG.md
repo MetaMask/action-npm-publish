@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [3.1.0]
-### Changed
+### Added
 - Add optional npm-tag parameter to action ([#30](https://github.com/MetaMask/action-npm-publish/pull/30))
 
 ## [3.0.0]
