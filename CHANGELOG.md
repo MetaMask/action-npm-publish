@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [3.1.1]
-### Uncategorized
+### Fixed
 - Rename `YARN_NPM_TAG` to `PUBLISH_NPM_TAG` ([#32](https://github.com/MetaMask/action-npm-publish/pull/32))
+  - This fixes a bug in the previous release, due to environment variables starting with `YARN_` being reserved for Yarn settings.
 
 ## [3.1.0]
 ### Added
