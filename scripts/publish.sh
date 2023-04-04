@@ -10,7 +10,7 @@ if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
   exit 0
 fi
 
-if [[ -z $YARN_NPM_TAG ]]; then
+if [[ -z $PUBLISH_NPM_TAG ]]; then
   echo "Notice: 'npm-tag' not set."
   exit 1
 fi
@@ -27,4 +27,4 @@ if [[ -n "$1" ]]; then
   fi
 fi
 
-yarn npm publish --tag "$YARN_NPM_TAG"
+yarn npm publish --tag "$PUBLISH_NPM_TAG"
