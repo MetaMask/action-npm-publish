@@ -7,9 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [3.1.0]
-### Uncategorized
+### Changed
 - Add optional npm-tag parameter to action ([#30](https://github.com/MetaMask/action-npm-publish/pull/30))
-- Bump json5 from 1.0.1 to 1.0.2 ([#27](https://github.com/MetaMask/action-npm-publish/pull/27))
 
 ## [3.0.0]
 ### Changed
