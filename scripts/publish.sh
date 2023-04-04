@@ -10,6 +10,11 @@ if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
   exit 0
 fi
 
+if [[ -z $YARN_NPM_TAG ]]; then
+  echo "Notice: 'npm-tag' not set."
+  exit 1
+fi
+
 # check param, if it's set (monorepo) we check if it's published before proceeding
 if [[ -n "$1" ]]; then
   # check if module is published
@@ -22,4 +27,4 @@ if [[ -n "$1" ]]; then
   fi
 fi
 
-yarn npm publish
+yarn npm publish --tag "$YARN_NPM_TAG"

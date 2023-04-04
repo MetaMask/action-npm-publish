@@ -4,6 +4,10 @@ inputs:
   npm-token:
     description: 'The token used for npm publishing. If omitted the action will perform a dry run npm publish.'
     required: false
+  npm-tag:
+    description: 'The npm tag to publish to. Defaults to "latest".'
+    required: false
+    default: 'latest'
   slack-webhook-url:
     description: 'Slack Webhook URL'
     required: false
@@ -16,6 +20,7 @@ runs:
       run: ${{ github.action_path }}/scripts/main.sh
       env:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
+        YARN_NPM_TAG: ${{ inputs.npm-tag }}
     - id: name-version
       shell: bash
       if: inputs.slack-webhook-url != ''
