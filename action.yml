@@ -34,6 +34,7 @@ runs:
       with:
         payload: |
           {
+            "icon_url": "https://files.slack.com/files-tmb/T02P98BKE-F056Q4DK0D7-3a0e728b4d/image_from_ios_360.jpg",
             "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
               {
