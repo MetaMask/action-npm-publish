@@ -34,7 +34,7 @@ runs:
       with:
         payload: |
           {
-            "icon_url": "https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.jpg",
+            "icon_url": "https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.svg",
             "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
               {
