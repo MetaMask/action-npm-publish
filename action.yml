@@ -11,6 +11,18 @@ inputs:
   slack-webhook-url:
     description: 'Slack Webhook URL'
     required: false
+  icon_url:
+    description: 'Url to the avatar used for the bot in Slack'
+    required: false
+    default: 'https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.svg'
+  bot-name:
+    description: 'The name of the bot as it appears on Slack'
+    required: false
+    default: 'MetaMask bot'
+  bot-at:
+    description: 'Use this if you want to ping a subset of individuals on Slack',
+    required: false
+    default: '@metamask-npm-publishers'
 
 runs:
   using: 'composite'
@@ -35,7 +47,7 @@ runs:
       with:
         payload: |
           {
-            "icon_url": "https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.svg",
+            "icon_url": "${{ inputs.icon_url }}",
             "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
               {
