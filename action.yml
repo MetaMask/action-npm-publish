@@ -25,8 +25,8 @@ runs:
       shell: bash
       if: inputs.slack-webhook-url != ''
       run: |
-        NAME_VERSION=$(jq --raw-output '.name + "@" + .version' package.json )
-        NAME_VERSION="${NAME_VERSION#@}"
+        TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
+        NAME_VERSION="${TEXT#@}"
         echo "NAME_VERSION=$NAME_VERSION" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
       id: slack
