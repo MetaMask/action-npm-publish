@@ -22,7 +22,6 @@ inputs:
   bot-at:
     description: 'Use this if you want to ping a subset of individuals on Slack',
     required: false
-    default: '@metamask-npm-publishers'
 
 runs:
   using: 'composite'
@@ -40,6 +39,23 @@ runs:
         TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
         TEXT_STRIPPED="${TEXT#@}"
         echo "NAME_VERSION=$TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
+    - id: bot-at-text
+      shell: bash
+      if: inputs.bot-at != ''
+      # generate text based on bot-at
+      run: |
+        BOT_AT_TEXT="${{ inputs.bot-at }}"
+        echo "BOT_AT_TEXT=$BOT_AT_TEXT" >> "$GITHUB_OUTPUT"
+    - id: final-text
+      shell: bash
+      run: |
+        DEFAULT_TEXT="`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
+        BOT_AT_TEXT="${{ step.bot-at-text.outputs.BOT_AT_TEXT }}"
+        FINAL_TEXT="$DEFAULT_TEXT"
+        if [[ -z "$BOT_AT_TEXT" ]]; then
+          FINAL_TEXT="$BOT_AT_TEXT $DEFAULT_TEXT"
+        fi
+        echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
       id: slack
       if: inputs.slack-webhook-url != ''
@@ -47,6 +63,7 @@ runs:
       with:
         payload: |
           {
+            "username": "${{ inputs.bot_name }}",
             "icon_url": "${{ inputs.icon_url }}",
             "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
@@ -54,7 +71,7 @@ runs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
+                  "text": "${{ steps.final-text.outputs.FINAL_TEXT }}"
                 }
               }
             ]
