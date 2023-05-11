@@ -11,7 +11,7 @@ inputs:
   slack-webhook-url:
     description: 'Slack Webhook URL'
     required: false
-  icon_url:
+  icon-url:
     description: 'Url to the avatar used for the bot in Slack'
     required: false
     default: 'https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.svg'
@@ -63,8 +63,8 @@ runs:
       with:
         payload: |
           {
-            "username": "${{ inputs.bot_name }}",
-            "icon_url": "${{ inputs.icon_url }}",
+            "username": "${{ inputs.bot-name }}",
+            "icon_url": "${{ inputs.icon-url }}",
             "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
               {
