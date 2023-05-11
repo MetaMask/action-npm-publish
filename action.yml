@@ -63,12 +63,12 @@ runs:
       with:
         payload: |
           {
-            "username": "${{ inputs.bot-name }}",
-            "icon_url": "${{ inputs.icon-url }}",
             "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
             "blocks": [
               {
                 "type": "section",
+                "username": "${{ inputs.bot-name }}",
+                "icon_url": "${{ inputs.icon-url }}",
                 "text": {
                   "type": "mrkdwn",
                   "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
