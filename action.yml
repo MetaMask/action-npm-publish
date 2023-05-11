@@ -15,11 +15,11 @@ inputs:
     description: 'Url to the avatar used for the bot in Slack'
     required: false
     default: 'https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.png'
-  bot-name:
+  username:
     description: 'The name of the bot as it appears on Slack'
     required: false
     default: 'MetaMask bot'
-  bot-at:
+  target-name:
     description: 'Use this if you want to ping an individual or subset of individuals on Slack using @'
     required: false
 
@@ -39,20 +39,20 @@ runs:
         TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
         TEXT_STRIPPED="${TEXT#@}"
         echo "NAME_VERSION=$TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
-    - id: bot-at-text
+    - id: target-name-text
       shell: bash
-      if: inputs.bot-at != ''
+      if: inputs.target-name != ''
       run: |
-        BOT_AT_TEXT="${{ inputs.bot-at }}"
-        echo "BOT_AT_TEXT=$BOT_AT_TEXT" >> "$GITHUB_OUTPUT"
+        TARGET_NAME_TEXT="${{ inputs.target-name }}"
+        echo "TARGET_NAME_TEXT=$TARGET_NAME_TEXT" >> "$GITHUB_OUTPUT"
     - id: final-text
       shell: bash
       run: |
         DEFAULT_TEXT="\`${{ steps.name-version.outputs.NAME_VERSION }}\` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
-        BOT_AT_TEXT="${{ steps.bot-at-text.outputs.BOT_AT_TEXT }}"
+        TARGET_NAME_TEXT="${{ steps.target-name-text.outputs.TARGET_NAME_TEXT }}"
         FINAL_TEXT="$DEFAULT_TEXT"
-        if [[ ! "$BOT_AT_TEXT" == "" ]]; then
-          FINAL_TEXT="<$BOT_AT_TEXT> $DEFAULT_TEXT"
+        if [[ ! "$TARGET_NAME_TEXT" == "" ]]; then
+          FINAL_TEXT="<$TARGET_NAME_TEXT> $DEFAULT_TEXT"
         fi
         echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
@@ -64,7 +64,7 @@ runs:
           {
             "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
             "icon_url": "${{ inputs.icon-url }}",
-            "username": "${{ inputs.bot-name }}"
+            "username": "${{ inputs.username }}"
           }
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}

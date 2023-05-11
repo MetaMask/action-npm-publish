@@ -54,8 +54,8 @@ The absolute minimum configuration for this is:
 We've added the ability to customize the message posted in Slack and those optional inputs are as follows:
 
 - `icon-url`
-- `bot-name`
-- `bot-at`
+- `username`
+- `target-name`
 
 example:
 
@@ -64,8 +64,8 @@ example:
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
     icon-url: 'https://ricky.codes/me.jpg'
-    bot-name: 'rickybot'
-    bot-at: '@ricky'
+    username: 'rickybot'
+    target-name: '@ricky'
 ```
 
 You can read more about these option in the [API](#API) section below
@@ -83,5 +83,5 @@ You can read more about these option in the [API](#API) section below
 #### The following inputs only apply if `slack-webhook-url` is set...
 
 - **`icon-url`** _(optional)_. Url to the avatar used for the bot in Slack. If not set this defaults to the avatar in this repository.
-- **`bot-name`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
-- **`bot-at`** _(optional)_. Use this if you want to ping an individual or subset of individuals on Slack using `@`.
+- **`username`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
+- **`target-name`** _(optional)_. Use this if you want to ping an individual or subset of individuals on Slack using `@`.
