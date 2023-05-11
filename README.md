@@ -43,10 +43,29 @@ If you omit `npm-token`, then packages will be prepared for publishing, but no p
 
 You can optionally send deployment announcements to Slack by providing a `slack-webhook-url` input:
 
+The absolute minimum configuration for this is:
+
 ```yaml
 - uses: MetaMask/action-npm-publish@v2
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+```
+
+We've now added the ability to customize the message posted in Slack and those optional inputs are as follows:
+
+- `icon-url`: Url to the avatar used for the bot in Slack. If not set this defaults to the avatar in this repository.
+- `bot-name`: The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
+- `bot-at`: Use this if you want to ping an individual or subset of individuals on Slack using @.
+
+example:
+
+```yaml
+- uses: MetaMask/action-npm-publish@v2
+  with:
+    slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    icon-url: 'https://ricky.codes/me.jpg'
+    bot-name: 'rickybot'
+    bot-at: '@ricky'
 ```
 
 ![image](https://user-images.githubusercontent.com/675259/203841602-124d537d-7476-4263-a17c-6d05b68c37d0.png)
