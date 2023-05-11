@@ -20,7 +20,7 @@ inputs:
     required: false
     default: 'MetaMask bot'
   bot-at:
-    description: 'Use this if you want to ping a subset of individuals on Slack'
+    description: 'Use this if you want to ping an individual or subset of individuals on Slack using @'
     required: false
 
 runs:
