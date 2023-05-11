@@ -49,7 +49,7 @@ runs:
     - id: final-text
       shell: bash
       run: |
-        DEFAULT_TEXT="`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
+        DEFAULT_TEXT="\`${{ steps.name-version.outputs.NAME_VERSION }}\` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
         echo "FINAL_TEXT=$DEFAULT_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
       id: slack
