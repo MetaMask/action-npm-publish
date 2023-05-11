@@ -42,7 +42,6 @@ runs:
     - id: bot-at-text
       shell: bash
       if: inputs.bot-at != ''
-      # generate text based on bot-at
       run: |
         BOT_AT_TEXT="${{ inputs.bot-at }}"
         echo "BOT_AT_TEXT=$BOT_AT_TEXT" >> "$GITHUB_OUTPUT"
