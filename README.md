@@ -51,11 +51,11 @@ The absolute minimum configuration for this is:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
 
-We've now added the ability to customize the message posted in Slack and those optional inputs are as follows:
+We've added the ability to customize the message posted in Slack and those optional inputs are as follows:
 
-- `icon-url`: Url to the avatar used for the bot in Slack. If not set this defaults to the avatar in this repository.
-- `bot-name`: The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
-- `bot-at`: Use this if you want to ping an individual or subset of individuals on Slack using @.
+- `icon-url`
+- `bot-name`
+- `bot-at`
 
 example:
 
@@ -68,6 +68,8 @@ example:
     bot-at: '@ricky'
 ```
 
+You can read more about these option in the [API](#API) section below
+
 ![image](https://user-images.githubusercontent.com/675259/203841602-124d537d-7476-4263-a17c-6d05b68c37d0.png)
 
 ## API
@@ -76,4 +78,10 @@ example:
 
 - **`npm-token`** _(optional)_. The auth token associated with the registry that Yarn commands will use to access and publish packages. If omitted, the action will perform a dry-run publish.
 
-- **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to a Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration. 
+- **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to a Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration.
+
+#### The following inputs only apply if `slack-webhook-url` is set...
+
+- **`icon-url`** _(optional)_. Url to the avatar used for the bot in Slack. If not set this defaults to the avatar in this repository.
+- **`bot-name`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
+- **`bot-at`** _(optional)_. Use this if you want to ping an individual or subset of individuals on Slack using `@`.
