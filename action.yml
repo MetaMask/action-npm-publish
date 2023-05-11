@@ -14,7 +14,7 @@ inputs:
   icon-url:
     description: 'Url to the avatar used for the bot in Slack'
     required: false
-    default: 'https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.svg'
+    default: 'https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.png'
   bot-name:
     description: 'The name of the bot as it appears on Slack'
     required: false
