@@ -52,7 +52,7 @@ runs:
         DEFAULT_TEXT="`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
         BOT_AT_TEXT="${{ steps.bot-at-text.outputs.BOT_AT_TEXT }}"
         FINAL_TEXT="$DEFAULT_TEXT"
-        if [[ -z "$BOT_AT_TEXT" ]]; then
+        if [[ ! "$BOT_AT_TEXT" == "" ]]; then
           FINAL_TEXT="$BOT_AT_TEXT $DEFAULT_TEXT"
         fi
         echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
