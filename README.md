@@ -65,7 +65,7 @@ example:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
     icon-url: 'https://ricky.codes/me.jpg'
     username: 'rickybot'
-    target-name: '@ricky'
+    target-name: 'ricky'
 ```
 
 You can read more about these option in the [API](#API) section below

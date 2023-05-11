@@ -52,7 +52,7 @@ runs:
         TARGET_NAME_TEXT="${{ steps.target-name-text.outputs.TARGET_NAME_TEXT }}"
         FINAL_TEXT="$DEFAULT_TEXT"
         if [[ ! "$TARGET_NAME_TEXT" == "" ]]; then
-          FINAL_TEXT="<$TARGET_NAME_TEXT> $DEFAULT_TEXT"
+          FINAL_TEXT="<@$TARGET_NAME_TEXT> $DEFAULT_TEXT"
         fi
         echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
