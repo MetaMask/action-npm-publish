@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use MetaMaskBot avatar for `icon_url` in Slack message ([#36](https://github.com/MetaMask/action-npm-publish/pull/36))
 
 ### Changed
-- switch package version comparison to yarn ([#34](https://github.com/MetaMask/action-npm-publish/pull/34))
+- Use Yarn rather than npm for package version comparison ([#34](https://github.com/MetaMask/action-npm-publish/pull/34))
+  - This improves compatibility for projects using custom registries
 
 ## [3.1.1]
 ### Fixed
