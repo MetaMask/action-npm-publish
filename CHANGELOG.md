@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0]
+### Uncategorized
+- Add options for customising Slack announce message ([#37](https://github.com/MetaMask/action-npm-publish/pull/37))
+- Use MetaMaskBot avatar for `icon_url` in Slack message ([#36](https://github.com/MetaMask/action-npm-publish/pull/36))
+- switch package version comparison to yarn ([#34](https://github.com/MetaMask/action-npm-publish/pull/34))
+
 ## [3.1.1]
 ### Fixed
 - Rename `YARN_NPM_TAG` to `PUBLISH_NPM_TAG` ([#32](https://github.com/MetaMask/action-npm-publish/pull/32))
@@ -48,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v3.1.1...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/MetaMask/action-npm-publish/compare/v3.1.1...v3.2.0
 [3.1.1]: https://github.com/MetaMask/action-npm-publish/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v2.1.1...v3.0.0
