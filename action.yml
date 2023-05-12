@@ -11,6 +11,17 @@ inputs:
   slack-webhook-url:
     description: 'Slack Webhook URL'
     required: false
+  icon-url:
+    description: 'Url to the avatar used for the bot in Slack'
+    required: false
+    default: 'https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.png'
+  username:
+    description: 'The name of the bot as it appears on Slack'
+    required: false
+    default: 'MetaMask bot'
+  target-name:
+    description: 'Use this if you want to ping an individual or subset of individuals on Slack using @'
+    required: false
 
 runs:
   using: 'composite'
@@ -25,8 +36,25 @@ runs:
       shell: bash
       if: inputs.slack-webhook-url != ''
       run: |
-        NAME_VERSION=$(jq --raw-output '.name + "@" + .version' package.json)
-        echo "NAME_VERSION=$NAME_VERSION" >> "$GITHUB_OUTPUT"
+        TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
+        TEXT_STRIPPED="${TEXT#@}"
+        echo "NAME_VERSION=$TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
+    - id: target-name-text
+      shell: bash
+      if: inputs.target-name != ''
+      run: |
+        TARGET_NAME_TEXT="${{ inputs.target-name }}"
+        echo "TARGET_NAME_TEXT=$TARGET_NAME_TEXT" >> "$GITHUB_OUTPUT"
+    - id: final-text
+      shell: bash
+      run: |
+        DEFAULT_TEXT="\`${{ steps.name-version.outputs.NAME_VERSION }}\` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
+        TARGET_NAME_TEXT="${{ steps.target-name-text.outputs.TARGET_NAME_TEXT }}"
+        FINAL_TEXT="$DEFAULT_TEXT"
+        if [[ ! "$TARGET_NAME_TEXT" == "" ]]; then
+          FINAL_TEXT="<@$TARGET_NAME_TEXT> $DEFAULT_TEXT"
+        fi
+        echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
       id: slack
       if: inputs.slack-webhook-url != ''
@@ -34,17 +62,9 @@ runs:
       with:
         payload: |
           {
-            "icon_url": "https://raw.githubusercontent.com/MetaMask/action-npm-publish/main/robo.svg",
-            "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/",
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "`${{ steps.name-version.outputs.NAME_VERSION }}` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|Click to review>"
-                }
-              }
-            ]
+            "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
+            "icon_url": "${{ inputs.icon-url }}",
+            "username": "${{ inputs.username }}"
           }
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
