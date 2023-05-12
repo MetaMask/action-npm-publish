@@ -36,9 +36,9 @@ runs:
       shell: bash
       if: inputs.slack-webhook-url != ''
       run: |
-        TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
-        TEXT_STRIPPED="${TEXT#@}"
-        echo "NAME_VERSION=$TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
+        NAME_VERSION_TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
+        NAME_VERSION_TEXT_STRIPPED="${NAME_VERSION_TEXT#@}"
+        echo "NAME_VERSION=$NAME_VERSION_TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
     - id: final-text
       shell: bash
       run: |
