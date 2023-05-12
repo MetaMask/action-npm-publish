@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [3.2.0]
-### Uncategorized
+### Added
 - Add options for customising Slack announce message ([#37](https://github.com/MetaMask/action-npm-publish/pull/37))
 - Use MetaMaskBot avatar for `icon_url` in Slack message ([#36](https://github.com/MetaMask/action-npm-publish/pull/36))
+
+### Changed
 - switch package version comparison to yarn ([#34](https://github.com/MetaMask/action-npm-publish/pull/34))
 
 ## [3.1.1]
