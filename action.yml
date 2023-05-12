@@ -39,17 +39,11 @@ runs:
         TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
         TEXT_STRIPPED="${TEXT#@}"
         echo "NAME_VERSION=$TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
-    - id: target-name-text
-      shell: bash
-      if: inputs.target-name != ''
-      run: |
-        TARGET_NAME_TEXT="${{ inputs.target-name }}"
-        echo "TARGET_NAME_TEXT=$TARGET_NAME_TEXT" >> "$GITHUB_OUTPUT"
     - id: final-text
       shell: bash
       run: |
         DEFAULT_TEXT="\`${{ steps.name-version.outputs.NAME_VERSION }}\` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
-        TARGET_NAME_TEXT="${{ steps.target-name-text.outputs.TARGET_NAME_TEXT }}"
+        TARGET_NAME_TEXT="${{ inputs.target-name }}"
         FINAL_TEXT="$DEFAULT_TEXT"
         if [[ ! "$TARGET_NAME_TEXT" == "" ]]; then
           FINAL_TEXT="<@$TARGET_NAME_TEXT> $DEFAULT_TEXT"
