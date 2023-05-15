@@ -56,6 +56,7 @@ We've added the ability to customize the message posted in Slack and those optio
 - `icon-url`
 - `username`
 - `target-name`
+- `channel`
 
 example:
 
@@ -63,9 +64,10 @@ example:
 - uses: MetaMask/action-npm-publish@v2
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-    icon-url: 'https://ricky.codes/me.jpg'
-    username: 'rickybot'
-    target-name: 'ricky'
+    icon-url: https://ricky.codes/me.jpg
+    username: rickybot
+    target-name: ricky
+    channel: dev-channel
 ```
 
 You can read more about these option in the [API](#API) section below
@@ -85,3 +87,4 @@ You can read more about these option in the [API](#API) section below
 - **`icon-url`** _(optional)_. Url to the avatar used for the bot in Slack. If not set this defaults to the avatar in this repository.
 - **`username`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
 - **`target-name`** _(optional)_. Use this if you want to ping an individual or subset of individuals on Slack using `@`.
+- **`channel`** _(optional)_. Use this if you want to post to a channel other than the default: `metamask-dev`.

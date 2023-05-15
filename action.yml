@@ -22,6 +22,10 @@ inputs:
   target-name:
     description: 'Use this if you want to ping an individual or subset of individuals on Slack using @'
     required: false
+  channel:
+    description: 'The Slack channel to post in'
+    required: false
+    default: 'metamask-dev'
 
 runs:
   using: 'composite'
@@ -58,7 +62,8 @@ runs:
           {
             "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
             "icon_url": "${{ inputs.icon-url }}",
-            "username": "${{ inputs.username }}"
+            "username": "${{ inputs.username }}",
+            "channel": "#${{ inputs.channel }}"
           }
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
