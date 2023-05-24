@@ -45,6 +45,7 @@ runs:
         echo "NAME_VERSION=$NAME_VERSION_TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
     - id: final-text
       shell: bash
+      if: inputs.slack-webhook-url != ''
       run: |
         DEFAULT_TEXT="\`${{ steps.name-version.outputs.NAME_VERSION }}\` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
         TARGET_NAME_TEXT="${{ inputs.target-name }}"
