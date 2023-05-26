@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [3.2.1]
-
 ### Added
 - Add new input to support customising the Slack channel ([#40](https://github.com/MetaMask/action-npm-publish/pull/40))
 ### Fixed
