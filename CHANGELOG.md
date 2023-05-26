@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Only run final-text if slack-webhook-url is defined ([#41](https://github.com/MetaMask/action-npm-publish/pull/41))
 
 ### Added
-
 - Add new input to support customising the Slack channel ([#40](https://github.com/MetaMask/action-npm-publish/pull/40))
 
 ## [3.2.0]
