@@ -19,8 +19,8 @@ inputs:
     description: 'The name of the bot as it appears on Slack'
     required: false
     default: 'MetaMask bot'
-  target-name:
-    description: 'Use this if you want to ping an individual or subset of individuals on Slack using @'
+  subteam:
+    description: 'Use this if you want to ping a subteam of individuals on Slack using @'
     required: false
   channel:
     description: 'The Slack channel to post in'
@@ -48,10 +48,10 @@ runs:
       if: inputs.slack-webhook-url != ''
       run: |
         DEFAULT_TEXT="\`${{ steps.name-version.outputs.NAME_VERSION }}\` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
-        TARGET_NAME_TEXT="${{ inputs.target-name }}"
+        SUBTEAM_TEXT="${{ inputs.subteam }}"
         FINAL_TEXT="$DEFAULT_TEXT"
-        if [[ ! "$TARGET_NAME_TEXT" == "" ]]; then
-          FINAL_TEXT="<@$TARGET_NAME_TEXT> $DEFAULT_TEXT"
+        if [[ ! "$SUBTEAM_TEXT" == "" ]]; then
+          FINAL_TEXT="<!subteam^$SUBTEAM_TEXT> $DEFAULT_TEXT"
         fi
         echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
