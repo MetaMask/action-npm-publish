@@ -36,7 +36,7 @@ Add the following to a job's list of steps. This requires that you set the `NPM_
 If you omit `npm-token`, then packages will be prepared for publishing, but no publishing will actually occur:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v2
+- uses: MetaMask/action-npm-publish@v4
 ```
 
 ### Slack announce
@@ -46,7 +46,7 @@ You can optionally send deployment announcements to Slack by providing a `slack-
 The absolute minimum configuration for this is:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v2
+- uses: MetaMask/action-npm-publish@v4
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
@@ -61,12 +61,13 @@ We've added the ability to customize the message posted in Slack and those optio
 example:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v2
+- uses: MetaMask/action-npm-publish@v4
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
     icon-url: https://ricky.codes/me.jpg
     username: rickybot
-    target-name: ricky
+    # re subteam, see: https://api.slack.com/reference/surfaces/formatting#mentioning-groups
+    subteam: subteam: S042S7RE4AE # @metamask-npm-publishers
     channel: dev-channel
 ```
 
