@@ -19,7 +19,7 @@ fi
 if [[ -n "$1" ]]; then
   # check if module is published
   PACKAGE_NAME=$(jq --raw-output .name package.json)
-  LATEST_PACKAGE_VERSION=$(yarn info --json "$PACKAGE_NAME" | jq --raw-output .children.Version || echo "")
+  LATEST_PACKAGE_VERSION=$(npm view "$PACKAGE_NAME" dist-tags --workspaces false --json | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag]' || echo "")
   CURRENT_PACKAGE_VERSION=$(jq --raw-output .version package.json)
 
   if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
