@@ -55,7 +55,7 @@ We've added the ability to customize the message posted in Slack and those optio
 
 - `icon-url`
 - `username`
-- `target-name`
+- `subteam`
 - `channel`
 
 example:
