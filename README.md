@@ -67,7 +67,7 @@ example:
     icon-url: https://ricky.codes/me.jpg
     username: rickybot
     # re subteam, see: https://api.slack.com/reference/surfaces/formatting#mentioning-groups
-    subteam: subteam: S042S7RE4AE # @metamask-npm-publishers
+    subteam: S042S7RE4AE # @metamask-npm-publishers
     channel: dev-channel
 ```
 
