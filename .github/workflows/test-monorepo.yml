@@ -1,5 +1,8 @@
 name: test-monorepo
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
 jobs:
   # test npm publish dry-run
   checkout_publish_skunkworks_dry_run:
