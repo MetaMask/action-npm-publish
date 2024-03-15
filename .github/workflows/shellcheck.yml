@@ -3,7 +3,10 @@ name: shellcheck
 permissions:
   checks: write
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
   lint:
