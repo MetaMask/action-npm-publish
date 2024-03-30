@@ -13,7 +13,7 @@ for file in "$directory"/*.tgz; do
         name="${basename%-*}"
         name_with_slash="${name/-//}"
         echo "$name_with_slash"
-        pkdiff "$name_with_slash@latest" "$file" \
+        npx pkdiff "$name_with_slash@latest" "$file" \
             --no-exit-code \
             --no-open \
             --output "/tmp/$basename.html"

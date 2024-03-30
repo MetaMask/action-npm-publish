@@ -36,10 +36,6 @@ runs:
       env:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
-    - id: install-pkdiff
-      if: inputs.npm-token == ''
-      run: |
-        npm i -g pkdiff
     - id: generate-reports
       if: inputs.npm-token == ''
       run: ${{ github.action_path }}/scripts/reports.sh
