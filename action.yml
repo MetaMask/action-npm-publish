@@ -37,9 +37,11 @@ runs:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
     - id: generate-reports
+      shell: bash
       if: inputs.npm-token == ''
       run: ${{ github.action_path }}/scripts/reports.sh
     - id: upload-artifacts
+      shell: bash
       if: inputs.npm-token == ''
       uses: actions/upload-artifact@v4
       width:
