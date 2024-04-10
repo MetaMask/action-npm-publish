@@ -41,7 +41,6 @@ runs:
       if: inputs.npm-token == ''
       run: ${{ github.action_path }}/scripts/reports.sh
     - id: upload-artifacts
-      shell: bash
       if: inputs.npm-token == ''
       uses: actions/upload-artifact@v4
       with:
