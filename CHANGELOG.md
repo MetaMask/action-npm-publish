@@ -7,16 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.0.0]
-### Uncategorized
+### Changed
+- **BREAKING:** Disallow publishing packages with version 0.0.0 ([#63](https://github.com/MetaMask/action-npm-publish/pull/63))
+
+### Fixed
 - Fix Yarn 4 compatibility ([#65](https://github.com/MetaMask/action-npm-publish/pull/65))
-- Disallow publishing packages with version 0.0.0 ([#63](https://github.com/MetaMask/action-npm-publish/pull/63))
-- Run linting and testing GitHub workflows on PRs ([#62](https://github.com/MetaMask/action-npm-publish/pull/62))
-- Enabling MetaMask security code scanner ([#60](https://github.com/MetaMask/action-npm-publish/pull/60))
-- Add Shared Libraries team in codeowners file ([#59](https://github.com/MetaMask/action-npm-publish/pull/59))
-- Update README.md ([#56](https://github.com/MetaMask/action-npm-publish/pull/56))
-- Update README.md ([#55](https://github.com/MetaMask/action-npm-publish/pull/55))
-- Update README.md ([#54](https://github.com/MetaMask/action-npm-publish/pull/54))
-- Bump word-wrap from 1.2.3 to 1.2.4 ([#53](https://github.com/MetaMask/action-npm-publish/pull/53))
 
 ## [4.0.1]
 ### Changed
