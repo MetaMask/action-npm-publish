@@ -36,9 +36,8 @@ runs:
       env:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 16
+    - id: install-pkdiff
+      run: npm i -g pkdiff
     - id: generate-reports
       shell: bash
       if: inputs.npm-token == ''
