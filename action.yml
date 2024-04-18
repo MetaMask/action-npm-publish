@@ -39,10 +39,10 @@ runs:
     - id: install-pkdiff
       shell: bash
       run: npm i -g pkdiff
-    - id: generate-reports
+    - id: generate-report
       shell: bash
       if: inputs.npm-token == ''
-      run: ${{ github.action_path }}/scripts/reports.sh
+      run: ${{ github.action_path }}/scripts/report.sh
     - id: upload-artifacts
       if: inputs.npm-token == ''
       uses: actions/upload-artifact@v4
