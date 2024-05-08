@@ -36,20 +36,6 @@ runs:
       env:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
-    - id: install-pkdiff
-      shell: bash
-      run: npm i -g pkdiff
-    - id: generate-report
-      shell: bash
-      if: inputs.npm-token == ''
-      run: ${{ github.action_path }}/scripts/report.sh
-    - id: upload-artifact
-      if: inputs.npm-token == ''
-      uses: actions/upload-artifact@v4
-      with:
-        path: |
-          /tmp/*.tgz
-          /tmp/*.html
     - id: name-version
       shell: bash
       if: inputs.slack-webhook-url != ''
