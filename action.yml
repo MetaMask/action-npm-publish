@@ -25,7 +25,6 @@ inputs:
   channel:
     description: 'The Slack channel to post in'
     required: false
-    default: 'metamask-dev'
 
 runs:
   using: 'composite'
@@ -70,7 +69,7 @@ runs:
         echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
       id: slack
-      if: inputs.slack-webhook-url != ''
+      if: ${{ inputs.slack-webhook-url != '' && inputs.channel != '' }}
       uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
       with:
         payload: |
@@ -80,6 +79,17 @@ runs:
             "username": "${{ inputs.username }}",
             "channel": "#${{ inputs.channel }}"
           }
+    - name: Post to a default Slack channel
+      id: slack
+      if: ${{ inputs.slack-webhook-url != '' && inputs.channel == '' }}
+      uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+      with:
+        payload: |
+          {
+            "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
+            "icon_url": "${{ inputs.icon-url }}",
+            "username": "${{ inputs.username }}"
+          }          
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
