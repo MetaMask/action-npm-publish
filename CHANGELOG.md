@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix Slack announcement for public default channel ([#73](https://github.com/MetaMask/action-npm-publish/pull/73), [#77](https://github.com/MetaMask/action-npm-publish/pull/77))
   - We have found that the Slack announcement does not work correctly for public channels when the `channel` parameter is given. The action has been updated to omit the default if no channel is specified, so that announcements to the default channel work correctly even if it is public.
-	- This was originally published in v4.0.4, but this is the first v5.x release that includes this change.
+  - This was originally published in v4.0.4, but this is the first v5.x release that includes this change.
 
 ## [5.0.1]
 ### Fixed
