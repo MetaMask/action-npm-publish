@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0]
+### Changed
+- **BREAKING:** Disallow publishing packages with version 0.0.0 ([#63](https://github.com/MetaMask/action-npm-publish/pull/63))
+
+### Fixed
+- Fix Yarn 4 compatibility ([#65](https://github.com/MetaMask/action-npm-publish/pull/65))
+
 ## [4.0.3]
 ### Fixed
 - Fix Slack announcement for public default channel ([#73](https://github.com/MetaMask/action-npm-publish/pull/73))
@@ -84,7 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.3...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.3...v5.0.0
 [4.0.3]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.0...v4.0.1

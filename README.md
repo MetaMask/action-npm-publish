@@ -55,7 +55,7 @@ We've added the ability to customize the message posted in Slack and those optio
 
 - `icon-url`
 - `username`
-- `target-name`
+- `subteam`
 - `channel`
 
 example:
@@ -67,7 +67,7 @@ example:
     icon-url: https://ricky.codes/me.jpg
     username: rickybot
     # re subteam, see: https://api.slack.com/reference/surfaces/formatting#mentioning-groups
-    subteam: subteam: S042S7RE4AE # @metamask-npm-publishers
+    subteam: S042S7RE4AE # @metamask-npm-publishers
     channel: dev-channel
 ```
 
@@ -87,5 +87,5 @@ You can read more about these option in the [API](#API) section below
 
 - **`icon-url`** _(optional)_. Url to the avatar used for the bot in Slack. If not set this defaults to the avatar in this repository.
 - **`username`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
-- **`target-name`** _(optional)_. Use this if you want to ping an individual or subset of individuals on Slack using `@`.
+- **`subteam`** _(optional)_. Use this if you want to ping a subteam of individuals on Slack using `@`.
 - **`channel`** _(optional)_. Use this if you want to post to a channel other than the default: `metamask-dev`.
