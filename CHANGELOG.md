@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.3]
+### Fixed
+- Fix Slack announcement for public default channel ([#73](https://github.com/MetaMask/action-npm-publish/pull/73))
+  - We have found that the Slack announcement does not work correctly for public channels when the `channel` parameter is given. The action has been updated to omit the default if no channel is specified, so that announcements to the default channel work correctly even if it is public.
+
 ## [4.0.2]
 ### Fixed
 - Prevent workflow from failing if Slack announcement step fails ([#69](https://github.com/MetaMask/action-npm-publish/pull/69))
@@ -79,7 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.2...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.3...HEAD
+[4.0.3]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v3.2.0...v4.0.0
