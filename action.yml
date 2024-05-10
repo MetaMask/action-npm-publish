@@ -54,7 +54,6 @@ runs:
         fi
         echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
-      id: slack
       if: ${{ inputs.slack-webhook-url != '' && inputs.channel != '' }}
       uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
       with:
@@ -66,7 +65,6 @@ runs:
             "channel": "#${{ inputs.channel }}"
           }
     - name: Post to a default Slack channel
-      id: slack
       if: ${{ inputs.slack-webhook-url != '' && inputs.channel == '' }}
       uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
       with:
