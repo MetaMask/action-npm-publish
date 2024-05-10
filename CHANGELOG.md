@@ -7,18 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.1.0]
-### Uncategorized
-- Update version and changelog with v5.0.1 release ([#79](https://github.com/MetaMask/action-npm-publish/pull/79))
-- Update changelog with v4.0.x releases ([#76](https://github.com/MetaMask/action-npm-publish/pull/76))
+### Added
 - Improve Dry Run Output ([#64](https://github.com/MetaMask/action-npm-publish/pull/64))
-- 5.0.0 ([#67](https://github.com/MetaMask/action-npm-publish/pull/67))
-- Run linting and testing GitHub workflows on PRs ([#62](https://github.com/MetaMask/action-npm-publish/pull/62))
-- Enabling MetaMask security code scanner ([#60](https://github.com/MetaMask/action-npm-publish/pull/60))
-- Add Shared Libraries team in codeowners file ([#59](https://github.com/MetaMask/action-npm-publish/pull/59))
-- Update README.md ([#56](https://github.com/MetaMask/action-npm-publish/pull/56))
-- Update README.md ([#55](https://github.com/MetaMask/action-npm-publish/pull/55))
-- Update README.md ([#54](https://github.com/MetaMask/action-npm-publish/pull/54))
-- Bump word-wrap from 1.2.3 to 1.2.4 ([#53](https://github.com/MetaMask/action-npm-publish/pull/53))
+  - The dry run step now includes a detailed report about the changes in each published package. It is stored as an artifact, and a link is shared in the logs of the "Dry Run Publish" step.
+
+### Fixed
+- Fix Slack announcement for public default channel ([#73](https://github.com/MetaMask/action-npm-publish/pull/73), [#77](https://github.com/MetaMask/action-npm-publish/pull/77))
+  - We have found that the Slack announcement does not work correctly for public channels when the `channel` parameter is given. The action has been updated to omit the default if no channel is specified, so that announcements to the default channel work correctly even if it is public.
+	- This was originally published in v4.0.4, but this is the first v5.x release that includes this change.
 
 ## [5.0.1]
 ### Fixed
