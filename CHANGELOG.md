@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix Yarn 4 compatibility ([#65](https://github.com/MetaMask/action-npm-publish/pull/65))
 
+## [4.0.5]
+### Fixed
+- Add missing configuration for non-default Slack channel messages ([#81](https://github.com/MetaMask/action-npm-publish/pull/81))
+
 ## [4.0.4]
 ### Fixed
 - Fix action validation error ([#77](https://github.com/MetaMask/action-npm-publish/pull/77))
@@ -118,7 +122,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [5.1.1]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/MetaMask/action-npm-publish/compare/v5.0.0...v5.0.1
-[5.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.4...v5.0.0
+[5.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.5...v5.0.0
+[4.0.4]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.4...v4.0.5
 [4.0.4]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.1...v4.0.2
