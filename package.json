@@ -15,7 +15,7 @@
     "url": "https://github.com/MetaMask/action-npm-publish/issues"
   },
   "homepage": "https://github.com/MetaMask/action-npm-publish#readme",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "main": "index.js",
   "directories": {
     "test": "test"
