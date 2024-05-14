@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.1.1]
-### Uncategorized
-- fix: add missing configuration for non-default Slack channel messages ([#81](https://github.com/MetaMask/action-npm-publish/pull/81))
+### Fixed
+- Add missing configuration for non-default Slack channel messages ([#81](https://github.com/MetaMask/action-npm-publish/pull/81))
 
 ## [5.1.0]
 ### Added
