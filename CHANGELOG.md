@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.2]
+### Uncategorized
+- Fix report script when publishing package with dash in organisation name ([#85](https://github.com/MetaMask/action-npm-publish/pull/85))
+- Fix changelog following backport ([#84](https://github.com/MetaMask/action-npm-publish/pull/84))
+- 5.1.1 ([#82](https://github.com/MetaMask/action-npm-publish/pull/82))
+- 5.1.0 ([#80](https://github.com/MetaMask/action-npm-publish/pull/80))
+- Update version and changelog with v5.0.1 release ([#79](https://github.com/MetaMask/action-npm-publish/pull/79))
+- Update changelog with v4.0.x releases ([#76](https://github.com/MetaMask/action-npm-publish/pull/76))
+- 5.0.0 ([#67](https://github.com/MetaMask/action-npm-publish/pull/67))
+- Run linting and testing GitHub workflows on PRs ([#62](https://github.com/MetaMask/action-npm-publish/pull/62))
+- Enabling MetaMask security code scanner ([#60](https://github.com/MetaMask/action-npm-publish/pull/60))
+- Add Shared Libraries team in codeowners file ([#59](https://github.com/MetaMask/action-npm-publish/pull/59))
+- Update README.md ([#56](https://github.com/MetaMask/action-npm-publish/pull/56))
+- Update README.md ([#55](https://github.com/MetaMask/action-npm-publish/pull/55))
+- Update README.md ([#54](https://github.com/MetaMask/action-npm-publish/pull/54))
+- Bump word-wrap from 1.2.3 to 1.2.4 ([#53](https://github.com/MetaMask/action-npm-publish/pull/53))
+
 ## [5.1.1]
 ### Fixed
 - Add missing configuration for non-default Slack channel messages ([#81](https://github.com/MetaMask/action-npm-publish/pull/81))
@@ -118,12 +135,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.1...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.2...HEAD
+[5.1.2]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.1...v5.1.2
 [5.1.1]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/MetaMask/action-npm-publish/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.5...v5.0.0
-[4.0.4]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.4...v4.0.5
+[4.0.5]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.4...v4.0.5
 [4.0.4]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/MetaMask/action-npm-publish/compare/v4.0.1...v4.0.2
