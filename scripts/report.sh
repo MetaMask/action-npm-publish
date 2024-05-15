@@ -10,10 +10,9 @@ for file in "$directory"/*.tgz; do
     if [ -f "$file" ]; then
         echo "Processing $file"
         basename=$(basename "$file")
-        name="${basename%-*}"
-        name_with_slash="${name/-//}"
-        echo "$name_with_slash"
-        pkdiff "$name_with_slash@latest" "$file" \
+        name="$(tar -O -zxf "$file" package/package.json | jq --raw-output .name)"
+        echo "$name"
+        pkdiff "$name@latest" "$file" \
             --no-exit-code \
             --no-open \
             --output "$directory/$basename.html"
