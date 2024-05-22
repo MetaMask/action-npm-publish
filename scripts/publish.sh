@@ -4,6 +4,8 @@ set -x
 set -e
 set -o pipefail
 
+# just testing if this lints in gha ci
+
 if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
   echo "Notice: 'npm-token' not set. Running 'yarn pack'."
   yarn pack --out /tmp/%s-%v.tgz
