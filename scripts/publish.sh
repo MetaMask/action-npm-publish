@@ -28,7 +28,7 @@ if [[ -n "$1" ]]; then
 fi
 
 YARN_VERSION="$(yarn --version)"
-if [[ "$YARN_VERSION" =~ "^1" ]]; then
+if [[ "$YARN_VERSION" =~ ^1 ]]; then
   echo "Warning: Detected Yarn Classic. This action officially supports Yarn v3 and newer. Older versions may break in future versions." >&2
   npm_config__auth="$YARN_NPM_AUTH_TOKEN" yarn publish --tag "$PUBLISH_NPM_TAG"
 else
