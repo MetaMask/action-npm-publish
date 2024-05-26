@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 
-set -x
 set -e
 set -o pipefail
 
-YARN_NPM_AUTH_TOKEN="${YARN_NPM_AUTH_TOKEN:-$NPM_TOKEN}"
+export YARN_NPM_AUTH_TOKEN="${YARN_NPM_AUTH_TOKEN:-$NPM_TOKEN}"
 
-YARN_MAJOR="$(yarn --version | sed 's/\..*//' | true)"
+YARN_MAJOR="$(yarn --version | sed 's/\..*//' || true)"
 if [[ "$YARN_MAJOR" -ge "3" ]]; then
-  PUBLISH_CMD="yarn npm publish --tag '$PUBLISH_NPM_TAG'"
+  PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
   PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
 else
   echo "Warning: Did not detect compatible yarn version. This action officially supports Yarn v3 and newer. Falling back to using npm." >&2
   export npm_config__auth="$YARN_NPM_AUTH_TOKEN"
-  PUBLISH_CMD="npm publish --tag '$PUBLISH_NPM_TAG'"
-  PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
+  PUBLISH_CMD="npm publish --tag $PUBLISH_NPM_TAG"
+  PACK_CMD="npm pack --pack-destination=/tmp/"
 fi
 
 if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
@@ -22,6 +21,8 @@ if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
   $PACK_CMD
   exit 0
 fi
+
+set -x
 
 if [[ -z $PUBLISH_NPM_TAG ]]; then
   echo "Notice: 'npm-tag' not set."
