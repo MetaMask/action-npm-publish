@@ -4,6 +4,8 @@ set -x
 set -e
 set -o pipefail
 
+YARN_NPM_AUTH_TOKEN="${YARN_NPM_AUTH_TOKEN:-$NPM_TOKEN}"
+
 if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
   echo "Notice: 'npm-token' not set. Running 'yarn pack --dry-run'."
   yarn pack --dry-run
