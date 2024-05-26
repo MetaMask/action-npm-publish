@@ -6,9 +6,20 @@ set -o pipefail
 
 YARN_NPM_AUTH_TOKEN="${YARN_NPM_AUTH_TOKEN:-$NPM_TOKEN}"
 
+YARN_MAJOR="$(yarn --version | sed 's/\..*//' | true)"
+if [[ "$YARN_MAJOR" -ge "3" ]]; then
+  PUBLISH_CMD="yarn npm publish --tag '$PUBLISH_NPM_TAG'"
+  PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
+else
+  echo "Warning: Did not detect compatible yarn version. This action officially supports Yarn v3 and newer. Falling back to using npm." >&2
+  export npm_config__auth="$YARN_NPM_AUTH_TOKEN"
+  PUBLISH_CMD="npm publish --tag '$PUBLISH_NPM_TAG'"
+  PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
+fi
+
 if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
-  echo "Notice: 'npm-token' not set. Running 'yarn pack --dry-run'."
-  yarn pack --dry-run
+  echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
+  $PACK_CMD
   exit 0
 fi
 
@@ -29,10 +40,4 @@ if [[ -n "$1" ]]; then
   fi
 fi
 
-YARN_VERSION="$(yarn --version)"
-if [[ "$YARN_VERSION" =~ ^1 ]]; then
-  echo "Warning: Detected Yarn Classic. This action officially supports Yarn v3 and newer. Older versions may break in future versions." >&2
-  npm_config__auth="$YARN_NPM_AUTH_TOKEN" yarn publish --tag "$PUBLISH_NPM_TAG"
-else
-  yarn npm publish --tag "$PUBLISH_NPM_TAG"
-fi
+$PUBLISH_CMD
