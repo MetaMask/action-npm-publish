@@ -42,4 +42,4 @@ jobs:
           cd skunkworks
           yarn install --immutable
           yarn plugin import workspace-tools
-          NPM_TOKEN="test" ../action-npm-publish/scripts/main.sh
+          PUBLISH_NPM_TAG="latest" NPM_TOKEN="test" ../action-npm-publish/scripts/main.sh
