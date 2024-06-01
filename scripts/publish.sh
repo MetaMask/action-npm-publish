@@ -11,9 +11,10 @@ if [[ "$YARN_MAJOR" -ge "3" ]]; then
   PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
   # install is handled by yarn berry pack/publish
   INSTALL_CMD=""
+  LOGIN_CMD=""
 else
   echo "Warning: Did not detect compatible yarn version. This action officially supports Yarn v3 and newer. Falling back to using npm." >&2
-  export npm_config__auth="$YARN_NPM_AUTH_TOKEN"
+  echo "//registry.npmjs.org/:_authToken=${YARN_NPM_AUTH_TOKEN}" >> $HOME/.npmrc
   PUBLISH_CMD="npm publish --tag $PUBLISH_NPM_TAG"
   PACK_CMD="npm pack --pack-destination=/tmp/"
   if [[ -f 'yarn.lock' ]]; then
@@ -51,3 +52,4 @@ fi
 
 $INSTALL_CMD
 $PUBLISH_CMD
+rm -f $HOME/.npmrc
