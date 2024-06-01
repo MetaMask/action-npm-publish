@@ -15,8 +15,8 @@ if [[ "$YARN_MAJOR" -ge "3" ]]; then
 else
   echo "Warning: Did not detect compatible yarn version. This action officially supports Yarn v3 and newer. Falling back to using npm." >&2
   export npm_config__auth="$YARN_NPM_AUTH_TOKEN"
+  echo "//registry.npmjs.org/:_authToken=${YARN_NPM_AUTH_TOKEN}" >> ~/.npmrc
   PUBLISH_CMD="npm publish --tag $PUBLISH_NPM_TAG"
-  LOGIN_CMD="npm adduser"
   PACK_CMD="npm pack --pack-destination=/tmp/"
   if [[ -f 'yarn.lock' ]]; then
     INSTALL_CMD="yarn install --frozen-lockfile"
@@ -52,5 +52,4 @@ if [[ -n "$1" ]]; then
 fi
 
 $INSTALL_CMD
-$LOGIN_CMD
 $PUBLISH_CMD
