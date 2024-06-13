@@ -7,29 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.2.0]
-### Uncategorized
-- Handle publishing of packages using Yarn Classic / NPM  ([#87](https://github.com/MetaMask/action-npm-publish/pull/87))
-- Update CODEOWNERS ([#89](https://github.com/MetaMask/action-npm-publish/pull/89))
-- 5.1.2 ([#86](https://github.com/MetaMask/action-npm-publish/pull/86))
-- Fix changelog following backport ([#84](https://github.com/MetaMask/action-npm-publish/pull/84))
-- 5.1.1 ([#82](https://github.com/MetaMask/action-npm-publish/pull/82))
-- 5.1.0 ([#80](https://github.com/MetaMask/action-npm-publish/pull/80))
-- Update version and changelog with v5.0.1 release ([#79](https://github.com/MetaMask/action-npm-publish/pull/79))
-- Update changelog with v4.0.x releases ([#76](https://github.com/MetaMask/action-npm-publish/pull/76))
-- 5.0.0 ([#67](https://github.com/MetaMask/action-npm-publish/pull/67))
-- Run linting and testing GitHub workflows on PRs ([#62](https://github.com/MetaMask/action-npm-publish/pull/62))
-- Enabling MetaMask security code scanner ([#60](https://github.com/MetaMask/action-npm-publish/pull/60))
-- Add Shared Libraries team in codeowners file ([#59](https://github.com/MetaMask/action-npm-publish/pull/59))
-- Update README.md ([#56](https://github.com/MetaMask/action-npm-publish/pull/56))
-- Update README.md ([#55](https://github.com/MetaMask/action-npm-publish/pull/55))
-- Update README.md ([#54](https://github.com/MetaMask/action-npm-publish/pull/54))
-- Bump word-wrap from 1.2.3 to 1.2.4 ([#53](https://github.com/MetaMask/action-npm-publish/pull/53))
-- 4.0.1 ([#52](https://github.com/MetaMask/action-npm-publish/pull/52))
-- Bump semver from 6.3.0 to 6.3.1 ([#50](https://github.com/MetaMask/action-npm-publish/pull/50))
-- Update README.md ([#48](https://github.com/MetaMask/action-npm-publish/pull/48))
-- 4.0.0 ([#47](https://github.com/MetaMask/action-npm-publish/pull/47))
-- 3.2.0 ([#38](https://github.com/MetaMask/action-npm-publish/pull/38))
-- Remove `target-name-text` step ([#39](https://github.com/MetaMask/action-npm-publish/pull/39))
+### Added
+- Handle publishing of packages not on Yarn Berry with NPM ([#87](https://github.com/MetaMask/action-npm-publish/pull/87))
+
+### Fixed
+- Recognize `NPM_TOKEN` environment variable ([#87](https://github.com/MetaMask/action-npm-publish/pull/87))
 
 ## [5.1.2]
 ### Fixed
