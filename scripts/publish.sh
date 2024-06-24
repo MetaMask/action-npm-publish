@@ -24,7 +24,8 @@ else
   fi
 fi
 
-if [[ -z $YARN_NPM_AUTH_TOKEN ]]; then
+# "dry-run" for polyrepo
+if [[ -z $YARN_NPM_AUTH_TOKEN && ! -n "$1" ]]; then
   echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
   $INSTALL_CMD
   $PACK_CMD
@@ -50,6 +51,13 @@ if [[ -n "$1" ]]; then
   # check if module is published
   PACKAGE_NAME=$(jq --raw-output .name package.json)
   LATEST_PACKAGE_VERSION=$(npm view "$PACKAGE_NAME" dist-tags --workspaces false --json | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag]' || echo "")
+
+  # "dry-run" for monorepo
+  if [ -z $YARN_NPM_AUTH_TOKEN && ! "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
+    echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
+    $PACK_CMD
+    exit 0
+  fi
 
   if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
     echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. aborting publish."
