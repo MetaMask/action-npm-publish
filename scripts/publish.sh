@@ -24,6 +24,7 @@ else
 fi
 
 # "dry-run" for polyrepo
+echo "$1"
 if [[ -z "$YARN_NPM_AUTH_TOKEN" && -z "$1" ]]; then
   echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
   $INSTALL_CMD
