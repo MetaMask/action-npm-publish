@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -e
+if [[ -z $ACTIONS_RUNNER_DEBUG ]]; then
+  set -e
+fi
 set -o pipefail
 
 export YARN_NPM_AUTH_TOKEN="${YARN_NPM_AUTH_TOKEN:-$NPM_TOKEN}"
