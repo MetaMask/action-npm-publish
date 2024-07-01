@@ -23,8 +23,10 @@ else
   fi
 fi
 
+IS_MONOREPO="$1"
+
 # "dry-run" for polyrepo
-if [[ -z "$YARN_NPM_AUTH_TOKEN" && -z "$1" ]]; then
+if [[ -z "$YARN_NPM_AUTH_TOKEN" && -z "$IS_MONOREPO" ]]; then
   echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
   $INSTALL_CMD
   $PACK_CMD
@@ -46,7 +48,7 @@ if [[ "$CURRENT_PACKAGE_VERSION" = "0.0.0" ]]; then
 fi
 
 # check param, if it's set (monorepo) we check if it's published before proceeding
-if [[ -n "$1" ]]; then
+if [[ -n "$IS_MONOREPO" ]]; then
   # check if module is published
   PACKAGE_NAME=$(jq --raw-output .name package.json)
   LATEST_PACKAGE_VERSION=$(npm view "$PACKAGE_NAME" dist-tags --workspaces false --json | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag]' || echo "")
