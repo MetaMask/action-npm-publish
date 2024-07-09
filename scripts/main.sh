@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -x
+if [[ -z $ACTIONS_RUNNER_DEBUG ]]; then
+  set -x
+fi
 set -e
 set -o pipefail
 
