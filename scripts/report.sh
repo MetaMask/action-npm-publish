@@ -15,6 +15,6 @@ for file in "$directory"/*.tgz; do
         pkdiff "$name@latest" "$file" \
             --no-exit-code \
             --no-open \
-            --output "$directory/$basename.html"
+            --output "$directory/$basename.html" || true
     fi
 done
