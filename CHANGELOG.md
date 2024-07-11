@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Handle publishing of packages not on Yarn Berry with NPM ([#87](https://github.com/MetaMask/action-npm-publish/pull/87))
 
 ### Fixed
+- Fix report script for unpublished packages ([#93](https://github.com/MetaMask/action-npm-publish/pull/93))
 - Recognize `NPM_TOKEN` environment variable ([#87](https://github.com/MetaMask/action-npm-publish/pull/87))
 
 ## [5.1.2]
