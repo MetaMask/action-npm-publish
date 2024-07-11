@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.2.0]
+### Added
+- Handle publishing of packages not on Yarn Berry with NPM ([#87](https://github.com/MetaMask/action-npm-publish/pull/87))
+
+### Changed
+- Only show packages in the dry run that need publishing ([#90](https://github.com/MetaMask/action-npm-publish/pull/90))
+
+### Fixed
+- Fix report script for unpublished packages ([#93](https://github.com/MetaMask/action-npm-publish/pull/93))
+- Recognize `NPM_TOKEN` environment variable ([#87](https://github.com/MetaMask/action-npm-publish/pull/87))
+
 ## [5.1.2]
 ### Fixed
 - Fix report script when publishing package with dash in organisation name ([#85](https://github.com/MetaMask/action-npm-publish/pull/85))
@@ -122,7 +133,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.2...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v5.2.0...HEAD
+[5.2.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.2...v5.2.0
 [5.1.2]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.1...v5.1.2
 [5.1.1]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.0.1...v5.1.0
