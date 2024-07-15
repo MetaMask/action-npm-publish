@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ -z $ACTIONS_RUNNER_DEBUG ]]; then
+if [ "${ACTIONS_RUNNER_DEBUG}" = "true" ]; then
   set -x
 fi
 set -e
