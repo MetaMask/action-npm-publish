@@ -49,14 +49,14 @@ You can notify `@MetaMask/npm-publishers` that a release is ready to be approved
 - uses: MetaMask/action-npm-publish@v5
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    subteam: S042S7RE4AE  # @metamask-npm-publishers
 ```
 
-If you want to customize the Slack message, you can use these inputs to do so:
+This posts a message to `#metamask-dev`, such as:
 
-- `icon-url`
-- `username`
-- `subteam`
-- `channel`
+![example deployment](docs/example-deployment.png)
+
+Here is another example that customizes the icon URL, bot name, and channel:
 
 For example:
 
@@ -70,10 +70,6 @@ For example:
     subteam: S042S7RE4AE  # @metamask-npm-publishers
     channel: dev-channel
 ```
-
-This creates a message such as:
-
-![image](https://user-images.githubusercontent.com/675259/203841602-124d537d-7476-4263-a17c-6d05b68c37d0.png)
 
 You can read more about these options in the [API](#api) section below.
 
