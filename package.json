@@ -2,8 +2,11 @@
   "private": true,
   "name": "action-npm-publish",
   "scripts": {
+    "build": "echo 'Nothing to build.'",
+    "lint": "yarn lint:eslint && yarn lint:changelog",
+    "lint:changelog": "./scripts/validate-changelog.sh",
     "lint:eslint": "eslint . --cache --ext js,ts",
-    "lint:fix": "yarn lint:eslint --fix",
+    "lint:fix": "yarn lint:eslint --fix && yarn lint:changelog",
     "test": "node test/index.js"
   },
   "repository": {
@@ -24,6 +27,7 @@
     "node": "^16.0.0"
   },
   "devDependencies": {
+    "@metamask/auto-changelog": "^3.4.4",
     "@metamask/eslint-config": "^9.0.0",
     "@metamask/eslint-config-nodejs": "^9.0.0",
     "eslint": "^7.23.0",

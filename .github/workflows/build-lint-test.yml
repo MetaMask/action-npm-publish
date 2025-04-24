@@ -1,0 +1,137 @@
+name: Build, Lint, and Test
+
+on:
+  workflow_call:
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v1
+        with:
+          is-high-risk-environment: false
+          node-version: '.nvmrc'
+          cache-node-modules: true
+
+  build:
+    name: Build
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v1
+        with:
+          is-high-risk-environment: false
+          node-version: '.nvmrc'
+      - run: yarn build
+      - name: Require clean working directory
+        shell: bash
+        run: |
+          if ! git diff --exit-code; then
+            echo "Working tree dirty at end of job"
+            exit 1
+          fi
+
+  lint:
+    name: Lint
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v1
+        with:
+          is-high-risk-environment: false
+          node-version: '.nvmrc'
+      - name: Run lint
+        run: yarn lint
+      - name: Run shellcheck
+        uses: fearphage/shellcheck-action@95d2a3d34d381a7314c286ea1725ca8cce3b51fd
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Require clean working directory
+        shell: bash
+        run: |
+          if ! git diff --exit-code; then
+            echo "Working tree dirty at end of job"
+            exit 1
+          fi
+
+  test-action-only:
+    name: Test this action only
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v1
+        with:
+          is-high-risk-environment: false
+          node-version: '.nvmrc'
+      - run: yarn test
+      - name: Require clean working directory
+        shell: bash
+        run: |
+          if ! git diff --exit-code; then
+            echo "Working tree dirty at end of job"
+            exit 1
+          fi
+
+  test-polyrepo-dry-run:
+    name: Test w/ polyrepo (dry-run)
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out utils
+        uses: actions/checkout@v4
+        with:
+          repository: MetaMask/utils
+          ref: 7c9d3a22d69b0def075c1f630e0249cfae9ddfb6
+          path: utils
+      - name: Set up utils
+        run: yarn install --immutable
+        working-directory: utils
+      - name: Set up utils
+        run: yarn build
+        working-directory: utils
+      - name: Run action within utils
+        run: ../action-npm-publish/scripts/main.sh
+        working-directory: utils
+
+  test-monorepo-dry-run:
+    name: Test w/ monorepo (dry-run)
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Check out snaps
+        uses: actions/checkout@v4
+        with:
+          repository: MetaMask/snaps
+          ref: f1458ab6b2d786e63adb1a52efc0022065ac8f27
+          path: snaps
+      - name: Set up snaps
+        run: yarn install --immutable
+        working-directory: snaps
+      - name: Run action within snaps
+        run: ../action-npm-publish/scripts/main.sh
+        working-directory: snaps
+
+  test-monorepo-republishing-same-version:
+    name: Test w/ monorepo (republishing same version)
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Check out snaps
+        uses: actions/checkout@v4
+        with:
+          repository: MetaMask/snaps
+          ref: v102.0.0
+          path: snaps
+      - name: Set up snaps
+        run: yarn install --immutable
+        working-directory: snaps
+      - name: Run action within snaps
+        run: ../action-npm-publish/scripts/main.sh
+        working-directory: snaps
+        env:
+          NPM_TOKEN: not-a-real-token
