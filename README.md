@@ -15,16 +15,14 @@ Designed for use with [`action-publish-release`](https://github.com/MetaMask/act
 - You'll need to create an NPM token for your repo and set it as a secret under an `npm-publish` environment so that releases can go through an approval step. Reach out to the `@metamask/npm-publishers` group for help on creating the NPM token and setting up this environment.
 - If your project is using Yarn Modern, Yarn is configured to use the `node-modules` linker, and your project defines a `prepack` script for any releasable packages, ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
 - The `slack-webhook-url` option for this action makes use of another action, `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. This action is authored by a Marketplace "verified creator". If your repository or organization restricts which actions can be used and does not allow Marketplace verified creators by default, ensure that this is listed as an allowed action.
-- In the job that uses this action, you'll need to first check out the repo, set up Node, and install dependencies. See the "Quick start" example below for more.
-- If your project defines a `prepack` script, you will probably want to set `SKIP_PREPACK: true` as an environment variable.
 
 ### Quick start
 
-The [`publish-release` workflow](https://github.com/MetaMask/metamask-module-template/blob/main/.github/workflows/publish-release.yml) from the [module template](https://github.com/MetaMask/metamask-module-template) is a live example of how we use this action in many MetaMask projects. In particular it demonstrates
+The [`publish-release` workflow](https://github.com/MetaMask/metamask-module-template/blob/main/.github/workflows/publish-release.yml) from the [module template](https://github.com/MetaMask/metamask-module-template) is a live example of how we use this action in many MetaMask projects. In particular it demonstrates:
 
-- How we typically check out and set up the repo
-- Setting `SKIP_PREPACK: true` to avoid running linting or tests before preparing packages
-- Announcing new releases in Slack
+- How we typically check out and set up the repo beforehand
+- How we place the publishing step under an approval step
+- How we notify approvers in Slack
 
 The sections below go into more detail on use cases.
 
@@ -52,7 +50,7 @@ If you supply `npm-token`, then publishing will actually occur. You will probabl
 
 This assumes that you've created an `npm-publish` environment and placed it behind an approval step.
 
-You can notify `@MetaMask/npm-publishers` that a release is ready to be approved by providing a `slack-webhook-url` input:
+You can automatically notify `@MetaMask/npm-publishers` that a release is ready to be approved by providing a `slack-webhook-url` input:
 
 ```yaml
 - uses: MetaMask/action-npm-publish@v5
