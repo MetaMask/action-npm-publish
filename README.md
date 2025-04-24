@@ -1,29 +1,46 @@
 # action-npm-publish
 
-This is a GitHub action that publishes one or more packages in a repo to NPM.
+This is a GitHub action that publishes one or more packages within a repo to NPM.
 
-- For a single-package project, the action will publish the package at the version listed in `package.json`.
-- For a multi-package package (monorepo), the action will publish each workspace package (the set of packages matched via the `workspaces` field in `package.json`, recursively) at the version listed in its `package.json`. (Any package which has already been published at its current version will be skipped.)
+- For a single-package repo, the action will publish the package at the version listed in `package.json`.
+- For a multi-package repo (monorepo), the action will iterate through the packages specified by the `workspaces` field in `package.json` and publish each one at the version listed in its `package.json`.
+
+Designed for use with [`action-publish-release`](https://github.com/MetaMask/action-publish-release).
 
 ## Usage
 
 ### Prequisites
 
-- Ensure your project is using Yarn.
-- Create an NPM token for your repo and assign it as a secret. Place this secret under an `npm-publish` environment so that releases can go through an approval step. Reach out to the `@metamask/npm-publishers` group for help on creating the NPM token and setting up this environment.
-- If your project is using Yarn Modern, is configured to use the `node-modules` linker, and defines a `prepack` script for any releasable packages, ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
+- Ensure your project is using Yarn. Other package managers may not work as expected.
+- You'll need to create an NPM token for your repo and set it as a secret under an `npm-publish` environment so that releases can go through an approval step. Reach out to the `@metamask/npm-publishers` group for help on creating the NPM token and setting up this environment.
+- If your project is using Yarn Modern, Yarn is configured to use the `node-modules` linker, and your project defines a `prepack` script for any releasable packages, ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
 - The `slack-webhook-url` option for this action makes use of another action, `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. This action is authored by a Marketplace "verified creator". If your repository or organization restricts which actions can be used and does not allow Marketplace verified creators by default, ensure that this is listed as an allowed action.
+- In the job that uses this action, you'll need to first check out the repo, set up Node, and install dependencies. See the "Quick start" example below for more.
+- If your project defines a `prepack` script, you will probably want to set `SKIP_PREPACK: true` as an environment variable.
 
 ### Quick start
 
-If you're in a hurry, take a look at the [`publish-release` workflow](https://github.com/MetaMask/metamask-module-template/blob/main/.github/workflows/publish-release.yml) from the [module template](https://github.com/MetaMask/metamask-module-template). This workflow defines two jobs relevant to NPM publishing:
+The [`publish-release` workflow](https://github.com/MetaMask/metamask-module-template/blob/main/.github/workflows/publish-release.yml) from the [module template](https://github.com/MetaMask/metamask-module-template) is a live example of how we use this action in many MetaMask projects. In particular it demonstrates
 
-- `publish-npm`: Runs `npm publish` under the `npm-publish` environment. This environment is set up in the module template (and other repos) so that the workflow will pause and allow a member of `@MetaMask/npm-publishers` to inspect and approve the release.
-- `publish-npm-dry-run`: Runs `npm publish` in dry-run mode. This runs before the previous step and prints out a list of the package contents so approvers can inspect the package before it is published.
+- How we typically check out and set up the repo
+- Setting `SKIP_PREPACK: true` to avoid running linting or tests before preparing packages
+- Announcing new releases in Slack
+
+The sections below go into more detail on use cases.
+
+### Preparing packages in dry-run mode
+
+By default, without supplying `npm-token`, packages will be prepared for publishing, but no publishing will actually occur. This is useful so that approvers can inspect the package before it is published.
+
+Add this to a job's steps in your workflow:
+
+```yaml
+- uses: MetaMask/action-npm-publish@v5
+```
 
 ### Publishing to NPM
 
-Add the following to a job's list of steps:
+If you supply `npm-token`, then publishing will actually occur. You will probably want to pair this with the previous step:
 
 ```yaml
 - uses: MetaMask/action-npm-publish@v5
@@ -31,17 +48,9 @@ Add the following to a job's list of steps:
     npm-token: ${{ secrets.NPM_TOKEN }}
 ```
 
-### Running dry-run mode
-
-If you omit the `npm-token` input, then packages will be prepared for publishing, but no publishing will actually occur:
-
-```yaml
-- uses: MetaMask/action-npm-publish@v5
-```
-
 ### Automatically requesting approvals in Slack
 
-This step assumes that you've created an `npm-publish` environment and placed it behind an approval step.
+This assumes that you've created an `npm-publish` environment and placed it behind an approval step.
 
 You can notify `@MetaMask/npm-publishers` that a release is ready to be approved by providing a `slack-webhook-url` input:
 
