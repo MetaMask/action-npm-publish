@@ -6,7 +6,6 @@ This is a GitHub action that handles publishing to NPM for a project that repres
 
 - For a monorepo, the action will publish each workspace package (the set of packages matched via the `workspaces` field in `package.json`, recursively) using its current version as per `package.json`. (Any package which has already been published at its current version will be skipped.)
 
-
 ## Requirements
 
 **This action assumes that Yarn is installed and that the package is using Yarn v3.** It may fail for other Yarn versions or other package managers.
@@ -89,3 +88,5 @@ You can read more about these option in the [API](#API) section below
 - **`username`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
 - **`subteam`** _(optional)_. Use this if you want to ping a subteam of individuals on Slack using `@`.
 - **`channel`** _(optional)_. Use this if you want to post to a channel other than the default: `metamask-dev`.
+
+x
