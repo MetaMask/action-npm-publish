@@ -33,7 +33,9 @@ if [[ -z "$YARN_NPM_AUTH_TOKEN" && -z "$IS_MONOREPO" ]]; then
   exit 0
 fi
 
-set -x
+if [ "${ACTIONS_RUNNER_DEBUG}" = "true" ]; then
+  set -x
+fi
 
 if [[ -z $PUBLISH_NPM_TAG ]]; then
   echo "Notice: 'npm-tag' not set."
