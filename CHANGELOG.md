@@ -7,14 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.3.0]
-### Uncategorized
-- chore: Only enable command logging if `RUNNER_DEBUG` is set ([#105](https://github.com/MetaMask/action-npm-publish/pull/105))
+### Changed
+- Only enable command logging if `RUNNER_DEBUG` is set ([#94](https://github.com/MetaMask/action-npm-publish/pull/94), [#105](https://github.com/MetaMask/action-npm-publish/pull/105))
 - Use environment variables for script inputs ([#104](https://github.com/MetaMask/action-npm-publish/pull/104))
-- ci: Run CI on `ubuntu-latest` and fix tests ([#107](https://github.com/MetaMask/action-npm-publish/pull/107))
-- Update codeowners to `@MetaMask/core-platform` ([#106](https://github.com/MetaMask/action-npm-publish/pull/106))
-- fix diff, closes #96 ([#98](https://github.com/MetaMask/action-npm-publish/pull/98))
-- fix debug ([#94](https://github.com/MetaMask/action-npm-publish/pull/94))
-- minor refactor: assign $1 as $IS_MONOREPO ([#92](https://github.com/MetaMask/action-npm-publish/pull/92))
+
+### Fixed
+- Fix backwards diff ([#98](https://github.com/MetaMask/action-npm-publish/pull/98))
 
 ## [5.2.0]
 ### Added
