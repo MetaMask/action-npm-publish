@@ -20,7 +20,6 @@ jobs:
         run: |
           cd skunkworks
           yarn install --immutable
-          yarn plugin import workspace-tools
           PUBLISH_NPM_TAG="latest" ../action-npm-publish/scripts/main.sh
   # test that publishing is skipped when attempting to republish the latest version
   checkout_publish_skunkworks_skip:
@@ -41,5 +40,4 @@ jobs:
         run: |
           cd skunkworks
           yarn install --immutable
-          yarn plugin import workspace-tools
           PUBLISH_NPM_TAG="latest" NPM_TOKEN="test" ../action-npm-publish/scripts/main.sh
