@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Only enable command logging if `RUNNER_DEBUG` is set ([#94](https://github.com/MetaMask/action-npm-publish/pull/94), [#105](https://github.com/MetaMask/action-npm-publish/pull/105))
 
 ### Fixed
-- Fix backwards diff ([#98](https://github.com/MetaMask/action-npm-publish/pull/98))
+- Fix additions showing up as removals, and vice versa in package diff ([#98](https://github.com/MetaMask/action-npm-publish/pull/98))
 
 ## [5.2.0]
 ### Added
