@@ -6,7 +6,7 @@ on:
 jobs:
   # test npm publish dry-run
   checkout_publish_skunkworks_dry_run:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -24,7 +24,7 @@ jobs:
           PUBLISH_NPM_TAG="latest" ../action-npm-publish/scripts/main.sh
   # test that publishing is skipped when attempting to republish the latest version
   checkout_publish_skunkworks_skip:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Get Latest Version from npm
         id: latestrelease
