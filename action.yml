@@ -59,9 +59,13 @@ runs:
     - id: final-text
       shell: bash
       if: inputs.slack-webhook-url != ''
+      env:
+        NAME_VERSION: ${{ steps.name-version.outputs.NAME_VERSION }}
+        SUBTEAM_TEXT: ${{ inputs.subteam }}
+        REPOSITORY: ${{ github.repository }}
+        RUN_ID: ${{ github.run_id }}
       run: |
-        DEFAULT_TEXT="\`${{ steps.name-version.outputs.NAME_VERSION }}\` is awaiting deployment :rocket: \n <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/|→ Click here to review deployment>"
-        SUBTEAM_TEXT="${{ inputs.subteam }}"
+        DEFAULT_TEXT="\`$NAME_VERSION\` is awaiting deployment :rocket: \n <https://github.com/$REPOSITORY/actions/runs/$RUN_ID/|→ Click here to review deployment>"
         FINAL_TEXT="$DEFAULT_TEXT"
         if [[ ! "$SUBTEAM_TEXT" == "" ]]; then
           FINAL_TEXT="<!subteam^$SUBTEAM_TEXT> $DEFAULT_TEXT"
@@ -91,7 +95,7 @@ runs:
             "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
             "icon_url": "${{ inputs.icon-url }}",
             "username": "${{ inputs.username }}"
-          }          
+          }
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
