@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "${ACTIONS_RUNNER_DEBUG}" = "true" ]; then
+if [ "${RUNNER_DEBUG}" = "1" ]; then
   set -x
 fi
 

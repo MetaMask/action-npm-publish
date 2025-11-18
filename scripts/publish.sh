@@ -33,7 +33,7 @@ if [[ -z "$YARN_NPM_AUTH_TOKEN" && -z "$IS_MONOREPO" ]]; then
   exit 0
 fi
 
-if [ "${ACTIONS_RUNNER_DEBUG}" = "true" ]; then
+if [ "${RUNNER_DEBUG}" = "1" ]; then
   set -x
 fi
 
