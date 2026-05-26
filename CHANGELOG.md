@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## [5.3.1]
-### Uncategorized
-- fix: Only install `pkdiff` if no token was specified ([#109](https://github.com/MetaMask/action-npm-publish/pull/109))
+### Fixed
+- Only install `pkdiff` if no token was specified ([#109](https://github.com/MetaMask/action-npm-publish/pull/109))
+- Specify version for `pkdiff` ([#111](https://github.com/MetaMask/action-npm-publish/pull/111))
 
 ## [5.3.0]
 ### Changed
