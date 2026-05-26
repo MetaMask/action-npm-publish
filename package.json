@@ -21,7 +21,7 @@
     "test": "test"
   },
   "engines": {
-    "node": "^16.0.0"
+    "node": "^22.14.0 || >=24"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^9.0.0",
