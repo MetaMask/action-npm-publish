@@ -36,6 +36,7 @@ runs:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
     - id: install-pkdiff
+      if: inputs.npm-token == ''
       shell: bash
       run: npm i -g pkdiff
     - id: generate-report
