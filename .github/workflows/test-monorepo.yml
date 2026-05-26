@@ -8,12 +8,12 @@ jobs:
   checkout_publish_skunkworks_dry_run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
           ref: 2befb570c72fddd577410b0193982332eed0fc41
           path: skunkworks
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v3
         with:
           path: action-npm-publish
       - name: Setup, Build, Publish
@@ -28,12 +28,12 @@ jobs:
       - name: Get Latest Version from npm
         id: latestrelease
         run: echo "releasever=$(npm view MetaMask/snaps-skunkworks version --workspaces=false)" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
           ref: v${{ steps.latestrelease.outputs.releasever }}
           path: skunkworks
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v3
         with:
           path: action-npm-publish
       - name: Setup, Build, Publish

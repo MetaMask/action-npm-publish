@@ -8,15 +8,15 @@ jobs:
   checkout_publish_utils_dry_run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v3
         with:
           repository: MetaMask/utils
           ref: v11.8.1
           path: utils
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v3
         with:
           path: action-npm-publish
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v3
         with:
           node-version: 24
       - name: Setup, Build, Publish
