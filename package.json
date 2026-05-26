@@ -1,27 +1,24 @@
 {
-  "private": true,
   "name": "action-npm-publish",
-  "scripts": {
-    "lint:eslint": "eslint . --cache --ext js,ts",
-    "lint:fix": "yarn lint:eslint --fix",
-    "test": "node test/index.js"
+  "version": "5.3.1",
+  "private": true,
+  "homepage": "https://github.com/MetaMask/action-npm-publish#readme",
+  "bugs": {
+    "url": "https://github.com/MetaMask/action-npm-publish/issues"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/action-npm-publish.git"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/MetaMask/action-npm-publish/issues"
-  },
-  "homepage": "https://github.com/MetaMask/action-npm-publish#readme",
-  "version": "5.3.1",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
-  "engines": {
-    "node": "^22.14.0 || >=24"
+  "scripts": {
+    "lint:eslint": "eslint . --cache --ext js,ts",
+    "lint:fix": "yarn lint:eslint --fix",
+    "test": "node test/index.js"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^14.0.0",
@@ -34,6 +31,10 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-promise": "^7.1.0",
     "prettier": "^3.3.3",
+    "prettier-plugin-packagejson": "^3.0.2",
     "tapzero": "^0.6.1"
+  },
+  "engines": {
+    "node": "^22.14.0 || >=24"
   }
 }
