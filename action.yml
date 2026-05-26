@@ -8,6 +8,10 @@ inputs:
     description: 'The npm tag to publish to. Defaults to "latest".'
     required: false
     default: 'latest'
+  npm-staged-publish:
+    description: 'Whether to use staged publishing using an OIDC token. Mutually exclusive with "npm-token".'
+    required: false
+    default: 'false'
   slack-webhook-url:
     description: 'Slack Webhook URL'
     required: false
@@ -35,6 +39,7 @@ runs:
       env:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
+        STAGED_PUBLISH: ${{ inputs.npm-staged-publish }}
     - id: install-pkdiff
       if: inputs.npm-token == ''
       shell: bash
