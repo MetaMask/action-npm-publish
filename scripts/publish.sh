@@ -23,11 +23,25 @@ else
   fi
 fi
 
+# https://docs.npmjs.com/staged-publishing
+if [[ "$STAGED_PUBLISH" = "true" ]]; then
+  # Yarn does not support staged publishing (yet), so we use NPM for that even
+  # if Yarn is the default package manager.
+  PUBLISH_CMD="npm stage publish --tag $PUBLISH_NPM_TAG --provenance"
+fi
+
+# Perform a dry run if no auth token is provided and it's not a staged publish.
+if [[ -z "$YARN_NPM_AUTH_TOKEN" && "$STAGED_PUBLISH" != "true" ]]; then
+  echo "Notice: 'npm-token' not set, and 'staged-publish' is not enabled. Performing a dry run."
+  DRY_RUN="true"
+else
+  DRY_RUN="false"
+fi
+
 IS_MONOREPO="$1"
 
 # "dry-run" for polyrepo
-if [[ -z "$YARN_NPM_AUTH_TOKEN" && -z "$IS_MONOREPO" ]]; then
-  echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
+if [[ "$DRY_RUN" = "true" && -z "$IS_MONOREPO" ]]; then
   $INSTALL_CMD
   $PACK_CMD
   exit 0
@@ -37,7 +51,7 @@ if [ "${RUNNER_DEBUG}" = "1" ]; then
   set -x
 fi
 
-if [[ -z $PUBLISH_NPM_TAG ]]; then
+if [[ -z "$PUBLISH_NPM_TAG" ]]; then
   echo "Notice: 'npm-tag' not set."
   exit 1
 fi
@@ -56,14 +70,14 @@ if [[ -n "$IS_MONOREPO" ]]; then
   LATEST_PACKAGE_VERSION=$(npm view "$PACKAGE_NAME" dist-tags --workspaces false --json | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag]' || echo "")
 
   # "dry-run" for monorepo
-  if [[ -z "$YARN_NPM_AUTH_TOKEN" && ! "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]]; then
+  if [[ "$DRY_RUN" = "true" && ! "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]]; then
     echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
     $PACK_CMD
     exit 0
   fi
 
   if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
-    echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. aborting publish."
+    echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. Aborting publish."
     exit 0
   fi
 fi
