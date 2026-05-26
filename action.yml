@@ -38,7 +38,7 @@ runs:
     - id: install-pkdiff
       if: inputs.npm-token == ''
       shell: bash
-      run: npm i -g pkdiff
+      run: npm i -g pkdiff@2.0.1
     - id: generate-report
       shell: bash
       if: inputs.npm-token == ''
