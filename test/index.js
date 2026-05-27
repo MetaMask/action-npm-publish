@@ -13,9 +13,9 @@ test('should not have dependencies from now until forever', async (tapzero) => {
   tapzero.equal(hasDeps, false);
 });
 
-test('should only have 12 devDependency from now until forever', async (tapzero) => {
+test('should only have 13 devDependency from now until forever', async (tapzero) => {
   const { length } = Object.keys(devDependencies);
-  tapzero.equal(length, 12);
+  tapzero.equal(length, 13);
 });
 
 test('should not error when performing a dry-run publish', async (tapzero) => {
