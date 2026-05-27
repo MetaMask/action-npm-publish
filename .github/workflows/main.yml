@@ -63,9 +63,12 @@ jobs:
       contents: read
       security-events: write
 
-  build-lint-test:
-    name: Build, lint, and test
+  lint-test:
+    name: Lint and test
     uses: ./.github/workflows/lint-test.yml
+    permissions:
+      contents: read
+      checks: write
 
   all-jobs-completed:
     name: All jobs completed
@@ -73,7 +76,7 @@ jobs:
     needs:
       - check-workflows
       - analyse-code
-      - build-lint-test
+      - lint-test
     permissions: {}
     outputs:
       PASSED: ${{ steps.set-output.outputs.PASSED }}
