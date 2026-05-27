@@ -21,6 +21,7 @@
     "test": "node test/index.js"
   },
   "devDependencies": {
+    "@lavamoat/allow-scripts": "^5.0.2",
     "@metamask/eslint-config": "^14.0.0",
     "@metamask/eslint-config-nodejs": "^14.0.0",
     "eslint": "^9.11.0",
@@ -36,5 +37,11 @@
   },
   "engines": {
     "node": "^22.14.0 || >=24"
+  },
+  "packageManager": "yarn@4.15.0",
+  "lavamoat": {
+    "allowScripts": {
+      "eslint-plugin-import-x>unrs-resolver#1.12.2": false
+    }
   }
 }
