@@ -1,4 +1,4 @@
-name: shellcheck
+name: Shellcheck
 
 permissions:
   checks: write
@@ -10,11 +10,11 @@ on:
 
 jobs:
   lint:
-    name: lint
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: ShellCheck Action
+      - name: Run shellcheck
         uses: fearphage/shellcheck-action@95d2a3d34d381a7314c286ea1725ca8cce3b51fd
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

@@ -1,42 +1,50 @@
-name: test-monorepo
+name: Test publish (monorepo)
+
 on:
   push:
     branches: [main]
   pull_request:
+
 jobs:
-  # test npm publish dry-run
-  checkout_publish_skunkworks_dry_run:
+  # Test npm publish dry-run.
+  checkout-publish-skunkworks-dry-run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Snaps repository
+        uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
           ref: 2befb570c72fddd577410b0193982332eed0fc41
           path: skunkworks
-      - uses: actions/checkout@v3
+      - name: Checkout action repository
+        uses: actions/checkout@v3
         with:
           path: action-npm-publish
-      - name: Setup, Build, Publish
+      - name: Setup, build, publish
         run: |
           cd skunkworks
           yarn install --immutable
           PUBLISH_NPM_TAG="latest" ../action-npm-publish/scripts/main.sh
-  # test that publishing is skipped when attempting to republish the latest version
-  checkout_publish_skunkworks_skip:
+
+  # Test that publishing is skipped when attempting to republish the latest
+  # version.
+  checkout-publish-skunkworks-skip:
     runs-on: ubuntu-latest
     steps:
-      - name: Get Latest Version from npm
-        id: latestrelease
-        run: echo "releasever=$(npm view MetaMask/snaps-skunkworks version --workspaces=false)" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v3
+      - name: Get latest version from NPM
+        id: latest-release
+        run: echo "release-version=$(npm view MetaMask/snaps-skunkworks version --workspaces=false)" >> "$GITHUB_OUTPUT"
+      - name: Checkout Snaps repository
+        uses: actions/checkout@v3
         with:
           repository: MetaMask/snaps-skunkworks
-          ref: v${{ steps.latestrelease.outputs.releasever }}
+          ref: v${{ steps.latest-release.outputs.release-version }}
           path: skunkworks
-      - uses: actions/checkout@v3
+      - name: Checkout action repository
+        uses: actions/checkout@v3
         with:
           path: action-npm-publish
-      - name: Setup, Build, Publish
+      - name: Setup, build, publish
         run: |
           cd skunkworks
           yarn install --immutable

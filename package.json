@@ -16,6 +16,7 @@
     "test": "test"
   },
   "scripts": {
+    "lint": "yarn lint:eslint",
     "lint:eslint": "eslint . --cache",
     "lint:fix": "yarn lint:eslint --fix",
     "test": "node test/index.js"

@@ -1,28 +1,31 @@
-name: test-polyrepo
+name: Test publish (polyrepo)
 on:
   push:
     branches: [main]
   pull_request:
 jobs:
-  # test npm publish dry-run
-  checkout_publish_utils_dry_run:
+  # Test npm publish dry-run.
+  checkout-publish-utils-dry-run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout utils repository
+        uses: actions/checkout@v3
         with:
           repository: MetaMask/utils
           ref: v11.8.1
           path: utils
-      - uses: actions/checkout@v3
+      - name: Checkout action repository
+        uses: actions/checkout@v3
         with:
           path: action-npm-publish
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 24
       - name: Setup, Build, Publish
         shell: bash
         run: |
           cd utils
-          yarn
+          yarn install --immutable
           yarn build
           ../action-npm-publish/scripts/main.sh
