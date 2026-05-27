@@ -1,0 +1,147 @@
+name: Lint, test
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v3
+        with:
+          is-high-risk-environment: false
+          node-version: ${{ matrix.node-version }}
+          cache-node-modules: ${{ matrix.node-version == '22.x' }}
+
+  lint:
+    name: Lint
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v3
+        with:
+          is-high-risk-environment: false
+          node-version: ${{ matrix.node-version }}
+      - name: Lint
+        run: yarn lint
+      - name: Validate RC changelog
+        if: ${{ startsWith(github.head_ref, 'release/') }}
+        run: yarn lint:changelog --rc
+      - name: Validate changelog
+        if: ${{ !startsWith(github.head_ref, 'release/') }}
+        run: yarn lint:changelog
+      - name: Run shellcheck
+        uses: fearphage/shellcheck-action@95d2a3d34d381a7314c286ea1725ca8cce3b51fd
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Require clean working directory
+        shell: bash
+        run: |
+          if ! git diff --exit-code; then
+            echo "Working tree dirty at end of job"
+            exit 1
+          fi
+
+  test:
+    name: Test
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - name: Checkout and setup environment
+        uses: MetaMask/action-checkout-and-setup@v3
+        with:
+          is-high-risk-environment: false
+          node-version: ${{ matrix.node-version }}
+      - name: Test
+        run: yarn test
+      - name: Require clean working directory
+        shell: bash
+        run: |
+          if ! git diff --exit-code; then
+            echo "Working tree dirty at end of job"
+            exit 1
+          fi
+
+  test-publish-monorepo:
+    name: Test publish monorepo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Snaps repository
+        uses: actions/checkout@v6
+        with:
+          repository: MetaMask/snaps-skunkworks
+          ref: 2befb570c72fddd577410b0193982332eed0fc41
+          path: skunkworks
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Setup, build, publish
+        run: |
+          cd skunkworks
+          yarn install --immutable
+          PUBLISH_NPM_TAG="latest" ../action-npm-publish/scripts/main.sh
+
+  test-publish-monorepo-skip:
+    name: Test skipping publish of latest version (monorepo)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get latest version from NPM
+        id: latest-release
+        run: echo "release-version=$(npm view MetaMask/snaps-skunkworks version --workspaces=false)" >> "$GITHUB_OUTPUT"
+      - name: Checkout Snaps repository
+        uses: actions/checkout@v6
+        with:
+          repository: MetaMask/snaps-skunkworks
+          ref: v${{ steps.latest-release.outputs.release-version }}
+          path: skunkworks
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Setup, build, publish
+        run: |
+          cd skunkworks
+          yarn install --immutable
+          PUBLISH_NPM_TAG="latest" NPM_TOKEN="test" ../action-npm-publish/scripts/main.sh
+
+  test-publish-polyrepo:
+    name: Test publish polyrepo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout utils repository
+        uses: actions/checkout@v6
+        with:
+          repository: MetaMask/utils
+          ref: v11.8.1
+          path: utils
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Setup, build, publish
+        shell: bash
+        run: |
+          cd utils
+          yarn install --immutable
+          yarn build
+          ../action-npm-publish/scripts/main.sh
