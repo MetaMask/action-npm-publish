@@ -9,13 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout utils repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           repository: MetaMask/utils
           ref: v11.8.1
           path: utils
       - name: Checkout action repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           path: action-npm-publish
       - name: Setup Node.js

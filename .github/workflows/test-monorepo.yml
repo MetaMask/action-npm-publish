@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Snaps repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           repository: MetaMask/snaps-skunkworks
           ref: 2befb570c72fddd577410b0193982332eed0fc41
           path: skunkworks
       - name: Checkout action repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           path: action-npm-publish
       - name: Setup, build, publish
@@ -35,13 +35,13 @@ jobs:
         id: latest-release
         run: echo "release-version=$(npm view MetaMask/snaps-skunkworks version --workspaces=false)" >> "$GITHUB_OUTPUT"
       - name: Checkout Snaps repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           repository: MetaMask/snaps-skunkworks
           ref: v${{ steps.latest-release.outputs.release-version }}
           path: skunkworks
       - name: Checkout action repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           path: action-npm-publish
       - name: Setup, build, publish
