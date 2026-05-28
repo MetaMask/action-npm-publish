@@ -41,7 +41,7 @@ test('correct version should appear in dry-run output', async (tapzero) => {
   });
 });
 
-test('throws an error when OIDC token is invalid', async (t) => {
+test('throws an error when OIDC token is invalid', async (tapzero) => {
   await new Promise((resolve, reject) => {
     exec(
       `ACTIONS_ID_TOKEN_REQUEST_URL=${FAKE} ACTIONS_ID_TOKEN_REQUEST_TOKEN=${FAKE} STAGED_PUBLISH=true ./scripts/main.sh`,
@@ -50,7 +50,7 @@ test('throws an error when OIDC token is invalid', async (t) => {
           reject(new Error('Expected an error but did not get one.'));
         }
 
-        t.equal(error.code, 1);
+        tapzero.equal(error.code, 1);
         resolve();
       },
     );
