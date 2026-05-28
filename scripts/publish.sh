@@ -35,6 +35,8 @@ else
   DRY_RUN="false"
 fi
 
+[[ -n "$GITHUB_OUTPUT" ]] && echo "dry-run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+
 IS_MONOREPO="$1"
 
 # "dry-run" for polyrepo
