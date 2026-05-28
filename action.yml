@@ -30,22 +30,22 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - id: Publish
+    - id: publish
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
         STAGED_PUBLISH: ${{ inputs.staged-publish }}
     - id: install-pkdiff
-      if: inputs.npm-token == ''
+      if: steps.publish.outputs.dry-run == 'true'
       shell: bash
       run: npm i -g pkdiff@2.0.1
     - id: generate-report
       shell: bash
-      if: inputs.npm-token == ''
+      if: steps.publish.outputs.dry-run == 'true'
       run: ${{ github.action_path }}/scripts/report.sh
     - id: upload-artifact
-      if: inputs.npm-token == ''
+      if: steps.publish.outputs.dry-run == 'true'
       uses: actions/upload-artifact@v4
       with:
         path: |
