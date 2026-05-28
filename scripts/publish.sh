@@ -3,8 +3,6 @@
 set -e
 set -o pipefail
 
-export YARN_NPM_AUTH_TOKEN="${YARN_NPM_AUTH_TOKEN:-$NPM_TOKEN}"
-
 YARN_MAJOR="$(yarn --version | sed 's/\..*//' || true)"
 if [[ "$YARN_MAJOR" -ge "3" ]]; then
   PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
@@ -13,7 +11,6 @@ if [[ "$YARN_MAJOR" -ge "3" ]]; then
   INSTALL_CMD=""
 else
   echo "Warning: Did not detect compatible yarn version. This action officially supports Yarn v3 and newer. Falling back to using npm." >&2
-  echo "//registry.npmjs.org/:_authToken=${YARN_NPM_AUTH_TOKEN}" >> "$HOME/.npmrc"
   PUBLISH_CMD="npm publish --tag $PUBLISH_NPM_TAG"
   PACK_CMD="npm pack --pack-destination=/tmp/"
   if [[ -f 'yarn.lock' ]]; then
@@ -30,9 +27,9 @@ if [[ "$STAGED_PUBLISH" = "true" ]]; then
   PUBLISH_CMD="npm stage publish --tag $PUBLISH_NPM_TAG --provenance"
 fi
 
-# Perform a dry run if no auth token is provided and it's not a staged publish.
-if [[ -z "$YARN_NPM_AUTH_TOKEN" && "$STAGED_PUBLISH" != "true" ]]; then
-  echo "Notice: 'npm-token' not set, and 'staged-publish' is not enabled. Performing a dry run."
+# Perform a dry run if OIDC is not available.
+if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
+  echo "Notice: OIDC is not available. Performing a dry run."
   DRY_RUN="true"
 else
   DRY_RUN="false"
@@ -71,7 +68,7 @@ if [[ -n "$IS_MONOREPO" ]]; then
 
   # "dry-run" for monorepo
   if [[ "$DRY_RUN" = "true" && ! "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]]; then
-    echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
+    echo "Notice: OIDC is not available. Running '$PACK_CMD'."
     $PACK_CMD
     exit 0
   fi
@@ -84,4 +81,3 @@ fi
 
 $INSTALL_CMD
 $PUBLISH_CMD
-rm -f "$HOME/.npmrc"
