@@ -1,17 +1,14 @@
 name: 'Publish to npm'
 description: 'Publish the release to npm'
 inputs:
-  npm-token:
-    description: 'The token used for npm publishing. If omitted the action will perform a dry run npm publish.'
-    required: false
   npm-tag:
     description: 'The npm tag to publish to. Defaults to "latest".'
     required: false
     default: 'latest'
-  npm-staged-publish:
-    description: 'Whether to use staged publishing using an OIDC token. Mutually exclusive with "npm-token".'
+  staged-publish:
+    description: 'Whether to use staged publishing. Defaults to "true". If set to "false", the action will publish directly to NPM without a staging step.'
     required: false
-    default: 'false'
+    default: 'true'
   slack-webhook-url:
     description: 'Slack Webhook URL'
     required: false
@@ -37,9 +34,8 @@ runs:
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
-        YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
-        STAGED_PUBLISH: ${{ inputs.npm-staged-publish }}
+        STAGED_PUBLISH: ${{ inputs.staged-publish }}
     - id: install-pkdiff
       if: inputs.npm-token == ''
       shell: bash
