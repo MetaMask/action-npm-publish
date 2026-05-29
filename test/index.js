@@ -19,7 +19,7 @@ test('should only have 15 devDependency from now until forever', async (tapzero)
 
 test('should not error when performing a dry-run publish', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec('./scripts/main.sh', (error) => {
+    exec('PUBLISH_NPM_TAG=latest ./scripts/main.sh', (error) => {
       if (error) {
         reject(new Error(error));
       }
@@ -31,7 +31,7 @@ test('should not error when performing a dry-run publish', async (tapzero) => {
 
 test('correct version should appear in dry-run output', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec('./scripts/main.sh', (error, stdout) => {
+    exec('PUBLISH_NPM_TAG=latest ./scripts/main.sh', {}, (error, stdout) => {
       if (error) {
         reject(new Error(error));
       }
