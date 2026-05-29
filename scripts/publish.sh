@@ -24,9 +24,10 @@ fi
 PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
 
 # Get the package name and the latest published version for the specified tag,
-# if it exists.
+# if it exists. Note that we're `cd`ing into /tmp before running `npm view` to
+# avoid any issues with Corepack detecting Yarn.
 PACKAGE_NAME=$(jq --raw-output .name package.json)
-LATEST_PACKAGE_VERSION=$(npm view "$PACKAGE_NAME" dist-tags --workspaces false --json 2>/dev/null | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag]' || echo "")
+LATEST_PACKAGE_VERSION=$(cd /tmp && npm view "$PACKAGE_NAME" dist-tags --workspaces false --json 2>/dev/null | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag] // empty' || echo "")
 
 # Determine the publish command and whether to perform a dry run. It works as
 # follows:
