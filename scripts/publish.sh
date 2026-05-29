@@ -41,7 +41,7 @@ if [[ -n "$YARN_NPM_AUTH_TOKEN" && -z "$LATEST_PACKAGE_VERSION" ]]; then
   PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
   DRY_RUN="false"
 elif [[ -n "$YARN_NPM_AUTH_TOKEN" ]]; then
-  echo "Notice: Package already published; ignoring token and falling back to OIDC."
+  echo "Notice: Package already published. Ignoring token and falling back to OIDC."
 fi
 
 # Dry run will be set to false if a token is provided and the package has not
