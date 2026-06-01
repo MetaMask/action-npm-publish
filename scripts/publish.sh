@@ -87,17 +87,16 @@ publish_polyrepo() {
 }
 
 publish_monorepo() {
-  if [[ "$DRY_RUN" = "true" && ! "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]]; then
-    $PACK_CMD
-    exit 0
-  fi
-
   if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
     echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. Aborting publish."
     exit 0
   fi
 
-  $PUBLISH_CMD
+  if [[ "$DRY_RUN" = "true" ]]; then
+    $PACK_CMD
+  else
+    $PUBLISH_CMD
+  fi
 }
 
 main() {
