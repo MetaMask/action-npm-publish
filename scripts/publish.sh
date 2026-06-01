@@ -105,7 +105,7 @@ main() {
   configure_publish
 
   IS_MONOREPO="$1"
-  if [[ -n "$IS_MONOREPO" ]]; then
+  if [[ "$IS_MONOREPO" = "true" ]]; then
     publish_monorepo
   else
     publish_polyrepo
