@@ -3,71 +3,114 @@
 set -e
 set -o pipefail
 
-export YARN_NPM_AUTH_TOKEN="${YARN_NPM_AUTH_TOKEN:-$NPM_TOKEN}"
-
-YARN_MAJOR="$(yarn --version | sed 's/\..*//' || true)"
-if [[ "$YARN_MAJOR" -ge "3" ]]; then
-  PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
-  PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
-  # install is handled by yarn berry pack/publish
-  INSTALL_CMD=""
-else
-  echo "Warning: Did not detect compatible yarn version. This action officially supports Yarn v3 and newer. Falling back to using npm." >&2
-  echo "//registry.npmjs.org/:_authToken=${YARN_NPM_AUTH_TOKEN}" >> "$HOME/.npmrc"
-  PUBLISH_CMD="npm publish --tag $PUBLISH_NPM_TAG"
-  PACK_CMD="npm pack --pack-destination=/tmp/"
-  if [[ -f 'yarn.lock' ]]; then
-    INSTALL_CMD="yarn install --frozen-lockfile"
-  else
-    INSTALL_CMD="npm ci"
-  fi
-fi
-
-IS_MONOREPO="$1"
-
-# "dry-run" for polyrepo
-if [[ -z "$YARN_NPM_AUTH_TOKEN" && -z "$IS_MONOREPO" ]]; then
-  echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
-  $INSTALL_CMD
-  $PACK_CMD
-  exit 0
-fi
-
-if [ "${RUNNER_DEBUG}" = "1" ]; then
+if [ "$RUNNER_DEBUG" = "1" ]; then
   set -x
 fi
 
-if [[ -z $PUBLISH_NPM_TAG ]]; then
-  echo "Notice: 'npm-tag' not set."
-  exit 1
-fi
+check_requirements() {
+  IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$(yarn --version)"
 
-CURRENT_PACKAGE_VERSION=$(jq --raw-output .version package.json)
+  # TODO: Set this to the right version when Yarn releases a new version with the
+  # `--staged` flag for `yarn npm publish`.
+  if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 15 ) ]]; then
+    echo "::error::Yarn version 4.15.0 or higher is required. Detected version: $(yarn --version)."
+    exit 1
+  fi
 
-if [[ "$CURRENT_PACKAGE_VERSION" = "0.0.0" ]]; then
-  echo "Notice: Invalid version: $CURRENT_PACKAGE_VERSION. aborting publish."
-  exit 0
-fi
+  if [[ -z "$PUBLISH_NPM_TAG" ]]; then
+    echo "::error::'npm-tag' not set."
+    exit 1
+  fi
 
-# check param, if it's set (monorepo) we check if it's published before proceeding
-if [[ -n "$IS_MONOREPO" ]]; then
-  # check if module is published
+  CURRENT_PACKAGE_VERSION=$(jq --raw-output .version package.json)
+  if [[ "$CURRENT_PACKAGE_VERSION" = "0.0.0" ]]; then
+    echo "Notice: Invalid version: $CURRENT_PACKAGE_VERSION. Aborting publish."
+    exit 0
+  fi
+}
+
+get_package_info() {
   PACKAGE_NAME=$(jq --raw-output .name package.json)
-  LATEST_PACKAGE_VERSION=$(npm view "$PACKAGE_NAME" dist-tags --workspaces false --json | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag]' || echo "")
 
-  # "dry-run" for monorepo
-  if [[ -z "$YARN_NPM_AUTH_TOKEN" && ! "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]]; then
-    echo "Notice: 'npm-token' not set. Running '$PACK_CMD'."
+  # Get the latest published version for the specified tag, if it exists. Note
+  # that we're `cd`ing into /tmp before running `npm view` to avoid any issues
+  # with Corepack detecting Yarn.
+  LATEST_PACKAGE_VERSION=$(cd /tmp && npm view "$PACKAGE_NAME" dist-tags --workspaces false --json 2>/dev/null | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag] // empty' || echo "")
+}
+
+configure_publish() {
+  PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
+
+  # Determine the publish command and whether to perform a dry run. It works
+  # as follows:
+  # 1. If a token is provided, and the package has not been published before,
+  #    use the token for the initial publish.
+  # 2. If a token is provided, but the package has already been published,
+  #    ignore the token and fall back to OIDC (if available) for subsequent
+  #    publish.
+  # 3. If no token is provided, use OIDC if available.
+  # 4. If neither a token nor OIDC is available, perform a dry run.
+  if [[ -n "$YARN_NPM_AUTH_TOKEN" && -z "$LATEST_PACKAGE_VERSION" ]]; then
+    echo "Notice: Package not yet published. Using token for initial publish."
+    PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
+    DRY_RUN="false"
+  elif [[ -n "$YARN_NPM_AUTH_TOKEN" ]]; then
+    echo "Notice: Package already published. Ignoring token and falling back to OIDC."
+  fi
+
+  if [[ -z "$DRY_RUN" ]]; then
+    if [[ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
+      if [[ "$STAGED_PUBLISH" = "true" ]]; then
+        PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG --staged --provenance"
+      else
+        PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG --provenance"
+      fi
+      DRY_RUN="false"
+    else
+      echo "Notice: OIDC is not available. Performing a dry run."
+      DRY_RUN="true"
+    fi
+  fi
+
+  # Export the "dry-run" status for use in subsequent steps, if GITHUB_OUTPUT is
+  # available.
+  [[ -n "$GITHUB_OUTPUT" ]] && echo "dry-run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+}
+
+publish_polyrepo() {
+  if [[ "$DRY_RUN" = "true" ]]; then
+    $PACK_CMD
+    exit 0
+  fi
+
+  $PUBLISH_CMD
+}
+
+publish_monorepo() {
+  if [[ "$DRY_RUN" = "true" && ! "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]]; then
     $PACK_CMD
     exit 0
   fi
 
   if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
-    echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. aborting publish."
+    echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. Aborting publish."
     exit 0
   fi
-fi
 
-$INSTALL_CMD
-$PUBLISH_CMD
-rm -f "$HOME/.npmrc"
+  $PUBLISH_CMD
+}
+
+main() {
+  check_requirements
+  get_package_info
+  configure_publish
+
+  IS_MONOREPO="$1"
+  if [[ -n "$IS_MONOREPO" ]]; then
+    publish_monorepo
+  else
+    publish_polyrepo
+  fi
+}
+
+main "$@"

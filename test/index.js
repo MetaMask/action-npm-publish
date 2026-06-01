@@ -4,7 +4,6 @@ const { test } = require('tapzero');
 const packageJson = require('../package.json');
 
 const { devDependencies, version } = packageJson;
-const INVALID_TOKEN = 'should error when token is invalid';
 const FAKE = 'FAKE';
 
 test('should not have dependencies from now until forever', async (tapzero) => {
@@ -20,7 +19,7 @@ test('should only have 15 devDependency from now until forever', async (tapzero)
 
 test('should not error when performing a dry-run publish', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec('./scripts/main.sh', (error) => {
+    exec('PUBLISH_NPM_TAG=latest ./scripts/main.sh', (error) => {
       if (error) {
         reject(new Error(error));
       }
@@ -32,7 +31,7 @@ test('should not error when performing a dry-run publish', async (tapzero) => {
 
 test('correct version should appear in dry-run output', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec('./scripts/main.sh', (error, stdout) => {
+    exec('PUBLISH_NPM_TAG=latest ./scripts/main.sh', {}, (error, stdout) => {
       if (error) {
         reject(new Error(error));
       }
@@ -42,14 +41,18 @@ test('correct version should appear in dry-run output', async (tapzero) => {
   });
 });
 
-test('should error when token is invalid', async (tapzero) => {
+test('throws an error when OIDC token is invalid', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec(`YARN_NPM_AUTH_TOKEN=${FAKE} ./scripts/main.sh`, (error) => {
-      if (!error) {
-        reject(new Error(INVALID_TOKEN));
-      }
-      tapzero.equal(error.code, 1);
-      resolve();
-    });
+    exec(
+      `ACTIONS_ID_TOKEN_REQUEST_URL=${FAKE} ACTIONS_ID_TOKEN_REQUEST_TOKEN=${FAKE} STAGED_PUBLISH=true ./scripts/main.sh`,
+      (error) => {
+        if (!error) {
+          reject(new Error('Expected an error but did not get one.'));
+        }
+
+        tapzero.equal(error.code, 1);
+        resolve();
+      },
+    );
   });
 });
