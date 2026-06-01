@@ -67,6 +67,8 @@ fi
 # available.
 [[ -n "$GITHUB_OUTPUT" ]] && echo "dry-run=$DRY_RUN" >> "$GITHUB_OUTPUT"
 
+IS_MONOREPO="$1"
+
 # "dry-run" for polyrepo
 if [[ "$DRY_RUN" = "true" && -z "$IS_MONOREPO" ]]; then
   $PACK_CMD
@@ -79,8 +81,6 @@ if [[ "$CURRENT_PACKAGE_VERSION" = "0.0.0" ]]; then
   echo "Notice: Invalid version: $CURRENT_PACKAGE_VERSION. Aborting publish."
   exit 0
 fi
-
-IS_MONOREPO="$1"
 
 # check param, if it's set (monorepo) we check if it's published before proceeding
 if [[ -n "$IS_MONOREPO" ]]; then
