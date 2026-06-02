@@ -143,6 +143,8 @@ jobs:
           node-version: 24
       - name: Setup, build, publish
         shell: bash
+        env:
+          PUBLISH_NPM_TAG: latest
         run: |
           cd utils
           corepack enable
