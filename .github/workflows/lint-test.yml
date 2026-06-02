@@ -88,7 +88,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: MetaMask/snaps
-          ref: 06df849a905165966c53bb1862e02420f76f6dd7
+          ref: cecffa1a851a1fa5d68384c6f46ca1cf739f6d0c
           path: snaps
       - name: Checkout action repository
         uses: actions/checkout@v6
