@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: MetaMask/utils
-          ref: v11.8.1
+          ref: 48e4a5a9d4d389c0e0b0a066f3ec4bb90b14e07b
           path: utils
       - name: Checkout action repository
         uses: actions/checkout@v6
