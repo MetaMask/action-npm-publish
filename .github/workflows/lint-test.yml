@@ -87,18 +87,21 @@ jobs:
       - name: Checkout Snaps repository
         uses: actions/checkout@v6
         with:
-          repository: MetaMask/snaps-skunkworks
-          ref: 2befb570c72fddd577410b0193982332eed0fc41
-          path: skunkworks
+          repository: MetaMask/snaps
+          ref: 06df849a905165966c53bb1862e02420f76f6dd7
+          path: snaps
       - name: Checkout action repository
         uses: actions/checkout@v6
         with:
           path: action-npm-publish
       - name: Setup, build, publish
+        env:
+          PUBLISH_NPM_TAG: latest
         run: |
-          cd skunkworks
+          cd snaps
+          corepack enable
           yarn install --immutable
-          PUBLISH_NPM_TAG="latest" ../action-npm-publish/scripts/main.sh
+          ../action-npm-publish/scripts/main.sh
 
   test-publish-monorepo-skip:
     name: Test skipping publish of latest version (monorepo)
@@ -106,22 +109,26 @@ jobs:
     steps:
       - name: Get latest version from NPM
         id: latest-release
-        run: echo "release-version=$(npm view MetaMask/snaps-skunkworks version --workspaces=false)" >> "$GITHUB_OUTPUT"
+        run: echo "release-version=$(npm view MetaMask/snaps version --workspaces=false)" >> "$GITHUB_OUTPUT"
       - name: Checkout Snaps repository
         uses: actions/checkout@v6
         with:
-          repository: MetaMask/snaps-skunkworks
+          repository: MetaMask/snaps
           ref: v${{ steps.latest-release.outputs.release-version }}
-          path: skunkworks
+          path: snaps
       - name: Checkout action repository
         uses: actions/checkout@v6
         with:
           path: action-npm-publish
       - name: Setup, build, publish
+        env:
+          PUBLISH_NPM_TAG: latest
+          ACTIONS_ID_TOKEN_REQUEST_URL: test
         run: |
-          cd skunkworks
+          cd snaps
+          corepack enable
           yarn install --immutable
-          PUBLISH_NPM_TAG="latest" NPM_TOKEN="test" ../action-npm-publish/scripts/main.sh
+          ../action-npm-publish/scripts/main.sh
 
   test-publish-polyrepo:
     name: Test publish polyrepo
