@@ -12,8 +12,8 @@ check_requirements() {
 
   # TODO: Set this to the right version when Yarn releases a new version with the
   # `--staged` flag for `yarn npm publish`.
-  if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 15 ) ]]; then
-    echo "::error::Yarn version 4.15.0 or higher is required. Detected version: $(yarn --version)."
+  if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]]; then
+    echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $(yarn --version)."
     exit 1
   fi
 
