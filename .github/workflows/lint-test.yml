@@ -145,6 +145,7 @@ jobs:
         shell: bash
         run: |
           cd utils
+          corepack enable
           yarn install --immutable
           yarn build
           ../action-npm-publish/scripts/main.sh
