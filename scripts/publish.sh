@@ -74,7 +74,9 @@ configure_publish() {
 
   # Export the "dry-run" status for use in subsequent steps, if GITHUB_OUTPUT is
   # available.
-  [[ -n "$GITHUB_OUTPUT" ]] && echo "dry-run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+  if [[ -n "$GITHUB_OUTPUT" ]]; then
+    echo "dry-run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+  fi
 }
 
 publish_polyrepo() {
