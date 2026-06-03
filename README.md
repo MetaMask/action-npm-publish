@@ -31,7 +31,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: MetaMask/action-npm-publish@v4
+      - uses: MetaMask/action-npm-publish@v6
 ```
 
 This uses `--provenance` and (by default) `--staged` for publishing.
@@ -41,7 +41,7 @@ This uses `--provenance` and (by default) `--staged` for publishing.
 NPM requires a package to exist on the registry before OIDC can be configured for it, so the very first publish must use a token:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v4
+- uses: MetaMask/action-npm-publish@v6
   with:
     npm-token: ${{ secrets.NPM_TOKEN }}
 ```
@@ -53,7 +53,7 @@ Once the package has been published at least once, the token is ignored and OIDC
 If neither a token nor OIDC is available, packages will be prepared for publishing but no publishing will actually occur:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v4
+- uses: MetaMask/action-npm-publish@v6
 ```
 
 ### Slack announce
@@ -63,7 +63,7 @@ You can optionally send deployment announcements to Slack by providing a `slack-
 The absolute minimum configuration for this is:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v4
+- uses: MetaMask/action-npm-publish@v6
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
@@ -78,7 +78,7 @@ We've added the ability to customize the message posted in Slack and those optio
 example:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v4
+- uses: MetaMask/action-npm-publish@v6
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
     icon-url: https://ricky.codes/me.jpg
