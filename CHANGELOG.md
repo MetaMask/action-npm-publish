@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.0]
+### Added
+- **BREAKING:** Add support for NPM staged publishing ([#112](https://github.com/MetaMask/action-npm-publish/pull/112))
+  - Publishing now requires OIDC, with the exception of the initial publish (which still uses an NPM token).
+  - The action now uses staged publishing, meaning packages must be approved on NPM before they are published.
+  - The minimum Yarn version is now `4.16.0`, and `npm` is no longer supported.
+- **BREAKING:** Bump minimum Node.js version to `22.14.0` ([#113](https://github.com/MetaMask/action-npm-publish/pull/113))
+
 ## [5.3.1]
 ### Fixed
 - Only install `pkdiff` if no token was specified ([#109](https://github.com/MetaMask/action-npm-publish/pull/109))
@@ -145,7 +153,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v5.3.1...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v6.0.0...HEAD
+[6.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.3.1...v6.0.0
 [5.3.1]: https://github.com/MetaMask/action-npm-publish/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.2.0...v5.3.0
 [5.2.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.1.2...v5.2.0
