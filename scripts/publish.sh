@@ -35,7 +35,7 @@ get_package_info() {
   # Check whether the package exists on npm at all. Note that we're `cd`ing
   # into /tmp before running `npm view` to avoid any issues with Corepack
   # detecting Yarn.
-  PACKAGE_EXISTS=$(cd /tmp && npm view "$PACKAGE_NAME" version --workspaces false --json 2>/dev/null | jq --raw-output '. // empty' || echo "")
+  PUBLISHED_PACKAGE_VERSION=$(cd /tmp && npm view "$PACKAGE_NAME" --workspaces false --json 2>/dev/null | jq --raw-output '.version // empty' || echo "")
 }
 
 configure_publish() {
@@ -50,7 +50,7 @@ configure_publish() {
   #    publish.
   # 3. If no token is provided, use OIDC if available.
   # 4. If neither a token nor OIDC is available, perform a dry run.
-  if [[ -n "$YARN_NPM_AUTH_TOKEN" && -z "$PACKAGE_EXISTS" ]]; then
+  if [[ -n "$YARN_NPM_AUTH_TOKEN" && -z "$PUBLISHED_PACKAGE_VERSION" ]]; then
     echo "Notice: Package not yet published. Using token for initial publish."
     PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
     DRY_RUN="false"
