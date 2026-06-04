@@ -1,6 +1,6 @@
 {
   "name": "action-npm-publish",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "private": true,
   "homepage": "https://github.com/MetaMask/action-npm-publish#readme",
   "bugs": {
