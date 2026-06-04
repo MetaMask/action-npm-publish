@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.1.0]
 ### Changed
-- Update Slack message to link to staged publish instructions ([#118](https://github.com/MetaMask/action-npm-publish/pull/118))
+- Update the Slack message to include a link to the staged publishing instructions ([#118](https://github.com/MetaMask/action-npm-publish/pull/118))
 
 ## [6.0.0]
 ### Added
