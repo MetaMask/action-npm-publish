@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.1.0]
+### Changed
+- Update the Slack message to include a link to the staged publishing instructions ([#118](https://github.com/MetaMask/action-npm-publish/pull/118))
+
 ## [6.0.0]
 ### Added
 - **BREAKING:** Add support for NPM staged publishing ([#112](https://github.com/MetaMask/action-npm-publish/pull/112))
@@ -153,7 +157,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v6.0.0...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v6.1.0...HEAD
+[6.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.0.0...v6.1.0
 [6.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.3.1...v6.0.0
 [5.3.1]: https://github.com/MetaMask/action-npm-publish/compare/v5.3.0...v5.3.1
 [5.3.0]: https://github.com/MetaMask/action-npm-publish/compare/v5.2.0...v5.3.0
