@@ -71,7 +71,7 @@ runs:
         REPOSITORY: ${{ github.repository }}
         RUN_ID: ${{ github.run_id }}
       run: |
-        DEFAULT_TEXT="\`$NAME_VERSION\` is awaiting deployment :rocket: \n <https://github.com/$REPOSITORY/actions/runs/$RUN_ID/|→ Click here to review deployment>"
+        DEFAULT_TEXT="\`$NAME_VERSION\` is awaiting deployment :rocket: \n <https://github.com/$REPOSITORY/actions/runs/$RUN_ID/|→ Click here to review deployment> \n <https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2|→ See instructions for approving staged packages here>"
         FINAL_TEXT="$DEFAULT_TEXT"
         if [[ ! "$SUBTEAM_TEXT" == "" ]]; then
           FINAL_TEXT="<!subteam^$SUBTEAM_TEXT> $DEFAULT_TEXT"
