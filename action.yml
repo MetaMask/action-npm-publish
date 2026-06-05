@@ -12,6 +12,10 @@ inputs:
     description: 'Whether to use staged publishing. Defaults to "true". If set to "false", the action will publish directly to NPM without a staging step.'
     required: false
     default: 'true'
+  provenance:
+    description: 'Whether to include provenance information in the package. Must be disabled for private repositories. Defaults to "true".'
+    required: false
+    default: 'true'
   slack-webhook-url:
     description: 'Slack Webhook URL'
     required: false
@@ -40,6 +44,8 @@ runs:
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
         STAGED_PUBLISH: ${{ inputs.staged-publish }}
+        PROVENANCE: ${{ inputs.provenance }}
+        REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
     - id: install-pkdiff
       if: steps.publish.outputs.dry-run == 'true'
       shell: bash
