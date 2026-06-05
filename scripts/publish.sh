@@ -39,36 +39,52 @@ get_package_info() {
 configure_publish() {
   PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
 
-  # Determine the publish command and whether to perform a dry run. It works
-  # as follows:
-  # 1. If a token is provided, and the package has not been published before,
-  #    use the token for the initial publish.
-  # 2. If a token is provided, but the package has already been published,
-  #    ignore the token and fall back to OIDC (if available) for subsequent
-  #    publish.
-  # 3. If no token is provided, use OIDC if available.
-  # 4. If neither a token nor OIDC is available, perform a dry run.
-  if [[ -n "$YARN_NPM_AUTH_TOKEN" && -z "$PUBLISHED_PACKAGE_VERSION" ]]; then
-    echo "Notice: Package not yet published. Using token for initial publish."
-    PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
-    DRY_RUN="false"
-  elif [[ -n "$YARN_NPM_AUTH_TOKEN" ]]; then
-    echo "Notice: Package already published. Ignoring token and falling back to OIDC."
-    unset YARN_NPM_AUTH_TOKEN
-  fi
-
   # Build publish flags for OIDC publishing.
   PUBLISH_FLAGS=("--tag" "$PUBLISH_NPM_TAG")
   [[ "$STAGED_PUBLISH" = "true" ]] && PUBLISH_FLAGS+=("--staged")
   [[ "$PROVENANCE" = "true" && "$REPOSITORY_VISIBILITY" = "public" ]] && PUBLISH_FLAGS+=("--provenance")
 
-  if [[ -z "$DRY_RUN" ]]; then
-    if [[ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
-      PUBLISH_CMD="yarn npm publish ${PUBLISH_FLAGS[*]}"
-      DRY_RUN="false"
+  # Determine the publish command and whether to perform a dry run. It works
+  # as follows:
+  # 1. If `DRY_RUN` is explicitly set to `true`, perform a dry run.
+  # 2. If the package has not been published before and a token has been
+  #    provided, use the provided token for the initial publish.
+  # 3. If the package has not been published before and a token has not been
+  #    provided, perform a dry run.
+  # 4. If the package has already been published and OIDC is available, use
+  #    OIDC to publish.
+  # 4. If the package has already been published and OIDC is not available,
+  #    perform a dry run.
+  #
+  # If `DRY_RUN` is explicitly set to `false` and a publish is attempted
+  # without necessary authorization, abort with an error.
+  if [[ $DRY_RUN = "true" ]]; then
+    echo "Notice: Performing a dry run."
+  elif [[ -z "$PUBLISHED_PACKAGE_VERSION" ]]; then
+    if [[ -z "$YARN_NPM_AUTH_TOKEN" && "$DRY_RUN" = "false" ]]; then
+      echo "::error::'npm-token' not provided for initial publish."
+      exit 1
+    elif [[ -z "$YARN_NPM_AUTH_TOKEN" ]]; then
+      echo "Notice: Token is not available for initial publish. Performing a dry run."
+      DRY_RUN="true"
     else
+      echo "Notice: Package not yet published. Using npm token for initial publish."
+      PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
+      DRY_RUN="false"
+    fi
+  else
+	  # Unset auth token because it can interfere with OIDC publishing (see #123)
+	  unset YARN_NPM_AUTH_TOKEN
+    if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" && "$DRY_RUN" = "false" ]]; then
+      echo "::error:: OIDC is not available for publish."
+      exit 1
+    elif [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
       echo "Notice: OIDC is not available. Performing a dry run."
       DRY_RUN="true"
+    else
+      echo "Notice: Initial package version already published. Using OIDC to publish."
+      PUBLISH_CMD="yarn npm publish ${PUBLISH_FLAGS[*]}"
+      DRY_RUN="false"
     fi
   fi
 
