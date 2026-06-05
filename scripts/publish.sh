@@ -59,7 +59,7 @@ configure_publish() {
   # Build publish flags for OIDC publishing.
   PUBLISH_FLAGS=("--tag" "$PUBLISH_NPM_TAG")
   [[ "$STAGED_PUBLISH" = "true" ]] && PUBLISH_FLAGS+=("--staged")
-  [[ "$PROVENANCE" = "true" ]] && PUBLISH_FLAGS+=("--provenance")
+  [[ "$PROVENANCE" = "true" && "$REPOSITORY_VISIBILITY" = "public" ]] && PUBLISH_FLAGS+=("--provenance")
 
   if [[ -z "$DRY_RUN" ]]; then
     if [[ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then

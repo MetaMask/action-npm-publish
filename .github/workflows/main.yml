@@ -9,15 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  repository-info:
-    name: Get repository info
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Get repository info
-        uses: ./.github/actions/test
-
   check-workflows:
     name: Check workflows
     runs-on: ubuntu-latest

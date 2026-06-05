@@ -45,6 +45,7 @@ runs:
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
         STAGED_PUBLISH: ${{ inputs.staged-publish }}
         PROVENANCE: ${{ inputs.provenance }}
+        REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
     - id: install-pkdiff
       if: steps.publish.outputs.dry-run == 'true'
       shell: bash
