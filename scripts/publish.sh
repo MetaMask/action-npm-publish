@@ -56,13 +56,14 @@ configure_publish() {
     echo "Notice: Package already published. Ignoring token and falling back to OIDC."
   fi
 
+  # Build publish flags for OIDC publishing.
+  PUBLISH_FLAGS=("--tag" "$PUBLISH_NPM_TAG")
+  [[ "$STAGED_PUBLISH" = "true" ]] && PUBLISH_FLAGS+=("--staged")
+  [[ "$PROVENANCE" = "true" ]] && PUBLISH_FLAGS+=("--provenance")
+
   if [[ -z "$DRY_RUN" ]]; then
     if [[ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
-      if [[ "$STAGED_PUBLISH" = "true" ]]; then
-        PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG --staged --provenance"
-      else
-        PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG --provenance"
-      fi
+      PUBLISH_CMD="yarn npm publish ${PUBLISH_FLAGS[*]}"
       DRY_RUN="false"
     else
       echo "Notice: OIDC is not available. Performing a dry run."
