@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add `dry-run` option ([#122](https://github.com/MetaMask/action-npm-publish/pull/122))
   - If omitted, it defaults to `true` if required credentials are missing, `false` otherwise. This matches current behavior.
-	- When set to `false`, this will abort when authorization is missing (rather than assuming a dry run was intended, as it does today)
+  - When set to `false`, this will abort when authorization is missing (rather than assuming a dry run was intended, as it does today)
 
 ## [6.2.1]
 

@@ -73,8 +73,8 @@ configure_publish() {
       DRY_RUN="false"
     fi
   else
-	  # Unset auth token because it can interfere with OIDC publishing (see #123)
-	  unset YARN_NPM_AUTH_TOKEN
+    # Unset auth token because it can interfere with OIDC publishing (see #123)
+    unset YARN_NPM_AUTH_TOKEN
     if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" && "$DRY_RUN" = "false" ]]; then
       echo "::error:: OIDC is not available for publish."
       exit 1
