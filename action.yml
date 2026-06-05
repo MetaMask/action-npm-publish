@@ -13,7 +13,7 @@ inputs:
     required: false
     default: 'true'
   provenance:
-    description: 'Whether to include provenance information in the package. Defaults to "true".'
+    description: 'Whether to include provenance information in the package. Must be disabled for private repositories. Defaults to "true".'
     required: false
     default: 'true'
   slack-webhook-url:
