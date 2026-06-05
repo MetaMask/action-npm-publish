@@ -1,0 +1,9 @@
+name: 'Test'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get repository info
+      shell: bash
+      run: |
+        echo '${{ toJSON(github.event.repository) }}'
