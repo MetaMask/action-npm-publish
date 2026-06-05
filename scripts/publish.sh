@@ -53,7 +53,7 @@ configure_publish() {
   #    provided, perform a dry run.
   # 4. If the package has already been published and OIDC is available, use
   #    OIDC to publish.
-  # 4. If the package has already been published and OIDC is not available,
+  # 5. If the package has already been published and OIDC is not available,
   #    perform a dry run.
   #
   # If `DRY_RUN` is explicitly set to `false` and a publish is attempted
