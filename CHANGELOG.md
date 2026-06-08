@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- fix: Unset npm token when package is already published ([#123](https://github.com/MetaMask/action-npm-publish/pull/123))
+- Unset NPM token when package is already published ([#123](https://github.com/MetaMask/action-npm-publish/pull/123))
+  - This avoids an issue where Yarn may try to use the NPM token even when OIDC is available.
 
 ## [6.2.0]
 
