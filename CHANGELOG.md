@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.3.0]
+
 ### Added
 
 - Add `dry-run` option ([#122](https://github.com/MetaMask/action-npm-publish/pull/122))
@@ -242,7 +244,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v6.2.1...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v6.3.0...HEAD
+[6.3.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.2.1...v6.3.0
 [6.2.1]: https://github.com/MetaMask/action-npm-publish/compare/v6.2.0...v6.2.1
 [6.2.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.1.0...v6.2.0
 [6.1.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.0.0...v6.1.0
