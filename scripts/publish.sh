@@ -54,6 +54,7 @@ configure_publish() {
     DRY_RUN="false"
   elif [[ -n "$YARN_NPM_AUTH_TOKEN" ]]; then
     echo "Notice: Package already published. Ignoring token and falling back to OIDC."
+    unset YARN_NPM_AUTH_TOKEN
   fi
 
   # Build publish flags for OIDC publishing.
