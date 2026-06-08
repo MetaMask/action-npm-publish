@@ -33,6 +33,9 @@ inputs:
   channel:
     description: 'The Slack channel to post in'
     required: false
+  dry-run:
+    description: 'Enables dry run mode, which prepares the package for publishing but does not publish it'
+    required: false
 
 runs:
   using: 'composite'
@@ -46,6 +49,7 @@ runs:
         STAGED_PUBLISH: ${{ inputs.staged-publish }}
         PROVENANCE: ${{ inputs.provenance }}
         REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
+        DRY_RUN: ${{ inputs.dry-run }}
     - id: install-pkdiff
       if: steps.publish.outputs.dry-run == 'true'
       shell: bash

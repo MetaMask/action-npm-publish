@@ -50,11 +50,15 @@ Once the package has been published at least once, the token is ignored and OIDC
 
 ### Dry run mode
 
-If neither a token nor OIDC is available, packages will be prepared for publishing but no publishing will actually occur:
+In dry run mode, packages will be prepared for publishing but no publishing will actually occur. No token or OIDC is necessary.
 
 ```yaml
 - uses: MetaMask/action-npm-publish@v6
+  with:
+    dry-run: true
 ```
+
+If neither a token nor OIDC is available, `dry-run` will default to `true`, otherwise it defaults to `false`.
 
 ### Slack announce
 
