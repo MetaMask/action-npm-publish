@@ -17,7 +17,7 @@
   },
   "scripts": {
     "lint": "yarn lint:eslint",
-    "lint:changelog": "auto-changelog validate",
+    "lint:changelog": "auto-changelog validate --formatter prettier",
     "lint:eslint": "eslint . --cache",
     "lint:fix": "yarn lint:eslint --fix",
     "test": "node test/index.js"
