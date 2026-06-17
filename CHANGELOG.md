@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.4.0]
 
-### Uncategorized
+### Changed
 
-- perf: skip workspaces that don't need publishing ([#127](https://github.com/MetaMask/action-npm-publish/pull/127))
+- Skip workspaces that don't need publishing ([#127](https://github.com/MetaMask/action-npm-publish/pull/127), [#128](https://github.com/MetaMask/action-npm-publish/pull/128))
+  - This can improve performance and reduce logging in larger monorepos.
 
 ## [6.3.0]
 
