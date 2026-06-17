@@ -7,15 +7,20 @@ if [ "$RUNNER_DEBUG" = "1" ]; then
   set -x
 fi
 
-name="$1"
-local_version="$2"
-
 # Tolerate empty invocations (e.g., `xargs` with no input).
-if [[ -z "$name" ]]; then
+if [[ $# -eq 0 ]]; then
   exit 0
 fi
 
-if [[ -z "$local_version" ]]; then
+name="$1"
+local_version="$2"
+
+if [[ -z "$name" || "$name" = "null" ]]; then
+  echo "::error::Missing package name." >&2
+  exit 1
+fi
+
+if [[ -z "$local_version" || "$local_version" = "null" ]]; then
   echo "::error::Missing version for package '$name'." >&2
   exit 1
 fi

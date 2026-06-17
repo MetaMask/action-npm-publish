@@ -30,7 +30,12 @@ publish_monorepo() {
     yarn workspaces list --json --no-private \
       | jq --raw-output '.location' \
       | while read -r location; do
-          jq --raw-output '[.name, .version] | @tsv' "$location/package.json"
+          jq --raw-output --arg location "$location" '
+            [
+              (.name // error("Missing .name in " + $location + "/package.json")),
+              (.version // error("Missing .version in " + $location + "/package.json"))
+            ] | @tsv
+          ' "$location/package.json"
         done \
       | xargs -P 10 -n 2 "$script_path/needs-publish.sh"
   )
