@@ -29,16 +29,11 @@ if [[ "$local_version" = "0.0.0" ]]; then
   exit 0
 fi
 
-# Get the published version for the specified tag, if it exists. Note that
-# we're `cd`ing into /tmp before running `npm view` to avoid any issues with
+# Check whether this exact version is already published. Note that we're
+# `cd`ing into /tmp before running `npm view` to avoid any issues with
 # Corepack detecting Yarn.
-published=$(
-  cd /tmp \
-    && npm view "$name" dist-tags --workspaces false --json 2>/dev/null \
-    | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag] // empty' \
-    || echo ""
-)
-
-if [[ "$published" != "$local_version" ]]; then
-  echo "$name"
+if (cd /tmp && npm view "$name@$local_version" version --workspaces false --json >/dev/null 2>&1); then
+  exit 0
 fi
+
+echo "$name"
