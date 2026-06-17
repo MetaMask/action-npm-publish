@@ -83,26 +83,7 @@ configure_publish() {
   fi
 }
 
-publish_polyrepo() {
-  if [[ "$DRY_RUN" = "true" ]]; then
-    $PACK_CMD
-    exit 0
-  fi
-
-  $PUBLISH_CMD
-}
-
-publish_monorepo() {
-  # Get the published version for the specified tag, if it exists. Note that
-  # we're `cd`ing into /tmp before running `npm view` to avoid any issues with
-  # Corepack detecting Yarn.
-  LATEST_PACKAGE_VERSION=$(cd /tmp && npm view "$PACKAGE_NAME" dist-tags --workspaces false --json 2>/dev/null | jq --raw-output --arg tag "$PUBLISH_NPM_TAG" '.[$tag] // empty' || echo "")
-
-  if [ "$LATEST_PACKAGE_VERSION" = "$CURRENT_PACKAGE_VERSION" ]; then
-    echo "Notice: This module is already published at $CURRENT_PACKAGE_VERSION. Aborting publish."
-    exit 0
-  fi
-
+publish() {
   if [[ "$DRY_RUN" = "true" ]]; then
     $PACK_CMD
   else
@@ -114,13 +95,7 @@ main() {
   check_requirements
   get_package_info
   configure_publish
-
-  IS_MONOREPO="$1"
-  if [[ "$IS_MONOREPO" = "true" ]]; then
-    publish_monorepo
-  else
-    publish_polyrepo
-  fi
+  publish
 }
 
 main "$@"
