@@ -12,6 +12,11 @@ script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 publish_monorepo() {
   echo "Notice: Workspaces detected. Treating as monorepo."
 
+  if [[ -z "$PUBLISH_NPM_TAG" ]]; then
+    echo "::error::'npm-tag' not set."
+    exit 1
+  fi
+
   # Determine upfront which workspaces actually need publishing, so that
   # `yarn workspaces foreach` only runs for those. Each workspace is checked
   # in parallel via `xargs -P`.

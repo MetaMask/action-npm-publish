@@ -10,7 +10,17 @@ fi
 name="$1"
 local_version="$2"
 
-if [[ -z "$local_version" || "$local_version" = "0.0.0" ]]; then
+# Tolerate empty invocations (e.g., `xargs` with no input).
+if [[ -z "$name" ]]; then
+  exit 0
+fi
+
+if [[ -z "$local_version" ]]; then
+  echo "::error::Missing version for package '$name'." >&2
+  exit 1
+fi
+
+if [[ "$local_version" = "0.0.0" ]]; then
   exit 0
 fi
 
