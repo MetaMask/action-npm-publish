@@ -101,6 +101,13 @@ jobs:
           cd snaps
           corepack enable
           yarn install --immutable
+          # Bump a few workspaces to an unpublished version so the
+          # publish/pack path is actually exercised.
+          for pkg in snaps-sdk snaps-utils snaps-controllers; do
+            jq '.version = "999.0.0"' "packages/$pkg/package.json" \
+              > "packages/$pkg/package.json.tmp"
+            mv "packages/$pkg/package.json.tmp" "packages/$pkg/package.json"
+          done
           ../action-npm-publish/scripts/main.sh
 
   test-publish-monorepo-skip:
