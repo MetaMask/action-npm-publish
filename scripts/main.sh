@@ -54,7 +54,7 @@ publish_monorepo() {
   echo "Notice: Publishing ${#names[@]} package(s): ${pending//$'\n'/, }."
 
   yarn workspaces foreach --all "${include_args[@]}" --no-private --verbose \
-    exec "$script_path/publish.sh" true
+    exec "$script_path/publish.sh"
 }
 
 if [[ "$(jq 'has("workspaces")' package.json)" = "true" ]]; then
