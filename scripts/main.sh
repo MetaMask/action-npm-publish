@@ -9,13 +9,19 @@ fi
 
 script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
+IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$(yarn --version)"
+if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]]; then
+  echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $(yarn --version)."
+  exit 1
+fi
+
+if [[ -z "$PUBLISH_NPM_TAG" ]]; then
+  echo "::error::'npm-tag' not set."
+  exit 1
+fi
+
 publish_monorepo() {
   echo "Notice: Workspaces detected. Treating as monorepo."
-
-  if [[ -z "$PUBLISH_NPM_TAG" ]]; then
-    echo "::error::'npm-tag' not set."
-    exit 1
-  fi
 
   # Determine upfront which workspaces actually need publishing, so that
   # `yarn workspaces foreach` only runs for those. Each workspace is checked
