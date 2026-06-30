@@ -65,7 +65,7 @@ jobs:
 
   publish-release:
     name: Publish release
-    environment: npm-publish
+    environment: action-publish
     needs: announce-release
     permissions:
       contents: read
