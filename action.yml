@@ -90,8 +90,10 @@ runs:
         echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
     - name: Post to a Slack channel
       if: ${{ inputs.slack-webhook-url != '' && inputs.channel != '' }}
-      uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+      uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c
       with:
+        webhook: ${{ inputs.slack-webhook-url }}
+        webhook-type: incoming-webhook
         payload: |
           {
             "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
@@ -99,21 +101,17 @@ runs:
             "username": "${{ inputs.username }}",
             "channel": "#${{ inputs.channel }}"
           }
-      env:
-        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
       continue-on-error: true
     - name: Post to a default Slack channel
       if: ${{ inputs.slack-webhook-url != '' && inputs.channel == '' }}
-      uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+      uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c
       with:
+        webhook: ${{ inputs.slack-webhook-url }}
+        webhook-type: incoming-webhook
         payload: |
           {
             "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
             "icon_url": "${{ inputs.icon-url }}",
             "username": "${{ inputs.username }}"
           }
-      env:
-        SLACK_WEBHOOK_URL: ${{ inputs.slack-webhook-url }}
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
       continue-on-error: true
