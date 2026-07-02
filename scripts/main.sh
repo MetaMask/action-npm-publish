@@ -20,6 +20,14 @@ if [[ -z "$PUBLISH_NPM_TAG" ]]; then
   exit 1
 fi
 
+if [[ -n "$GITHUB_SHA" && -n "$GITHUB_REPOSITORY" ]]; then
+  pr_url=$(gh api "/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+    --jq '.[0].html_url // empty' 2>/dev/null || true)
+  if [[ -n "$pr_url" ]]; then
+    echo "Notice: Releasing via pull request: $pr_url"
+  fi
+fi
+
 publish_monorepo() {
   echo "Notice: Workspaces detected. Treating as monorepo."
 
