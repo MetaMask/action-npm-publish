@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.5.0]
 
-### Uncategorized
-
-- chore: update `slackapi/slack-github-action` to v3 ([#133](https://github.com/MetaMask/action-npm-publish/pull/133))
-
 ### Added
 
-- feat: log pull request link in publish workflow ([#132](https://github.com/MetaMask/action-npm-publish/pull/132))
+- Log pull request link in publish workflow ([#132](https://github.com/MetaMask/action-npm-publish/pull/132))
+
+### Changed
+
+- Bump `slackapi/slack-github-action` to `v3` ([#133](https://github.com/MetaMask/action-npm-publish/pull/133))
 
 ## [6.4.0]
 
