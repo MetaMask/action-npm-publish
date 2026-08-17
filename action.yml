@@ -40,7 +40,8 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - id: publish
+    - name: Run main publish script
+      id: publish
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
@@ -51,29 +52,34 @@ runs:
         REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
         DRY_RUN: ${{ inputs.dry-run }}
         GITHUB_TOKEN: ${{ github.token }}
-    - id: install-pkdiff
+    - name: Install `pkdiff`
+      id: install-pkdiff
       if: steps.publish.outputs.dry-run == 'true'
       shell: bash
       run: npm i -g pkdiff@2.0.1
-    - id: generate-report
+    - name: Generate package diff report
+      id: generate-report
       shell: bash
       if: steps.publish.outputs.dry-run == 'true'
       run: ${{ github.action_path }}/scripts/report.sh
-    - id: upload-artifact
+    - name: Upload package report artifact
+      id: upload-artifact
       if: steps.publish.outputs.dry-run == 'true'
       uses: actions/upload-artifact@v4
       with:
         path: |
           /tmp/*.tgz
           /tmp/*.html
-    - id: name-version
+    - name: Generate Slack publish message (1/2)
+      id: name-version
       shell: bash
       if: inputs.slack-webhook-url != ''
       run: |
         NAME_VERSION_TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
         NAME_VERSION_TEXT_STRIPPED="${NAME_VERSION_TEXT#@}"
         echo "NAME_VERSION=$NAME_VERSION_TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
-    - id: final-text
+    - name: Generate Slack publish message (2/2)
+      id: final-text
       shell: bash
       if: inputs.slack-webhook-url != ''
       env:
