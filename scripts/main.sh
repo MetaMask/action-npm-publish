@@ -9,6 +9,19 @@ fi
 
 script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
+if [[ -n "$GITHUB_SHA" && -n "$GITHUB_REPOSITORY" ]]; then
+  pr_url=$(gh api "/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+    --jq '.[0].html_url // empty' 2>/dev/null || true)
+  if [[ -n "$pr_url" ]]; then
+    echo "Notice: Releasing via pull request: $pr_url"
+  fi
+fi
+
+# The GitHub token is only needed for the `gh` call above. Unset it before any
+# `yarn` invocation, so that it isn't inherited by repository-loaded Yarn
+# configuration, plugins, or lifecycle scripts.
+unset GITHUB_TOKEN
+
 IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$(yarn --version)"
 if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]]; then
   echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $(yarn --version)."
@@ -19,18 +32,6 @@ if [[ -z "$PUBLISH_NPM_TAG" ]]; then
   echo "::error::'npm-tag' not set."
   exit 1
 fi
-
-if [[ -n "$GITHUB_SHA" && -n "$GITHUB_REPOSITORY" ]]; then
-  pr_url=$(gh api "/repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
-    --jq '.[0].html_url // empty' 2>/dev/null || true)
-  if [[ -n "$pr_url" ]]; then
-    echo "Notice: Releasing via pull request: $pr_url"
-  fi
-fi
-
-# The GitHub token is only needed for the `gh` call above. Unset it so that it
-# isn't inherited by `yarn` and any lifecycle scripts it runs.
-unset GITHUB_TOKEN
 
 publish_monorepo() {
   echo "Notice: Workspaces detected. Treating as monorepo."
