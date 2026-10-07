@@ -24,11 +24,14 @@ unset GITHUB_TOKEN
 
 # Yarn loads repository-controlled configuration and plugins, so run Yarn
 # commands that don't publish without any npm or OIDC credentials. The variables
-# are retained in this shell for `publish.sh`.
+# are set to empty values rather than unset, because Yarn aborts when its
+# configuration interpolates a missing variable (e.g.,
+# `npmAuthToken: "${YARN_NPM_AUTH_TOKEN}"`). The real values are retained in this
+# shell for `publish.sh`.
 run_yarn() {
-  env -u YARN_NPM_AUTH_TOKEN \
-      -u ACTIONS_ID_TOKEN_REQUEST_URL \
-      -u ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+  env YARN_NPM_AUTH_TOKEN= \
+      ACTIONS_ID_TOKEN_REQUEST_URL= \
+      ACTIONS_ID_TOKEN_REQUEST_TOKEN= \
       yarn "$@"
 }
 
