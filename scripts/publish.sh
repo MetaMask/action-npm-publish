@@ -25,7 +25,7 @@ get_package_info() {
 }
 
 configure_publish() {
-  PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
+  PACK_CMD=(yarn pack --out "/tmp/%s-%v.tgz")
 
   # Build publish flags for OIDC publishing.
   PUBLISH_FLAGS=("--tag" "$PUBLISH_NPM_TAG")
@@ -57,7 +57,7 @@ configure_publish() {
       DRY_RUN="true"
     else
       echo "Notice: Package not yet published. Using npm token for initial publish."
-      PUBLISH_CMD="yarn npm publish --tag $PUBLISH_NPM_TAG"
+      PUBLISH_CMD=(yarn npm publish --tag "$PUBLISH_NPM_TAG")
       DRY_RUN="false"
     fi
   else
@@ -71,7 +71,7 @@ configure_publish() {
       DRY_RUN="true"
     else
       echo "Notice: Initial package version already published. Using OIDC to publish."
-      PUBLISH_CMD="yarn npm publish ${PUBLISH_FLAGS[*]}"
+      PUBLISH_CMD=(yarn npm publish "${PUBLISH_FLAGS[@]}")
       DRY_RUN="false"
     fi
   fi
@@ -84,10 +84,24 @@ configure_publish() {
 }
 
 publish() {
+  # `yarn pack` and `yarn npm publish` run lifecycle scripts from the
+  # repository (e.g., `prepack`), so only expose the credentials that the
+  # command actually needs. Variables are set to empty values rather than
+  # unset, because Yarn aborts when its configuration interpolates a missing
+  # variable.
   if [[ "$DRY_RUN" = "true" ]]; then
-    $PACK_CMD
+    env YARN_NPM_AUTH_TOKEN= \
+        ACTIONS_ID_TOKEN_REQUEST_URL= \
+        ACTIONS_ID_TOKEN_REQUEST_TOKEN= \
+        "${PACK_CMD[@]}"
+  elif [[ -n "$YARN_NPM_AUTH_TOKEN" ]]; then
+    # Initial publish using a token. OIDC credentials are not needed.
+    env ACTIONS_ID_TOKEN_REQUEST_URL= \
+        ACTIONS_ID_TOKEN_REQUEST_TOKEN= \
+        "${PUBLISH_CMD[@]}"
   else
-    $PUBLISH_CMD
+    # OIDC publish. The token was unset in `configure_publish`.
+    "${PUBLISH_CMD[@]}"
   fi
 }
 
