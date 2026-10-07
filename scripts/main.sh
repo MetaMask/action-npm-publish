@@ -22,9 +22,20 @@ fi
 # configuration, plugins, or lifecycle scripts.
 unset GITHUB_TOKEN
 
-IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$(yarn --version)"
+# Yarn loads repository-controlled configuration and plugins, so run Yarn
+# commands that don't publish without any npm or OIDC credentials. The variables
+# are retained in this shell for `publish.sh`.
+run_yarn() {
+  env -u YARN_NPM_AUTH_TOKEN \
+      -u ACTIONS_ID_TOKEN_REQUEST_URL \
+      -u ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+      yarn "$@"
+}
+
+YARN_VERSION=$(run_yarn --version)
+IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$YARN_VERSION"
 if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]]; then
-  echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $(yarn --version)."
+  echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $YARN_VERSION."
   exit 1
 fi
 
@@ -40,7 +51,7 @@ publish_monorepo() {
   # `yarn workspaces foreach` only runs for those. Each workspace is checked
   # in parallel via `xargs -P`.
   pending=$(
-    yarn workspaces list --json --no-private \
+    run_yarn workspaces list --json --no-private \
       | jq --raw-output '.location' \
       | while read -r location; do
           jq --raw-output --arg location "$location" '
