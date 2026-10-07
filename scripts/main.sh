@@ -28,6 +28,10 @@ if [[ -n "$GITHUB_SHA" && -n "$GITHUB_REPOSITORY" ]]; then
   fi
 fi
 
+# The GitHub token is only needed for the `gh` call above. Unset it so that it
+# isn't inherited by `yarn` and any lifecycle scripts it runs.
+unset GITHUB_TOKEN
+
 publish_monorepo() {
   echo "Notice: Workspaces detected. Treating as monorepo."
 
