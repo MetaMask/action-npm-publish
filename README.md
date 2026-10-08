@@ -21,6 +21,7 @@ Yarn runs code from the repository being published: plugins, `yarnPath` releases
 
 - Yarn is pointed to a minimal configuration file stored outside of the checkout, so `.yarnrc.yml` in the repository (including its plugins) is not loaded. The configuration sets `nodeLinker: node-modules` and disables scripts (`enableScripts: false`), telemetry, and environment file injection. Packages are always published to `https://registry.npmjs.org`, and custom registries are not supported.
 - `~/.yarnrc.yml` is removed.
+- `YARN_*` environment variables override the configuration file, so they are unset before Yarn runs. If you set a Yarn setting through an environment variable (e.g., `YARN_NPM_PUBLISH_REGISTRY`) in the job that runs this action, it has no effect on the publish.
 - The `prepublish`, `prepublishOnly`, `prepack`, and `postpack` scripts are removed from the `package.json` of every package that may be published. These scripts do not run, so any build step must happen before this action is invoked.
 - Publishing fails if a package sets `publishConfig.registry` to anything other than `https://registry.npmjs.org`.
 
