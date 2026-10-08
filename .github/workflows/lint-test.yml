@@ -165,3 +165,92 @@ jobs:
           yarn install --immutable
           yarn build
           ../action-npm-publish/scripts/main.sh
+
+  test-sanitize:
+    name: Test sanitising Yarn configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Create project with canaries
+        run: |
+          mkdir -p /tmp/canary
+
+          cat > package.json <<'EOF'
+          {
+            "name": "sanitise-test",
+            "private": true,
+            "version": "0.0.0",
+            "workspaces": ["packages/*"],
+            "packageManager": "yarn@4.16.0"
+          }
+          EOF
+
+          mkdir -p .yarn/plugins packages/canary
+          cat > .yarn/plugins/canary.cjs <<'EOF'
+          module.exports = {
+            name: 'canary',
+            factory: () => {
+              require('fs').writeFileSync('/tmp/canary/plugin', 'ran');
+              return {};
+            },
+          };
+          EOF
+
+          cat > .yarnrc.yml <<'EOF'
+          nodeLinker: node-modules
+          plugins:
+            - path: .yarn/plugins/canary.cjs
+          EOF
+
+          cat > packages/canary/package.json <<'EOF'
+          {
+            "name": "sanitise-test-canary",
+            "version": "999.0.0",
+            "publishConfig": { "registry": "https://registry.npmjs.org/" },
+            "scripts": {
+              "prepublish": "touch /tmp/canary/prepublish",
+              "prepack": "touch /tmp/canary/prepack",
+              "postpack": "touch /tmp/canary/postpack"
+            }
+          }
+          EOF
+      - name: Install dependencies
+        run: |
+          corepack enable
+          yarn install
+
+          # The plugin must have loaded during the install, otherwise the
+          # canary doesn't prove anything.
+          test -e /tmp/canary/plugin
+          rm /tmp/canary/plugin
+
+          mkdir -p .yarn/releases
+          echo "require('fs').writeFileSync('/tmp/canary/yarnpath', 'ran'); process.exit(1);" > .yarn/releases/canary.cjs
+          echo "yarnPath: .yarn/releases/canary.cjs" >> .yarnrc.yml
+      - name: Dry run publish
+        uses: ./action-npm-publish
+        with:
+          dry-run: true
+      - name: Check that no canaries ran
+        run: |
+          failed=0
+          for marker in plugin yarnpath prepublish prepack postpack; do
+            if [[ -e "/tmp/canary/$marker" ]]; then
+              echo "::error::Canary '$marker' ran during publish."
+              failed=1
+            fi
+          done
+          exit "$failed"
+      - name: Check that the package was packed without lifecycle scripts
+        run: |
+          tarball=/tmp/sanitise-test-canary-999.0.0.tgz
+          test -f "$tarball"
+          tar -O -zxf "$tarball" package/package.json \
+            | jq --exit-status '.scripts | (has("prepublish") or has("prepack") or has("postpack")) | not'
