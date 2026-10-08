@@ -236,6 +236,11 @@ jobs:
           echo "yarnPath: .yarn/releases/canary.cjs" >> .yarnrc.yml
       - name: Dry run publish
         uses: ./action-npm-publish
+        # `YARN_*` variables override the action's Yarn configuration. With
+        # `pnp`, Yarn doesn't find the `node-modules` install and the publish
+        # fails, unless the action unsets the variable.
+        env:
+          YARN_NODE_LINKER: pnp
         with:
           dry-run: true
       - name: Check that no canaries ran
