@@ -29,6 +29,8 @@ enableScripts: false
 enableTelemetry: false
 injectEnvironmentFiles: []
 nodeLinker: node-modules
+npmPublishRegistry: "https://registry.npmjs.org"
+npmRegistryServer: "https://registry.npmjs.org"
 EOF
 
 export YARN_RC_FILENAME="$rc_filename"
