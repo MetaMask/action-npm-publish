@@ -28,6 +28,7 @@ cat > "$rc_path" <<'EOF'
 enableScripts: false
 enableTelemetry: false
 injectEnvironmentFiles: []
+nodeLinker: node-modules
 EOF
 
 export YARN_RC_FILENAME="$rc_filename"
