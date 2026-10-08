@@ -188,7 +188,7 @@ jobs:
             "private": true,
             "version": "0.0.0",
             "workspaces": ["packages/*"],
-            "packageManager": "yarn@4.16.0"
+            "packageManager": "yarn@4.16.0+sha256.ba05224324578801b9cc98170d64aa50b9a36733b440fb0942306da3fbbdc7d1"
           }
           EOF
 
@@ -224,7 +224,7 @@ jobs:
       - name: Install dependencies
         run: |
           corepack enable
-          yarn install
+          yarn install --no-immutable
 
           # The plugin must have loaded during the install, otherwise the
           # canary doesn't prove anything.
