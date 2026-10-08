@@ -11,9 +11,18 @@ This is a GitHub action that handles publishing to NPM for a project that repres
 
 **This action requires Yarn 4.16.0 or higher.**
 
-If your project is configured to use the `node-modules` linker and defines a `prepack` script for any releasable packages, you will need to ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
+This action assumes that your project uses the `node-modules` linker (`nodeLinker: node-modules`). For monorepos, you will need to ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
 
 This action depends upon the action `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. This action is authored by a Marketplace "verified creator". If your repository or organization restricts which actions can be used and does not allow Marketplace verified creators by default, ensure that this action is listed as an allowed action.
+
+## Security
+
+Yarn runs code from the repository being published: plugins, `yarnPath` releases, and lifecycle scripts. To prevent that code from reading publishing credentials, the action first sanitises the checkout:
+
+- Yarn is pointed to a minimal configuration file stored outside of the checkout, so `.yarnrc.yml` in the repository (including its plugins) is not loaded. The configuration sets `nodeLinker: node-modules` and disables scripts (`enableScripts: false`), telemetry, and environment file injection. Packages are always published to `https://registry.npmjs.org`, and custom registries are not supported.
+- `~/.yarnrc.yml` is removed.
+- The `prepublish`, `prepublishOnly`, `prepack`, and `postpack` scripts are removed from the `package.json` of every package that may be published. These scripts do not run, so any build step must happen before this action is invoked.
+- Publishing fails if a package sets `publishConfig.registry` to anything other than `https://registry.npmjs.org`.
 
 ## Usage
 
