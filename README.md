@@ -15,6 +15,15 @@ If your project is configured to use the `node-modules` linker and defines a `pr
 
 This action depends upon the action `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. This action is authored by a Marketplace "verified creator". If your repository or organization restricts which actions can be used and does not allow Marketplace verified creators by default, ensure that this action is listed as an allowed action.
 
+## Security
+
+Yarn runs code from the repository being published: plugins, `yarnPath` releases, and lifecycle scripts. To prevent that code from reading publishing credentials, the action first sanitises the checkout:
+
+- Yarn is pointed to a minimal configuration file stored outside of the checkout, so `.yarnrc.yml` in the repository (including its plugins) is not loaded. The configuration disables scripts (`enableScripts: false`), telemetry, and environment file injection. Custom registries are not supported.
+- `~/.yarnrc.yml` is removed.
+- The `prepublish`, `prepublishOnly`, `prepack`, and `postpack` scripts are removed from the `package.json` of every package that may be published. These scripts do not run, so any build step must happen before this action is invoked.
+- Publishing fails if a package sets `publishConfig.registry` to anything other than `https://registry.npmjs.org`.
+
 ## Usage
 
 ### Quick start
