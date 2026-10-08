@@ -9,6 +9,9 @@ fi
 
 script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
+# shellcheck source=scripts/environment.sh
+source "$script_path/environment.sh"
+
 IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$(yarn --version)"
 if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]]; then
   echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $(yarn --version)."
