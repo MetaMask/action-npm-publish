@@ -40,11 +40,17 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Sanitize Yarn configuration
+      shell: bash
+      run: ${{ github.action_path }}/scripts/sanitize.sh
+      env:
+        YARN_IGNORE_PATH: '1'
     - name: Run main publish script
       id: publish
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
+        YARN_IGNORE_PATH: '1'
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
         STAGED_PUBLISH: ${{ inputs.staged-publish }}
