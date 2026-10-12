@@ -21,6 +21,11 @@ if [ "$RUNNER_DEBUG" = "1" ]; then
   set -x
 fi
 
+script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+# shellcheck source=scripts/environment.sh
+source "$script_path/environment.sh"
+
 rc_filename=".yarnrc-$(openssl rand -hex 16).yml"
 rc_path="$(dirname "$PWD")/$rc_filename"
 cat > "$rc_path" <<'EOF'
