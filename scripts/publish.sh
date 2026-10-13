@@ -91,11 +91,39 @@ publish() {
   fi
 }
 
+report() {
+  # Yarn's `%s` placeholder is the package name with `/` replaced by `-`. The
+  # leading `@` of scoped packages is kept.
+  local slug="${PACKAGE_NAME//\//-}"
+  local tarball="/tmp/$slug-$CURRENT_PACKAGE_VERSION.tgz"
+
+  local checksum integrity
+  checksum=$(shasum -a 1 "$tarball" | cut -d' ' -f1)
+  integrity="sha512-$(openssl dgst -sha512 -binary "$tarball" | openssl base64 -A)"
+
+  echo "Checksum: $checksum"
+  echo "Integrity: $integrity"
+
+  if [[ -n "$GITHUB_STEP_SUMMARY" ]]; then
+    {
+      echo "### $PACKAGE_NAME"
+      echo
+      echo "- Checksum: \`$checksum\`"
+      echo "- Integrity: \`$integrity\`"
+      echo
+    } >> "$GITHUB_STEP_SUMMARY"
+  fi
+}
+
 main() {
   check_requirements
   get_package_info
   configure_publish
   publish
+
+  if [[ "$DRY_RUN" = "true" ]]; then
+    report
+  fi
 }
 
 main "$@"
