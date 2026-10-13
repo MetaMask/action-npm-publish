@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0]
+
+### Added
+
+- **BREAKING:** Sanitize Yarn configuration before publishing ([#138](https://github.com/MetaMask/action-npm-publish/pull/138))
+  - Lifecycle scripts related to publishing (`prepublish`, `prepack`) are no longer run.
+  - This action now assumes the following Yarn options:
+    - `nodeLinker: node-modules`
+    - `npmPublishRegistry: "https://registry.npmjs.org"` and/or `publishConfig.registry` set to `https://registry.npmjs.org` in `package.json`.
+      - Publishing to 3rd party registries was never officially supported by this action, but is now not allowed anymore.
+- **BREAKING:** Unset Yarn environment variables before running Yarn ([#139](https://github.com/MetaMask/action-npm-publish/pull/139))
+  - `YARN_*` environment variables that are set outside of the action are no longer forwarded to Yarn.
+- Print checksum and integrity in dry-run report ([#141](https://github.com/MetaMask/action-npm-publish/pull/141))
+  - The dry-run now includes a SHA-1 checksum and SHA-512 integrity hash.
+
+### Changed
+
+- Add names to all composite action steps ([#136](https://github.com/MetaMask/action-npm-publish/pull/136))
+
 ## [6.5.0]
 
 ### Added
@@ -261,7 +280,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v6.5.0...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.5.0...v7.0.0
 [6.5.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.4.0...v6.5.0
 [6.4.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.3.0...v6.4.0
 [6.3.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.2.1...v6.3.0
