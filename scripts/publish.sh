@@ -92,10 +92,9 @@ publish() {
 }
 
 report() {
-  # Yarn's `%s` placeholder is the package name with the leading `@` removed
-  # and `/` replaced by `-`.
-  local slug="${PACKAGE_NAME#@}"
-  slug="${slug//\//-}"
+  # Yarn's `%s` placeholder is the package name with `/` replaced by `-`. The
+  # leading `@` of scoped packages is kept.
+  local slug="${PACKAGE_NAME//\//-}"
   local tarball="/tmp/$slug-$CURRENT_PACKAGE_VERSION.tgz"
 
   local checksum integrity
