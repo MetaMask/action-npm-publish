@@ -15,6 +15,21 @@ for file in "$directory"/*.tgz; do
         basename=$(basename "$file")
         name="$(tar -O -zxf "$file" package/package.json | jq --raw-output .name)"
         echo "$name"
+
+        checksum=$(shasum -a 1 "$file" | cut -d' ' -f1)
+        integrity="sha512-$(openssl dgst -sha512 -binary "$file" | openssl base64 -A)"
+        echo "Checksum: $checksum"
+        echo "Integrity: $integrity"
+        if [[ -n "$GITHUB_STEP_SUMMARY" ]]; then
+            {
+                echo "### $name"
+                echo
+                echo "- Checksum: \`$checksum\`"
+                echo "- Integrity: \`$integrity\`"
+                echo
+            } >> "$GITHUB_STEP_SUMMARY"
+        fi
+
         pkdiff "$file" "$name@latest" \
             --no-exit-code \
             --no-open \
