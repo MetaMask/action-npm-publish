@@ -9,15 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [7.0.0]
 
-### Uncategorized
-
-- chore: add names to all composite action steps ([#136](https://github.com/MetaMask/action-npm-publish/pull/136))
-
 ### Added
 
-- feat: print checksum and integrity in dry-run report ([#141](https://github.com/MetaMask/action-npm-publish/pull/141))
-- feat: unset Yarn environment variables before running Yarn ([#139](https://github.com/MetaMask/action-npm-publish/pull/139))
-- feat: sanitise Yarn configuration before publishing ([#138](https://github.com/MetaMask/action-npm-publish/pull/138))
+- **BREAKING:** Sanitize Yarn configuration before publishing ([#138](https://github.com/MetaMask/action-npm-publish/pull/138))
+  - Lifecycle scripts related to publishing (`prepublish`, `prepack`) are no longer run.
+  - This action now assumes the following Yarn options:
+    - `nodeLinker: node-modules`
+    - `npmPublishRegistry: "https://registry.npmjs.org"` and/or `publishConfig.registry` set to `https://registry.npmjs.org` in `package.json`.
+      - Publishing to 3rd party registries was never officially supported by this action, but is now not allowed anymore.
+- **BREAKING:** Unset Yarn environment variables before running Yarn ([#139](https://github.com/MetaMask/action-npm-publish/pull/139))
+  - `YARN_*` environment variables that are set outside of the action are no longer forwarded to Yarn.
+- Print checksum and integrity in dry-run report ([#141](https://github.com/MetaMask/action-npm-publish/pull/141))
+  - The dry-run now includes a SHA-1 checksum and SHA-512 integrity hash.
+
+### Changed
+
+- Add names to all composite action steps ([#136](https://github.com/MetaMask/action-npm-publish/pull/136))
 
 ## [6.5.0]
 
