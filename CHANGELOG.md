@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [7.0.0]
+
+### Uncategorized
+
+- chore: add names to all composite action steps ([#136](https://github.com/MetaMask/action-npm-publish/pull/136))
+
+### Added
+
+- feat: print checksum and integrity in dry-run report ([#141](https://github.com/MetaMask/action-npm-publish/pull/141))
+- feat: unset Yarn environment variables before running Yarn ([#139](https://github.com/MetaMask/action-npm-publish/pull/139))
+- feat: sanitise Yarn configuration before publishing ([#138](https://github.com/MetaMask/action-npm-publish/pull/138))
+
 ## [6.5.0]
 
 ### Added
@@ -261,7 +273,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release ([#1](https://github.com/MetaMask/action-npm-publish/pull/1))
 
-[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v6.5.0...HEAD
+[Unreleased]: https://github.com/MetaMask/action-npm-publish/compare/v7.0.0...HEAD
+[7.0.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.5.0...v7.0.0
 [6.5.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.4.0...v6.5.0
 [6.4.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.3.0...v6.4.0
 [6.3.0]: https://github.com/MetaMask/action-npm-publish/compare/v6.2.1...v6.3.0
