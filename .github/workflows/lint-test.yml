@@ -15,7 +15,7 @@ jobs:
         node-version: [22.x]
     steps:
       - name: Checkout and setup environment
-        uses: MetaMask/action-checkout-and-setup@v3
+        uses: MetaMask/action-checkout-and-setup@0543b5929698c71e3ccc6ed24eac87825669b5de # v3.5.0
         with:
           is-high-risk-environment: false
           node-version: ${{ matrix.node-version }}
@@ -33,7 +33,7 @@ jobs:
       checks: write
     steps:
       - name: Checkout and setup environment
-        uses: MetaMask/action-checkout-and-setup@v3
+        uses: MetaMask/action-checkout-and-setup@0543b5929698c71e3ccc6ed24eac87825669b5de # v3.5.0
         with:
           is-high-risk-environment: false
           node-version: ${{ matrix.node-version }}
@@ -66,7 +66,7 @@ jobs:
         node-version: [22.x]
     steps:
       - name: Checkout and setup environment
-        uses: MetaMask/action-checkout-and-setup@v3
+        uses: MetaMask/action-checkout-and-setup@0543b5929698c71e3ccc6ed24eac87825669b5de # v3.5.0
         with:
           is-high-risk-environment: false
           node-version: ${{ matrix.node-version }}
@@ -85,13 +85,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Snaps repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           repository: MetaMask/snaps
           ref: cecffa1a851a1fa5d68384c6f46ca1cf739f6d0c
           path: snaps
       - name: Checkout action repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           path: action-npm-publish
       - name: Setup, build, publish
@@ -118,13 +118,13 @@ jobs:
         id: latest-release
         run: echo "release-version=$(npm view MetaMask/snaps version --workspaces=false)" >> "$GITHUB_OUTPUT"
       - name: Checkout Snaps repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           repository: MetaMask/snaps
           ref: v${{ steps.latest-release.outputs.release-version }}
           path: snaps
       - name: Checkout action repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           path: action-npm-publish
       - name: Setup, build, publish
@@ -142,17 +142,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout utils repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           repository: MetaMask/utils
           ref: 48e4a5a9d4d389c0e0b0a066f3ec4bb90b14e07b
           path: utils
       - name: Checkout action repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           path: action-npm-publish
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
       - name: Setup, build, publish
