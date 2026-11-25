@@ -31,13 +31,17 @@ test('should not error when performing a dry-run publish', async (tapzero) => {
 
 test('correct version should appear in dry-run output', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec('DRY_RUN=true PUBLISH_NPM_TAG=latest ./scripts/main.sh', {}, (error, stdout) => {
-      if (error) {
-        reject(new Error(error));
-      }
-      tapzero.equal(stdout.includes(version), true);
-      resolve();
-    });
+    exec(
+      'DRY_RUN=true PUBLISH_NPM_TAG=latest ./scripts/main.sh',
+      {},
+      (error, stdout) => {
+        if (error) {
+          reject(new Error(error));
+        }
+        tapzero.equal(stdout.includes(version), true);
+        resolve();
+      },
+    );
   });
 });
 
