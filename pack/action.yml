@@ -43,8 +43,6 @@ runs:
       id: select
       shell: bash
       run: |
-        # The selection fails if it can't be made, and never falls back to
-        # packing everything.
         candidates="$LOCATIONS"
         if [[ -z "${candidates//[[:space:]]/}" ]]; then
           candidates="$("${ACTION_PATH}/../scripts/select.sh")"
