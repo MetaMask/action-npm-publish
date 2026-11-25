@@ -43,18 +43,10 @@ runs:
       id: select
       shell: bash
       run: |
-        candidates="$LOCATIONS"
-        if [[ -z "${candidates//[[:space:]]/}" ]]; then
-          candidates="$("${ACTION_PATH}/../scripts/select.sh")"
+        selected="$(grep -v '^[[:space:]]*$' <<< "$LOCATIONS" || true)"
+        if [[ -z "$selected" ]]; then
+          selected="$("${ACTION_PATH}/../scripts/select.sh")"
         fi
-
-        selected=""
-        while IFS= read -r location; do
-          if [[ -n "${location//[[:space:]]/}" ]]; then
-            selected+="${location}"$'\n'
-          fi
-        done <<< "$candidates"
-        selected="${selected%$'\n'}"
 
         has_packages="false"
         if [[ -n "$selected" ]]; then
