@@ -7,7 +7,7 @@
 
 for name in $(compgen -e | grep '^YARN_' || true); do
   case "$name" in
-    YARN_NPM_AUTH_TOKEN | YARN_RC_FILENAME | YARN_IGNORE_PATH) ;;
+    YARN_RC_FILENAME | YARN_IGNORE_PATH) ;;
     *) unset "$name" ;;
   esac
 done
