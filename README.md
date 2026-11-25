@@ -97,7 +97,7 @@ To pack specific packages instead, set `locations`:
       packages/bar
 ```
 
-If no packages are selected, the action succeeds without packing or uploading anything, and `has-packages` is `false`. Use it to skip later steps and jobs. The tarballs are named `<name>-<version>.tgz`. Artifact names must be unique within a workflow run, so set `artifact-name` if you run the action more than once, or set it to an empty string to skip uploading.
+If no packages are selected, the action succeeds without packing or uploading anything, and `has-packages` is `false`. Use it to skip later steps and jobs. The tarballs are named `<name>-<version>.tgz`. Set `artifact-name` to an empty string to skip uploading.
 
 ### Slack announce
 

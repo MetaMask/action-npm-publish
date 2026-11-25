@@ -16,7 +16,7 @@ inputs:
     description: 'The directory to write the tarballs to. Defaults to a "tarballs" directory in the runner temporary directory.'
     required: false
   artifact-name:
-    description: 'The name of the artifact to upload the tarballs to. Artifact names must be unique within a workflow run, so set this if the action runs more than once. Set to an empty string to skip uploading.'
+    description: 'The name of the artifact to upload the tarballs to. Set to an empty string to skip uploading.'
     required: false
     default: 'npm-tarballs'
   retention-days:
