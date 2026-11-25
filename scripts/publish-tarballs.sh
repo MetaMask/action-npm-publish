@@ -16,7 +16,7 @@
 #    `https://registry.npmjs.org`.
 #
 # Packages that are not published, because of a dry run, are reported for
-# review instead.
+# review instead: the checksum and the list of files in each tarball.
 
 set -e
 set -o pipefail
@@ -30,6 +30,39 @@ registry="https://registry.npmjs.org/"
 script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 directory="$(cd "${TARBALLS_DIRECTORY:?}" && pwd -P)"
 
+# Prints a field of the manifest in a tarball (`$1`), using a `jq` filter (`$2`).
+read_manifest() {
+  tar -xzOf "$1" package/package.json | jq --raw-output "$2"
+}
+
+# Prints what is released (`name@version` for each package in the arguments), to
+# the log and to the top of the job summary, with a link to the pull request if
+# there is one.
+report_release() {
+  local packages=("$@")
+
+  local list
+  printf -v list '%s, ' "${packages[@]}"
+  echo "Notice: Publishing ${#packages[@]} package(s): ${list%, }."
+
+  if [[ -n "$GITHUB_STEP_SUMMARY" ]]; then
+    {
+      echo "## Release details"
+      echo
+
+      if [[ -n "$PULL_REQUEST_URL" ]]; then
+        echo "**Pull request:** ${PULL_REQUEST_URL}"
+        echo
+      fi
+
+      echo "**Packages (${#packages[@]}):**"
+      echo
+      printf -- "- \`%s\`\n" "${packages[@]}"
+      echo
+    } >> "$GITHUB_STEP_SUMMARY"
+  fi
+}
+
 # Prints the contents of a package that is not published, so they can be
 # reviewed: the checksum and integrity of the tarball, and the files in it, to
 # the log and to the job summary.
@@ -37,6 +70,11 @@ report_package() {
   local tarball="$1"
   local name="$2"
   local version="$3"
+
+  # Separates the package from the one before it in the job summary.
+  if [[ -n "$GITHUB_STEP_SUMMARY" ]]; then
+    printf -- '---\n\n' >> "$GITHUB_STEP_SUMMARY"
+  fi
 
   "$script_path/checksum.sh" "$tarball" "${name}@${version}"
 
@@ -110,20 +148,13 @@ if [[ "$has_invalid_tarballs" = "true" ]]; then
   exit 1
 fi
 
-# npm reads the token from this file, so it's never passed on the command line.
-# `${NODE_AUTH_TOKEN}` is expanded by npm, and not by the shell.
-npmrc="$(mktemp)"
-trap 'rm -f "$npmrc"' EXIT
-# shellcheck disable=SC2016
-echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' > "$npmrc"
-
-any_dry_run="false"
-published=()
+# Find the packages that need to be published.
+pending_tarballs=()
+pending_packages=()
 
 for tarball in "${tarballs[@]}"; do
-  manifest="$(tar -xzOf "$tarball" package/package.json)"
-  name="$(jq --raw-output '.name' <<< "$manifest")"
-  version="$(jq --raw-output '.version' <<< "$manifest")"
+  name="$(read_manifest "$tarball" '.name')"
+  version="$(read_manifest "$tarball" '.version')"
 
   if [[ "$version" = "0.0.0" ]]; then
     echo "Notice: Invalid version for ${name}: ${version}. Skipping."
@@ -138,6 +169,33 @@ for tarball in "${tarballs[@]}"; do
     echo "Notice: ${name}@${version} is already published. Skipping."
     continue
   fi
+
+  pending_tarballs+=("$tarball")
+  pending_packages+=("${name}@${version}")
+done
+
+if [[ ${#pending_packages[@]} -gt 0 ]]; then
+  report_release "${pending_packages[@]}"
+else
+  echo "Notice: No packages need publishing."
+fi
+
+# npm reads the token from this file, so it's never passed on the command line.
+# `${NODE_AUTH_TOKEN}` is expanded by npm, and not by the shell.
+npmrc="$(mktemp)"
+trap 'rm -f "$npmrc"' EXIT
+# shellcheck disable=SC2016
+echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' > "$npmrc"
+
+any_dry_run="false"
+
+for tarball in "${pending_tarballs[@]}"; do
+  name="$(read_manifest "$tarball" '.name')"
+  version="$(read_manifest "$tarball" '.version')"
+
+  # Leaves a blank line around each package in the log.
+  echo
+  echo "== ${name}@${version} =="
 
   # Check whether the package exists on npm at all. Note that we're `cd`ing into
   # /tmp before running `npm view` to avoid any issues with Corepack detecting
@@ -213,8 +271,6 @@ for tarball in "${tarballs[@]}"; do
     )
   fi
 
-  published+=("${name}@${version}")
-
   echo "::endgroup::"
 done
 
@@ -222,8 +278,4 @@ done
 # available.
 if [[ -n "$GITHUB_OUTPUT" ]]; then
   echo "dry-run=$any_dry_run" >> "$GITHUB_OUTPUT"
-fi
-
-if [[ ${#published[@]} -eq 0 && "$any_dry_run" = "false" ]]; then
-  echo "Notice: No packages need publishing."
 fi
