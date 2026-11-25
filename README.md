@@ -168,7 +168,7 @@ The `MetaMask/action-npm-publish/pack` action. See [Pack packages](#pack-package
 
 - **`token`** _(optional)_. The token used to fetch the base commit if it isn't available, which is needed for private repositories. Only used to select packages. Requires the `contents: read` permission. Defaults to the token of the workflow.
 
-- **`output-directory`** _(optional)_. The directory to write the tarballs to. Defaults to a `tarballs` directory in the runner temporary directory.
+- **`output-directory`** _(optional)_. The directory to write the tarballs to. It must be empty or not exist, so that tarballs from an earlier step can't end up in the output. Defaults to a `tarballs` directory in the runner temporary directory.
 
 - **`artifact-name`** _(optional)_. The name of the artifact to upload the tarballs to. Defaults to `npm-tarballs`. Set to an empty string to skip uploading.
 

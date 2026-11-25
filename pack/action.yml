@@ -13,7 +13,7 @@ inputs:
     required: false
     default: ${{ github.token }}
   output-directory:
-    description: 'The directory to write the tarballs to. Defaults to a "tarballs" directory in the runner temporary directory.'
+    description: 'The directory to write the tarballs to. Must be empty or not exist. Defaults to a "tarballs" directory in the runner temporary directory.'
     required: false
   artifact-name:
     description: 'The name of the artifact to upload the tarballs to. Set to an empty string to skip uploading.'

@@ -496,12 +496,33 @@ jobs:
           output-directory: ${{ runner.temp }}/selected
           locations: packages/second
           artifact-name: ''
+      - name: Create an output directory that is not empty
+        run: |
+          mkdir -p "$RUNNER_TEMP/occupied"
+          touch "$RUNNER_TEMP/occupied/planted.tgz"
+      - name: Pack to a directory that is not empty
+        id: pack-occupied
+        uses: ./action-npm-publish/pack
+        continue-on-error: true
+        with:
+          output-directory: ${{ runner.temp }}/occupied
+          locations: packages/second
+          artifact-name: ''
       - name: Check the tarballs
         env:
           ALL_DIRECTORY: ${{ runner.temp }}/tarballs
           SELECTED_DIRECTORY: ${{ runner.temp }}/selected
+          OCCUPIED_OUTCOME: ${{ steps.pack-occupied.outcome }}
         run: |
           failed=0
+
+          # The planted tarball must make the action fail, and must not be
+          # joined by a real tarball.
+          mapfile -t occupied < <(ls "$RUNNER_TEMP/occupied")
+          if [[ "$OCCUPIED_OUTCOME" != "failure" || "${occupied[*]}" != "planted.tgz" ]]; then
+            echo "::error::Expected packing to a directory that is not empty to fail (outcome=${OCCUPIED_OUTCOME}, files=${occupied[*]})."
+            failed=1
+          fi
 
           mapfile -t all < <(ls "$ALL_DIRECTORY")
           if [[ "${all[*]}" != "@pack-test-first-1.2.3.tgz @pack-test-second-1.2.3.tgz" ]]; then

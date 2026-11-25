@@ -8,6 +8,9 @@
 # (`.` for a polyrepo). Tarballs are named `<name>-<version>.tgz`, where the `/`
 # in scoped package names is replaced with `-`.
 #
+# The output directory must be empty or not exist, so that tarballs from an
+# earlier step can't end up in the output.
+#
 # Run `sanitize.sh` before this script, so that Yarn doesn't load any
 # configuration from the repository, and lifecycle scripts are removed from the
 # manifests.
@@ -38,6 +41,13 @@ locations=("$@")
 # selection can't result in packing everything.
 if [[ ${#locations[@]} -eq 0 ]]; then
   echo "::error::No package locations provided."
+  exit 1
+fi
+
+# The tarballs are uploaded and published as they are, so the directory must not
+# contain anything that an earlier step in the job put there.
+if [[ -d "$output_directory" && -n "$(ls -A "$output_directory")" ]]; then
+  echo "::error::The output directory \"$output_directory\" is not empty."
   exit 1
 fi
 
