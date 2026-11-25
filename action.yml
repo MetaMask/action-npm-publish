@@ -36,15 +36,30 @@ inputs:
   dry-run:
     description: 'Enables dry run mode, which prepares the package for publishing but does not publish it'
     required: false
+  use-pack:
+    description: 'Whether to publish the tarballs packed by the `pack` action in an earlier job, instead of packing the packages in the checkout. When "true", the action downloads the artifact, and neither a checkout nor Yarn is needed. Defaults to "false".'
+    required: false
+    default: 'false'
+  artifact-name:
+    description: 'The name of the artifact that contains the tarballs packed by the `pack` action. Only used if `use-pack` is "true". Defaults to "npm-tarballs".'
+    required: false
+    default: 'npm-tarballs'
 
 runs:
   using: 'composite'
   steps:
     - name: Sanitize Yarn configuration
+      if: inputs.use-pack != 'true'
       shell: bash
       run: ${{ github.action_path }}/scripts/sanitize.sh
       env:
         YARN_IGNORE_PATH: '1'
+    - name: Download packed tarballs
+      if: inputs.use-pack == 'true'
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/npm-tarballs
     - name: Run main publish script
       id: publish
       shell: bash
@@ -52,6 +67,9 @@ runs:
       env:
         YARN_IGNORE_PATH: '1'
         YARN_NPM_AUTH_TOKEN: ${{ inputs.npm-token }}
+        NPM_TOKEN: ${{ inputs.npm-token }}
+        USE_PACK: ${{ inputs.use-pack }}
+        TARBALLS_DIRECTORY: ${{ runner.temp }}/npm-tarballs
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
         STAGED_PUBLISH: ${{ inputs.staged-publish }}
         PROVENANCE: ${{ inputs.provenance }}
@@ -68,20 +86,44 @@ runs:
       shell: bash
       if: steps.publish.outputs.dry-run == 'true'
       run: ${{ github.action_path }}/scripts/report.sh
+      env:
+        TARBALLS_DIRECTORY: ${{ inputs.use-pack == 'true' && format('{0}/npm-tarballs', runner.temp) || '/tmp' }}
     - name: Upload package report artifact
       id: upload-artifact
       if: steps.publish.outputs.dry-run == 'true'
       uses: actions/upload-artifact@v4
       with:
         path: |
-          /tmp/*.tgz
-          /tmp/*.html
+          ${{ inputs.use-pack == 'true' && format('{0}/npm-tarballs', runner.temp) || '/tmp' }}/*.tgz
+          ${{ inputs.use-pack == 'true' && format('{0}/npm-tarballs', runner.temp) || '/tmp' }}/*.html
+    - name: Link package report in the job summary
+      if: steps.publish.outputs.dry-run == 'true'
+      shell: bash
+      env:
+        ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
+      run: |
+        {
+          echo "### Package diffs"
+          echo
+          echo "View the complete diff between each package and its latest published version in the report: ${ARTIFACT_URL}"
+        } >> "$GITHUB_STEP_SUMMARY"
     - name: Generate Slack publish message (1/2)
       id: name-version
       shell: bash
       if: inputs.slack-webhook-url != ''
+      env:
+        USE_PACK: ${{ inputs.use-pack }}
+        GH_TOKEN: ${{ github.token }}
       run: |
-        NAME_VERSION_TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
+        # Without a checkout, the root `package.json` is read with the GitHub
+        # API, at the commit that is being released.
+        if [[ "$USE_PACK" == "true" ]]; then
+          MANIFEST=$(gh api "repos/${GITHUB_REPOSITORY}/contents/package.json?ref=${GITHUB_SHA}" --jq '.content' | base64 --decode)
+        else
+          MANIFEST=$(cat package.json)
+        fi
+
+        NAME_VERSION_TEXT=$(jq --raw-output '.name + "@" + .version' <<< "$MANIFEST")
         NAME_VERSION_TEXT_STRIPPED="${NAME_VERSION_TEXT#@}"
         echo "NAME_VERSION=$NAME_VERSION_TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
     - name: Generate Slack publish message (2/2)
