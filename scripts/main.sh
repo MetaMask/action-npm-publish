@@ -18,6 +18,11 @@ if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]];
   exit 1
 fi
 
+if [[ "$DRY_RUN" != "true" && "$DRY_RUN" != "false" ]]; then
+  echo "::error::'dry-run' must be set to \"true\" or \"false\"."
+  exit 1
+fi
+
 if [[ -z "$PUBLISH_NPM_TAG" ]]; then
   echo "::error::'npm-tag' not set."
   exit 1
