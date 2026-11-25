@@ -19,7 +19,7 @@ test('should only have 15 devDependency from now until forever', async (tapzero)
 
 test('should not error when performing a dry-run publish', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec('PUBLISH_NPM_TAG=latest ./scripts/main.sh', (error) => {
+    exec('DRY_RUN=true PUBLISH_NPM_TAG=latest ./scripts/main.sh', (error) => {
       if (error) {
         reject(new Error(error));
       }
@@ -31,7 +31,7 @@ test('should not error when performing a dry-run publish', async (tapzero) => {
 
 test('correct version should appear in dry-run output', async (tapzero) => {
   await new Promise((resolve, reject) => {
-    exec('PUBLISH_NPM_TAG=latest ./scripts/main.sh', {}, (error, stdout) => {
+    exec('DRY_RUN=true PUBLISH_NPM_TAG=latest ./scripts/main.sh', {}, (error, stdout) => {
       if (error) {
         reject(new Error(error));
       }
@@ -41,10 +41,23 @@ test('correct version should appear in dry-run output', async (tapzero) => {
   });
 });
 
+test('throws an error when dry-run is not set', async (tapzero) => {
+  await new Promise((resolve, reject) => {
+    exec('PUBLISH_NPM_TAG=latest ./scripts/main.sh', (error) => {
+      if (!error) {
+        reject(new Error('Expected an error but did not get one.'));
+      }
+
+      tapzero.equal(error.code, 1);
+      resolve();
+    });
+  });
+});
+
 test('throws an error when OIDC token is invalid', async (tapzero) => {
   await new Promise((resolve, reject) => {
     exec(
-      `ACTIONS_ID_TOKEN_REQUEST_URL=${FAKE} ACTIONS_ID_TOKEN_REQUEST_TOKEN=${FAKE} STAGED_PUBLISH=true PUBLISH_NPM_TAG=latest ./scripts/main.sh`,
+      `DRY_RUN=false ACTIONS_ID_TOKEN_REQUEST_URL=${FAKE} ACTIONS_ID_TOKEN_REQUEST_TOKEN=${FAKE} STAGED_PUBLISH=true PUBLISH_NPM_TAG=latest ./scripts/main.sh`,
       (error) => {
         if (!error) {
           reject(new Error('Expected an error but did not get one.'));
