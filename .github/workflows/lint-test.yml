@@ -467,7 +467,6 @@ jobs:
             "name": "@pack-test/$name",
             "version": "1.2.3",
             "scripts": {
-              "prepare": "touch /tmp/canary/$name-prepare",
               "prepack": "touch /tmp/canary/$name-prepack",
               "postpack": "touch /tmp/canary/$name-postpack",
               "test": "echo test"
@@ -516,14 +515,8 @@ jobs:
             failed=1
           fi
 
-          for tarball in "$ALL_DIRECTORY"/*.tgz; do
-            if ! tar -O -zxf "$tarball" package/package.json \
-              | jq --exit-status '.scripts | keys == ["test"]' > /dev/null; then
-              echo "::error::${tarball} contains lifecycle scripts."
-              failed=1
-            fi
-          done
-
+          # Removing the scripts is tested by the sanitise test. This checks that
+          # the action sanitises before it packs.
           if compgen -G "/tmp/canary/*" > /dev/null; then
             echo "::error::Lifecycle scripts ran while packing."
             failed=1

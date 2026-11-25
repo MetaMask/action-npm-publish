@@ -8,9 +8,9 @@
 # (`.` for a polyrepo). Tarballs are named `<name>-<version>.tgz`, where the `/`
 # in scoped package names is replaced with `-`.
 #
-# Lifecycle scripts that run when packing or publishing are removed from each
-# manifest before packing. Run `sanitize.sh` before this script, so that Yarn
-# doesn't load any configuration from the repository.
+# Run `sanitize.sh` before this script, so that Yarn doesn't load any
+# configuration from the repository, and lifecycle scripts are removed from the
+# manifests.
 
 set -e
 set -o pipefail
@@ -45,18 +45,7 @@ mkdir -p "$output_directory"
 output_directory="$(cd "$output_directory" && pwd -P)"
 
 for location in "${locations[@]}"; do
-  manifest="$location/package.json"
-
-  stripped="$(jq '
-    if .scripts then
-      .scripts |= with_entries(select(.key | test("^(pre|post)?(pack|publish|prepare)$") | not))
-    else
-      .
-    end
-  ' "$manifest")"
-  echo "$stripped" > "$manifest"
-
-  name="$(jq --raw-output '.name' "$manifest")"
+  name="$(jq --raw-output '.name' "$location/package.json")"
   echo "::group::Packing $name"
   (cd "$location" && yarn pack --out "$output_directory/%s-%v.tgz")
   echo "::endgroup::"
