@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `use-pack` and `artifact-name` inputs to publish the tarballs packed by the `pack` action ([#146](https://github.com/MetaMask/action-npm-publish/pull/146))
   - With `use-pack: true`, the action downloads the artifact and publishes its tarballs with `npm publish` (or `npm stage publish` for staged publishing), without a checkout or Yarn.
   - Each tarball is validated before it is published: it may only contain files in `package/`, needs exactly one `package/package.json`, can't be private, and may only set `access` and `registry` in `publishConfig`, with the registry `https://registry.npmjs.org`.
-  - The job summary starts with the release details: a link to the pull request and the packages that are released.
+  - The job summary starts with the release details: a link to the pull request and the packages that are released. The "review deployment" link in the Slack message goes to it.
   - In a dry run, the log and the job summary list the files in each tarball, next to its checksum and integrity.
   - Without `use-pack`, the action behaves as before.
 - Link the package report from the job summary of a dry run ([#146](https://github.com/MetaMask/action-npm-publish/pull/146))

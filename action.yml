@@ -135,8 +135,17 @@ runs:
         SUBTEAM_TEXT: ${{ inputs.subteam }}
         REPOSITORY: ${{ github.repository }}
         RUN_ID: ${{ github.run_id }}
+        JOB_ID: ${{ job.check_run_id }}
+        USE_PACK: ${{ inputs.use-pack }}
       run: |
-        DEFAULT_TEXT="\`$NAME_VERSION\` is awaiting deployment :rocket: \n <https://github.com/$REPOSITORY/actions/runs/$RUN_ID/|→ Click here to review deployment> \n <https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2|→ See instructions for approving staged packages here>"
+        # The release details and the files in each package are in the summary of
+        # this job, which is shown on the page of the run.
+        RUN_URL="https://github.com/$REPOSITORY/actions/runs/$RUN_ID/"
+        if [[ "$USE_PACK" == "true" ]]; then
+          RUN_URL="https://github.com/$REPOSITORY/actions/runs/$RUN_ID#summary-$JOB_ID"
+        fi
+
+        DEFAULT_TEXT="\`$NAME_VERSION\` is awaiting deployment :rocket: \n <$RUN_URL|→ Click here to review deployment> \n <https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2|→ See instructions for approving staged packages here>"
         FINAL_TEXT="$DEFAULT_TEXT"
         if [[ ! "$SUBTEAM_TEXT" == "" ]]; then
           FINAL_TEXT="<!subteam^$SUBTEAM_TEXT> $DEFAULT_TEXT"
