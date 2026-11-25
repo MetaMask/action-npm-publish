@@ -497,24 +497,12 @@ jobs:
           output-directory: ${{ runner.temp }}/selected
           locations: packages/second
           artifact-name: ''
-      - name: Download the uploaded tarballs
-        uses: actions/download-artifact@v8
-        with:
-          name: pack-test-all
-          path: ${{ runner.temp }}/downloaded
       - name: Check the tarballs
         env:
           ALL_DIRECTORY: ${{ runner.temp }}/tarballs
           SELECTED_DIRECTORY: ${{ runner.temp }}/selected
-          DOWNLOADED_DIRECTORY: ${{ runner.temp }}/downloaded
         run: |
           failed=0
-
-          mapfile -t downloaded < <(ls "$DOWNLOADED_DIRECTORY")
-          if [[ "${downloaded[*]}" != "@pack-test-first-1.2.3.tgz @pack-test-second-1.2.3.tgz" ]]; then
-            echo "::error::Unexpected downloaded tarballs: ${downloaded[*]}"
-            failed=1
-          fi
 
           mapfile -t all < <(ls "$ALL_DIRECTORY")
           if [[ "${all[*]}" != "@pack-test-first-1.2.3.tgz @pack-test-second-1.2.3.tgz" ]]; then
@@ -542,3 +530,23 @@ jobs:
           fi
 
           exit "$failed"
+
+  test-pack-artifact:
+    name: Test pack action artifact
+    needs: test-pack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the uploaded tarballs
+        uses: actions/download-artifact@v8
+        with:
+          name: pack-test-all
+          path: ${{ runner.temp }}/downloaded
+      - name: Check the tarballs
+        env:
+          DOWNLOADED_DIRECTORY: ${{ runner.temp }}/downloaded
+        run: |
+          mapfile -t downloaded < <(ls "$DOWNLOADED_DIRECTORY")
+          if [[ "${downloaded[*]}" != "@pack-test-first-1.2.3.tgz @pack-test-second-1.2.3.tgz" ]]; then
+            echo "::error::Unexpected downloaded tarballs: ${downloaded[*]}"
+            exit 1
+          fi
