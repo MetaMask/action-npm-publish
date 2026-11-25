@@ -187,8 +187,6 @@ trap 'rm -f "$npmrc"' EXIT
 # shellcheck disable=SC2016
 echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' > "$npmrc"
 
-any_dry_run="false"
-
 for tarball in "${pending_tarballs[@]}"; do
   name="$(read_manifest "$tarball" '.name')"
   version="$(read_manifest "$tarball" '.version')"
@@ -202,49 +200,35 @@ for tarball in "${pending_tarballs[@]}"; do
   # Yarn.
   published_version=$(cd /tmp && npm view "$name" --workspaces false --json 2>/dev/null | jq --raw-output '.version // empty' || echo "")
 
-  # Determine how to publish, and whether to perform a dry run. It works as
-  # follows:
-  # 1. If `DRY_RUN` is explicitly set to `true`, perform a dry run.
-  # 2. If the package has not been published before and a token has been
-  #    provided, use the provided token for the initial publish.
-  # 3. If the package has not been published before and a token has not been
-  #    provided, perform a dry run.
-  # 4. If the package has already been published and OIDC is available, use
-  #    OIDC to publish.
-  # 5. If the package has already been published and OIDC is not available,
-  #    perform a dry run.
-  #
-  # If `DRY_RUN` is explicitly set to `false` and a publish is attempted
-  # without necessary authorization, abort with an error.
-  method="dry-run"
+  # Determine how to publish. `DRY_RUN` is `true` or `false`, which is
+  # validated before this script runs:
+  # 1. If `DRY_RUN` is `true`, perform a dry run.
+  # 2. If the package has not been published before, use the provided token for
+  #    the initial publish. Abort with an error if there is no token.
+  # 3. If the package has already been published, use OIDC to publish. Abort
+  #    with an error if OIDC is not available.
   if [[ "$DRY_RUN" = "true" ]]; then
     echo "Notice: Performing a dry run for ${name}@${version}."
-  elif [[ -z "$published_version" ]]; then
-    if [[ -z "$NPM_TOKEN" && "$DRY_RUN" = "false" ]]; then
-      echo "::error::'npm-token' not provided for initial publish of ${name}."
-      exit 1
-    elif [[ -z "$NPM_TOKEN" ]]; then
-      echo "Notice: Token is not available for initial publish of ${name}. Performing a dry run."
-    else
-      echo "Notice: ${name} not yet published. Using npm token for initial publish."
-      method="token"
-    fi
-  else
-    if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" && "$DRY_RUN" = "false" ]]; then
-      echo "::error::OIDC is not available to publish ${name}."
-      exit 1
-    elif [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
-      echo "Notice: OIDC is not available. Performing a dry run for ${name}."
-    else
-      echo "Notice: Initial package version of ${name} already published. Using OIDC to publish."
-      method="oidc"
-    fi
-  fi
-
-  if [[ "$method" = "dry-run" ]]; then
-    any_dry_run="true"
     report_package "$tarball" "$name" "$version"
     continue
+  fi
+
+  if [[ -z "$published_version" ]]; then
+    if [[ -z "$NPM_TOKEN" ]]; then
+      echo "::error::'npm-token' not provided for initial publish of ${name}."
+      exit 1
+    fi
+
+    echo "Notice: ${name} not yet published. Using npm token for initial publish."
+    method="token"
+  else
+    if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
+      echo "::error::OIDC is not available to publish ${name}."
+      exit 1
+    fi
+
+    echo "Notice: Initial package version of ${name} already published. Using OIDC to publish."
+    method="oidc"
   fi
 
   echo "::group::Publishing ${name}@${version}"
@@ -273,9 +257,3 @@ for tarball in "${pending_tarballs[@]}"; do
 
   echo "::endgroup::"
 done
-
-# Export the "dry-run" status for use in subsequent steps, if GITHUB_OUTPUT is
-# available.
-if [[ -n "$GITHUB_OUTPUT" ]]; then
-  echo "dry-run=$any_dry_run" >> "$GITHUB_OUTPUT"
-fi

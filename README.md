@@ -42,6 +42,8 @@ jobs:
       id-token: write
     steps:
       - uses: MetaMask/action-npm-publish@v6
+        with:
+          dry-run: false
 ```
 
 This uses `--provenance` and (by default) `--staged` for publishing.
@@ -53,12 +55,15 @@ NPM requires a package to exist on the registry before OIDC can be configured fo
 ```yaml
 - uses: MetaMask/action-npm-publish@v6
   with:
+    dry-run: false
     npm-token: ${{ secrets.NPM_TOKEN }}
 ```
 
 Once the package has been published at least once, the token is ignored and OIDC is used exclusively for all subsequent publishes.
 
 ### Dry run mode
+
+The `dry-run` input is required, and must be `true` or `false`. The action doesn't decide it for you, so a missing token or OIDC permission fails the publish instead of silently turning it into a dry run.
 
 In dry run mode, packages will be prepared for publishing but no publishing will actually occur. No token or OIDC is necessary.
 
@@ -67,8 +72,6 @@ In dry run mode, packages will be prepared for publishing but no publishing will
   with:
     dry-run: true
 ```
-
-If neither a token nor OIDC is available, `dry-run` will default to `true`, otherwise it defaults to `false`.
 
 ### Pack packages
 
@@ -125,6 +128,7 @@ jobs:
     steps:
       - uses: MetaMask/action-npm-publish@v7
         with:
+          dry-run: false
           use-pack: true
 ```
 
@@ -149,6 +153,7 @@ The absolute minimum configuration for this is:
 ```yaml
 - uses: MetaMask/action-npm-publish@v6
   with:
+    dry-run: false
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
 
@@ -182,7 +187,9 @@ You can read more about these option in the [API](#API) section below
 
 #### Inputs
 
-- **`npm-token`** _(optional)_. The auth token for the NPM registry. Only used for the initial publish of a package that has not been published before, to allow OIDC to be set up for all subsequent publishes. If omitted, the action will attempt to use OIDC. If neither a token nor OIDC is available, the action will perform a dry run.
+- **`dry-run`** _(required)_. Whether to do a dry run, which prepares the packages for publishing but does not publish them. Must be `true` or `false`.
+
+- **`npm-token`** _(optional)_. The auth token for the NPM registry. Only used for the initial publish of a package that has not been published before, to allow OIDC to be set up for all subsequent publishes. If omitted, the action uses OIDC. If `dry-run` is `false` and the credentials needed to publish are missing, the action fails.
 
 - **`npm-tag`** _(optional)_. The npm tag to publish to. Defaults to `latest`.
 
