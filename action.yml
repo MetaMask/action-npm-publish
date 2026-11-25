@@ -33,37 +33,23 @@ inputs:
   dry-run:
     description: 'Whether to do a dry run, which prepares the packages for publishing but does not publish them. Must be "true" or "false".'
     required: true
-  use-pack:
-    description: 'Whether to publish the tarballs packed by the `pack` action in an earlier job, instead of packing the packages in the checkout. When "true", the action downloads the artifact, and neither a checkout nor Yarn is needed. Defaults to "false".'
-    required: false
-    default: 'false'
   artifact-name:
-    description: 'The name of the artifact that contains the tarballs packed by the `pack` action. Only used if `use-pack` is "true". Defaults to "npm-tarballs".'
+    description: 'The name of the artifact that contains the tarballs packed by the `pack` action. Defaults to "npm-tarballs".'
     required: false
     default: 'npm-tarballs'
 
 runs:
   using: 'composite'
   steps:
-    - name: Sanitize Yarn configuration
-      if: inputs.use-pack != 'true'
-      shell: bash
-      run: ${{ github.action_path }}/scripts/sanitize.sh
-      env:
-        YARN_IGNORE_PATH: '1'
     - name: Download packed tarballs
-      if: inputs.use-pack == 'true'
       uses: actions/download-artifact@v8
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ runner.temp }}/npm-tarballs
     - name: Run main publish script
-      id: publish
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
-        YARN_IGNORE_PATH: '1'
-        USE_PACK: ${{ inputs.use-pack }}
         TARBALLS_DIRECTORY: ${{ runner.temp }}/npm-tarballs
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
         STAGED_PUBLISH: ${{ inputs.staged-publish }}
@@ -82,15 +68,15 @@ runs:
       if: inputs.dry-run == 'true'
       run: ${{ github.action_path }}/scripts/report.sh
       env:
-        TARBALLS_DIRECTORY: ${{ inputs.use-pack == 'true' && format('{0}/npm-tarballs', runner.temp) || '/tmp' }}
+        TARBALLS_DIRECTORY: ${{ runner.temp }}/npm-tarballs
     - name: Upload package report artifact
       id: upload-artifact
       if: inputs.dry-run == 'true'
       uses: actions/upload-artifact@v4
       with:
         path: |
-          ${{ inputs.use-pack == 'true' && format('{0}/npm-tarballs', runner.temp) || '/tmp' }}/*.tgz
-          ${{ inputs.use-pack == 'true' && format('{0}/npm-tarballs', runner.temp) || '/tmp' }}/*.html
+          ${{ runner.temp }}/npm-tarballs/*.tgz
+          ${{ runner.temp }}/npm-tarballs/*.html
     - name: Link package report in the job summary
       if: inputs.dry-run == 'true'
       shell: bash
@@ -107,16 +93,11 @@ runs:
       shell: bash
       if: inputs.slack-webhook-url != ''
       env:
-        USE_PACK: ${{ inputs.use-pack }}
         GH_TOKEN: ${{ github.token }}
       run: |
-        # Without a checkout, the root `package.json` is read with the GitHub
-        # API, at the commit that is being released.
-        if [[ "$USE_PACK" == "true" ]]; then
-          MANIFEST=$(gh api "repos/${GITHUB_REPOSITORY}/contents/package.json?ref=${GITHUB_SHA}" --jq '.content' | base64 --decode)
-        else
-          MANIFEST=$(cat package.json)
-        fi
+        # There is no checkout, so the root `package.json` is read with the
+        # GitHub API, at the commit that is being released.
+        MANIFEST=$(gh api "repos/${GITHUB_REPOSITORY}/contents/package.json?ref=${GITHUB_SHA}" --jq '.content' | base64 --decode)
 
         NAME_VERSION_TEXT=$(jq --raw-output '.name + "@" + .version' <<< "$MANIFEST")
         NAME_VERSION_TEXT_STRIPPED="${NAME_VERSION_TEXT#@}"
@@ -131,14 +112,10 @@ runs:
         REPOSITORY: ${{ github.repository }}
         RUN_ID: ${{ github.run_id }}
         JOB_ID: ${{ job.check_run_id }}
-        USE_PACK: ${{ inputs.use-pack }}
       run: |
         # The release details and the files in each package are in the summary of
         # this job, which is shown on the page of the run.
-        RUN_URL="https://github.com/$REPOSITORY/actions/runs/$RUN_ID/"
-        if [[ "$USE_PACK" == "true" ]]; then
-          RUN_URL="https://github.com/$REPOSITORY/actions/runs/$RUN_ID#summary-$JOB_ID"
-        fi
+        RUN_URL="https://github.com/$REPOSITORY/actions/runs/$RUN_ID#summary-$JOB_ID"
 
         DEFAULT_TEXT="\`$NAME_VERSION\` is awaiting deployment :rocket: \n <$RUN_URL|→ Click here to review deployment> \n <https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2|→ See instructions for approving staged packages here>"
         FINAL_TEXT="$DEFAULT_TEXT"

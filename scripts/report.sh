@@ -7,7 +7,7 @@ fi
 set -e
 set -o pipefail
 
-directory="${TARBALLS_DIRECTORY:-/tmp}"
+directory="${TARBALLS_DIRECTORY:?}"
 
 for file in "$directory"/*.tgz; do
     if [ -f "$file" ]; then

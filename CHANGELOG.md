@@ -9,12 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `use-pack` and `artifact-name` inputs to publish the tarballs packed by the `pack` action ([#146](https://github.com/MetaMask/action-npm-publish/pull/146))
-  - With `use-pack: true`, the action downloads the artifact and publishes its tarballs with `npm publish` (or `npm stage publish` for staged publishing), without a checkout or Yarn.
+- Add the `artifact-name` input to publish the tarballs packed by the `pack` action ([#146](https://github.com/MetaMask/action-npm-publish/pull/146))
+  - The action downloads the artifact and publishes its tarballs with `npm publish` (or `npm stage publish` for staged publishing), without a checkout or Yarn.
   - Each tarball is validated before it is published: it may only contain files in `package/`, needs exactly one `package/package.json`, can't be private, and may only set `access` and `registry` in `publishConfig`, with the registry `https://registry.npmjs.org`.
   - The job summary starts with the release details: a link to the pull request and the packages that are released. The "review deployment" link in the Slack message goes to it.
   - In a dry run, the log and the job summary list the files in each tarball, next to its checksum and integrity.
-  - Without `use-pack`, the action behaves as before.
 - Link the package report from the job summary of a dry run ([#146](https://github.com/MetaMask/action-npm-publish/pull/146))
 - Add `MetaMask/action-npm-publish/pack` action to pack packages into tarballs ([#143](https://github.com/MetaMask/action-npm-publish/pull/143))
   - The action sanitises the Yarn configuration, removes lifecycle scripts, and runs `yarn pack` for the packages in the `locations` input.
@@ -24,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BREAKING:** Only publish the tarballs packed by the `pack` action ([#150](https://github.com/MetaMask/action-npm-publish/pull/150))
+  - The action no longer packs and publishes the packages in the checkout with Yarn, so a job that publishes needs no checkout and no Yarn. Pack the packages in an earlier job with `MetaMask/action-npm-publish/pack`.
+  - The action always downloads the artifact, named by `artifact-name`, and fails if it doesn't exist.
+  - The Yarn version check and the Yarn sanitising are removed from the main action. The `pack` action still sanitises the Yarn configuration.
 - **BREAKING:** Remove the `npm-token` input and only publish with OIDC ([#149](https://github.com/MetaMask/action-npm-publish/pull/149))
   - With `dry-run: false`, the action fails if a package hasn't been published before, because OIDC can only be configured for an existing package. Publish new packages once yourself first.
   - `YARN_NPM_AUTH_TOKEN` is no longer kept when the action unsets the `YARN_*` variables.

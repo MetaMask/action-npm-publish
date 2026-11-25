@@ -1,29 +1,28 @@
 # action-npm-publish
 
-This is a GitHub action that handles publishing to NPM for a project that represents a single package (in the case of a polyrepo) or a collection of packages (in the case of a monorepo).
+This repository has two GitHub actions that handle publishing to NPM for a project that represents a single package (in the case of a polyrepo) or a collection of packages (in the case of a monorepo):
 
-- For a polyrepo project, the action will publish the package using its current version as per `package.json`.
+- The [`pack` action](#pack-packages) packs the packages to release into tarballs, in a job that has no publishing credentials.
+- The [main action](#publish-packed-tarballs) publishes those exact tarballs in another job, which needs no checkout and no Yarn.
 
-- For a monorepo, the action will publish each workspace package (the set of packages matched via the `workspaces` field in `package.json`, recursively) using its current version as per `package.json`. (Any package which has already been published at its current version will be skipped.)
-
+Any package that has already been published at its current version is skipped.
 
 ## Requirements
 
-**This action requires Yarn 4.16.0 or higher.**
+The `pack` action requires Yarn 4.16.0 or higher in the project. It assumes that the project uses the `node-modules` linker (`nodeLinker: node-modules`). The main action doesn't need Yarn or a checkout.
 
-This action assumes that your project uses the `node-modules` linker (`nodeLinker: node-modules`). For monorepos, you will need to ensure that the file `node_modules/.yarn-state.yml` is present before this action is invoked. This file is generated automatically when installing dependencies. If you want to publish without dependencies present, you can instantiate an empty state file or restore one from a cache.
-
-This action depends upon the action `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. This action is authored by a Marketplace "verified creator". If your repository or organization restricts which actions can be used and does not allow Marketplace verified creators by default, ensure that this action is listed as an allowed action.
+The main action depends upon the action `slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844`. This action is authored by a Marketplace "verified creator". If your repository or organization restricts which actions can be used and does not allow Marketplace verified creators by default, ensure that this action is listed as an allowed action.
 
 ## Security
 
-Yarn runs code from the repository being published: plugins, `yarnPath` releases, and lifecycle scripts. To prevent that code from reading publishing credentials, the action first sanitises the checkout:
+Yarn runs code from the repository being published: plugins, `yarnPath` releases, and lifecycle scripts. The `pack` action runs without publishing credentials, and it first sanitises the checkout, so that code from the repository can't change what is packed:
 
 - Yarn is pointed to a minimal configuration file stored outside of the checkout, so `.yarnrc.yml` in the repository (including its plugins) is not loaded. The configuration sets `nodeLinker: node-modules` and disables scripts (`enableScripts: false`), telemetry, and environment file injection. Packages are always published to `https://registry.npmjs.org`, and custom registries are not supported.
 - `~/.yarnrc.yml` is removed.
-- `YARN_*` environment variables override the configuration file, so they are unset before Yarn runs. If you set a Yarn setting through an environment variable (e.g., `YARN_NPM_PUBLISH_REGISTRY`) in the job that runs this action, it has no effect on the publish.
-- The `prepublish`, `prepublishOnly`, `prepack`, and `postpack` scripts are removed from the `package.json` of every package that may be published. These scripts do not run, so any build step must happen before this action is invoked.
-- Publishing fails if a package sets `publishConfig.registry` to anything other than `https://registry.npmjs.org`.
+- `YARN_*` environment variables override the configuration file, so they are unset before Yarn runs. If you set a Yarn setting through an environment variable (e.g., `YARN_NPM_PUBLISH_REGISTRY`) in the job that runs the `pack` action, it has no effect.
+- The `prepublish`, `prepublishOnly`, `prepack`, and `postpack` scripts are removed from the `package.json` of every package that may be packed. These scripts do not run, so any build step must happen before the `pack` action is invoked.
+
+The main action doesn't run code from the repository at all: it validates each tarball (see [Publish packed tarballs](#publish-packed-tarballs)) and publishes it with `npm publish --ignore-scripts`.
 
 ## Usage
 
@@ -41,12 +40,12 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: MetaMask/action-npm-publish@v6
+      - uses: MetaMask/action-npm-publish@v8
         with:
           dry-run: false
 ```
 
-This uses `--provenance` and (by default) `--staged` for publishing.
+This uses `--provenance` and (by default) staged publishing. See [Publish packed tarballs](#publish-packed-tarballs) for the complete workflow, with the job that packs the packages.
 
 ### Initial publish
 
@@ -59,7 +58,7 @@ The `dry-run` input is required, and must be `true` or `false`. The action doesn
 In dry run mode, packages will be prepared for publishing but no publishing will actually occur. OIDC is not necessary, and packages that haven't been published before are allowed.
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v6
+- uses: MetaMask/action-npm-publish@v8
   with:
     dry-run: true
 ```
@@ -75,14 +74,14 @@ The base commit is the commit before the push (`github.event.before`), so a push
 Because the selection only looks at the commits in the push, packages from a release that failed to publish aren't included in the next release. Re-run the failed workflow instead, which publishes the same tarballs.
 
 ```yaml
-- uses: MetaMask/action-npm-publish/pack@v7
+- uses: MetaMask/action-npm-publish/pack@v8
   id: pack
 ```
 
 To pack specific packages instead, set `locations`:
 
 ```yaml
-- uses: MetaMask/action-npm-publish/pack@v7
+- uses: MetaMask/action-npm-publish/pack@v8
   id: pack
   with:
     artifact-name: my-tarballs
@@ -106,7 +105,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: yarn install --immutable && yarn build
-      - uses: MetaMask/action-npm-publish/pack@v7
+      - uses: MetaMask/action-npm-publish/pack@v8
         id: pack
 
   publish:
@@ -117,13 +116,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: MetaMask/action-npm-publish@v7
+      - uses: MetaMask/action-npm-publish@v8
         with:
           dry-run: false
-          use-pack: true
 ```
 
-With `use-pack`, the action downloads the artifact (named by `artifact-name`, `npm-tarballs` by default, as in the pack action) and publishes the tarballs in it, as they are, with `npm publish --ignore-scripts`. It fails if the artifact doesn't exist, and doesn't fall back to packing the checkout. Without `use-pack`, the action packs and publishes the packages in the checkout, as before.
+The action downloads the artifact (named by `artifact-name`, `npm-tarballs` by default, as in the pack action) and publishes the tarballs in it, as they are, with `npm publish --ignore-scripts`. It fails if the artifact doesn't exist.
 
 Because the tarballs come from another job, the action only publishes a tarball that:
 
@@ -142,7 +140,7 @@ You can optionally send deployment announcements to Slack by providing a `slack-
 The absolute minimum configuration for this is:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v6
+- uses: MetaMask/action-npm-publish@v8
   with:
     dry-run: false
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -158,7 +156,7 @@ We've added the ability to customize the message posted in Slack and those optio
 example:
 
 ```yaml
-- uses: MetaMask/action-npm-publish@v6
+- uses: MetaMask/action-npm-publish@v8
   with:
     slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
     icon-url: https://ricky.codes/me.jpg
@@ -184,9 +182,7 @@ You can read more about these option in the [API](#API) section below
 
 - **`staged-publish`** _(optional)_. Whether to use staged publishing when publishing via OIDC. Defaults to `true`. If set to `false`, the action will publish directly to NPM without a staging step.
 
-- **`use-pack`** _(optional)_. Whether to publish the tarballs packed by the [`pack` action](#pack-packages) in an earlier job, instead of packing the packages in the checkout. Defaults to `false`. See [Publish packed tarballs](#publish-packed-tarballs).
-
-- **`artifact-name`** _(optional)_. The name of the artifact that contains the tarballs packed by the `pack` action. Only used if `use-pack` is `true`. Defaults to `npm-tarballs`.
+- **`artifact-name`** _(optional)_. The name of the artifact that contains the tarballs packed by the [`pack` action](#pack-packages). Defaults to `npm-tarballs`.
 
 - **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to a Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration.
 
