@@ -72,19 +72,32 @@ If neither a token nor OIDC is available, `dry-run` will default to `true`, othe
 
 ### Pack packages
 
-The `pack` action packs packages into tarballs with `yarn pack`, without running code from the repository. It sanitises the Yarn configuration (see [Security](#security)), removes lifecycle scripts, and packs all public workspaces, or only the ones listed in `locations`. It's meant for workflows that build packages in one job and publish the tarballs in another.
+The `pack` action packs packages into tarballs with `yarn pack`, without running code from the repository. It sanitises the Yarn configuration (see [Security](#security)), removes lifecycle scripts, and packs the packages to release. It's meant for workflows that build packages in one job and publish the tarballs in another, so it also uploads the tarballs as an artifact.
+
+By default, the packages to release are the ones whose `version` in the current commit differs from the version in a base commit, including new packages. Private packages and packages with version `0.0.0` are skipped. This selects from the Git history instead of from what is published on npm, so a release doesn't include packages that an earlier release commit already released.
+
+The base commit is the commit before the push (`github.event.before`), so a push of several commits selects every package that was bumped in any of them. If that isn't available, which is the case for the first push of a branch and for events other than a push, the parent of the current commit is used instead. Set `base` to use another commit. The action fetches the base commit if needed, authenticating with the `token` input (the token of the workflow by default, which needs the `contents: read` permission), and fails if it can't. The token is only used for that fetch, and not when packing. It never falls back to packing all packages.
+
+Because the selection only looks at the commits in the push, packages from a release that failed to publish aren't included in the next release. Re-run the failed workflow instead, which publishes the same tarballs.
+
+```yaml
+- uses: MetaMask/action-npm-publish/pack@v7
+  id: pack
+```
+
+To pack specific packages instead, set `locations`:
 
 ```yaml
 - uses: MetaMask/action-npm-publish/pack@v7
   id: pack
   with:
-    output-directory: ${{ runner.temp }}/tarballs
+    artifact-name: my-tarballs
     locations: |
       packages/foo
       packages/bar
 ```
 
-The `directory` output is the absolute path of the directory containing the tarballs, which are named `<name>-<version>.tgz`.
+If no packages are selected, the action succeeds without packing or uploading anything, and `has-packages` is `false`. Use it to skip later steps and jobs. The tarballs are named `<name>-<version>.tgz`. Artifact names must be unique within a workflow run, so set `artifact-name` if you run the action more than once, or set it to an empty string to skip uploading.
 
 ### Slack announce
 
@@ -124,7 +137,9 @@ You can read more about these option in the [API](#API) section below
 
 ## API
 
-### Inputs
+### Main action
+
+#### Inputs
 
 - **`npm-token`** _(optional)_. The auth token for the NPM registry. Only used for the initial publish of a package that has not been published before, to allow OIDC to be set up for all subsequent publishes. If omitted, the action will attempt to use OIDC. If neither a token nor OIDC is available, the action will perform a dry run.
 
@@ -134,15 +149,33 @@ You can read more about these option in the [API](#API) section below
 
 - **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to a Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration.
 
-#### The following inputs only apply if `slack-webhook-url` is set...
+##### The following inputs only apply if `slack-webhook-url` is set...
 
 - **`icon-url`** _(optional)_. Url to the avatar used for the bot in Slack. If not set this defaults to the avatar in this repository.
 - **`username`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
 - **`subteam`** _(optional)_. Use this if you want to ping a subteam of individuals on Slack using `@`.
 - **`channel`** _(optional)_. Use this if you want to post to a channel other than the default: `metamask-dev`.
 
-### Pack action inputs and outputs
+### Pack sub-action
+
+The `MetaMask/action-npm-publish/pack` action. See [Pack packages](#pack-packages) for how it works.
+
+#### Inputs
+
+- **`locations`** _(optional)_. The locations of the packages to pack, one per line. Use `.` for a polyrepo. Defaults to the packages whose version changed compared to the base commit.
+
+- **`base`** _(optional)_. The commit to compare the current commit to, to select the packages to pack. Only used if `locations` is not set. Defaults to `github.event.before`, or the parent of the current commit if that isn't available. The commit is fetched if needed.
+
+- **`token`** _(optional)_. The token used to fetch the base commit if it isn't available, which is needed for private repositories. Only used to select packages. Requires the `contents: read` permission. Defaults to the token of the workflow.
 
 - **`output-directory`** _(optional)_. The directory to write the tarballs to. Defaults to a `tarballs` directory in the runner temporary directory.
-- **`locations`** _(optional)_. The locations of the packages to pack, one per line. Defaults to all public workspaces.
-- **`directory`** _(output)_. The absolute path of the directory containing the tarballs.
+
+- **`artifact-name`** _(optional)_. The name of the artifact to upload the tarballs to. Defaults to `npm-tarballs`. Set to an empty string to skip uploading.
+
+- **`retention-days`** _(optional)_. The number of days to retain the artifact. Defaults to `4`.
+
+#### Outputs
+
+- **`has-packages`**. Whether there were any packages to pack (`true` or `false`).
+
+- **`locations`**. The locations of the packed packages, one per line.

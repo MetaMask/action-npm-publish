@@ -2,11 +2,11 @@
 
 # Packs packages into tarballs with `yarn pack`.
 #
-# Usage: pack.sh <output-directory> [location...]
+# Usage: pack.sh <output-directory> <location>...
 #
-# Without locations, every public workspace is packed (in a polyrepo, the root
-# is the only workspace). Tarballs are named `<name>-<version>.tgz`, where the
-# `/` in scoped package names is replaced with `-`.
+# At least one location is required, and each is the directory of a package
+# (`.` for a polyrepo). Tarballs are named `<name>-<version>.tgz`, where the `/`
+# in scoped package names is replaced with `-`.
 #
 # Lifecycle scripts that run when packing or publishing are removed from each
 # manifest before packing. Run `sanitize.sh` before this script, so that Yarn
@@ -25,7 +25,7 @@ script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 source "$script_path/environment.sh"
 
 if [[ $# -lt 1 || -z "$1" ]]; then
-  echo "::error::Usage: pack.sh <output-directory> [location...]" >&2
+  echo "::error::Usage: pack.sh <output-directory> <location>..." >&2
   exit 1
 fi
 
@@ -34,20 +34,10 @@ shift
 
 locations=("$@")
 
+# An empty list is an error rather than "all packages", so that a failed
+# selection can't result in packing everything.
 if [[ ${#locations[@]} -eq 0 ]]; then
-  # The output is captured in a variable first, because the exit status of a
-  # process substitution is ignored, so a failing `yarn` would go unnoticed.
-  workspaces="$(yarn workspaces list --json --no-private)"
-  workspace_locations="$(jq --raw-output '.location' <<< "$workspaces")"
-
-  # `mapfile` turns empty input into an array with one empty element.
-  if [[ -n "$workspace_locations" ]]; then
-    mapfile -t locations <<< "$workspace_locations"
-  fi
-fi
-
-if [[ ${#locations[@]} -eq 0 ]]; then
-  echo "::error::No packages found to pack."
+  echo "::error::No package locations provided."
   exit 1
 fi
 

@@ -260,6 +260,178 @@ jobs:
           tar -O -zxf "$tarball" package/package.json \
             | jq --exit-status '.scripts | (has("prepublish") or has("prepack") or has("postpack")) | not'
 
+  test-pack-select:
+    name: Test pack action package selection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Create base commit
+        run: |
+          corepack enable
+
+          git init --quiet
+          git config user.name test
+          git config user.email test@example.com
+
+          cat > package.json <<'EOF'
+          {
+            "name": "select-test",
+            "private": true,
+            "version": "0.0.0",
+            "workspaces": ["packages/*"],
+            "packageManager": "yarn@4.16.0+sha256.ba05224324578801b9cc98170d64aa50b9a36733b440fb0942306da3fbbdc7d1"
+          }
+          EOF
+          echo "nodeLinker: node-modules" > .yarnrc.yml
+          echo "node_modules" > .gitignore
+
+          for name in a b c; do
+            mkdir -p "packages/$name"
+            version="1.0.0"
+            if [[ "$name" == "c" ]]; then
+              version="0.0.0"
+            fi
+            echo "{ \"name\": \"@select-test/$name\", \"version\": \"$version\" }" > "packages/$name/package.json"
+          done
+
+          yarn install --no-immutable
+
+          git add .gitignore .yarnrc.yml package.json yarn.lock packages
+          git commit --quiet --message "Base"
+      - name: Create release commit
+        id: release-commit
+        run: |
+          # `a` is bumped, `d` is new, `b` changes without a version bump, `c`
+          # stays at `0.0.0`, and `e` is new at `0.0.0`.
+          echo '{ "name": "@select-test/a", "version": "1.1.0" }' > packages/a/package.json
+          echo '{ "name": "@select-test/b", "version": "1.0.0", "description": "Changed" }' > packages/b/package.json
+
+          mkdir -p packages/d packages/e
+          echo '{ "name": "@select-test/d", "version": "1.0.0" }' > packages/d/package.json
+          echo '{ "name": "@select-test/e", "version": "0.0.0" }' > packages/e/package.json
+
+          git add packages
+          git commit --quiet --message "Release"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Pack the selected packages
+        id: release
+        uses: ./action-npm-publish/pack
+        with:
+          base: HEAD^
+          artifact-name: ''
+      - name: Check the release
+        env:
+          HAS_PACKAGES: ${{ steps.release.outputs.has-packages }}
+          LOCATIONS: ${{ steps.release.outputs.locations }}
+          DIRECTORY: ${{ runner.temp }}/tarballs
+        run: |
+          failed=0
+
+          if [[ "$HAS_PACKAGES" != "true" ]]; then
+            echo "::error::Expected packages, got has-packages=${HAS_PACKAGES}."
+            failed=1
+          fi
+
+          if [[ "$LOCATIONS" != $'packages/a\npackages/d' ]]; then
+            echo "::error::Unexpected locations: ${LOCATIONS}"
+            failed=1
+          fi
+
+          mapfile -t tarballs < <(ls "$DIRECTORY")
+          if [[ "${tarballs[*]}" != "@select-test-a-1.1.0.tgz @select-test-d-1.0.0.tgz" ]]; then
+            echo "::error::Unexpected tarballs: ${tarballs[*]}"
+            failed=1
+          fi
+
+          exit "$failed"
+      - name: Create commit without version changes
+        run: |
+          echo '{ "name": "@select-test/b", "version": "1.0.0", "description": "Changed again" }' > packages/b/package.json
+          git add packages
+          git commit --quiet --message "Change without release"
+      - name: Pack with nothing to release
+        id: no-release
+        uses: ./action-npm-publish/pack
+        with:
+          base: HEAD^
+          artifact-name: ''
+          output-directory: ${{ runner.temp }}/none
+      - name: Check that nothing was packed
+        env:
+          HAS_PACKAGES: ${{ steps.no-release.outputs.has-packages }}
+          LOCATIONS: ${{ steps.no-release.outputs.locations }}
+        run: |
+          if [[ "$HAS_PACKAGES" != "false" || -n "$LOCATIONS" || -e "$RUNNER_TEMP/none" ]]; then
+            echo "::error::Expected nothing to be packed (has-packages=${HAS_PACKAGES}, locations=${LOCATIONS})."
+            exit 1
+          fi
+      - name: Create two commits, of which only the first bumps a version
+        run: |
+          echo '{ "name": "@select-test/b", "version": "1.1.0" }' > packages/b/package.json
+          git add packages
+          git commit --quiet --message "Release b"
+
+          echo '{ "name": "@select-test/a", "version": "1.1.0", "description": "Changed" }' > packages/a/package.json
+          git add packages
+          git commit --quiet --message "Change a without release"
+      - name: Pack from the parent commit
+        id: parent
+        uses: ./action-npm-publish/pack
+        with:
+          base: HEAD^
+          artifact-name: ''
+          output-directory: ${{ runner.temp }}/parent
+      - name: Pack from an explicit base
+        id: explicit-base
+        uses: ./action-npm-publish/pack
+        with:
+          base: ${{ steps.release-commit.outputs.sha }}
+          artifact-name: ''
+          output-directory: ${{ runner.temp }}/explicit-base
+      - name: Pack with an all-zeros base
+        id: zeros
+        uses: ./action-npm-publish/pack
+        with:
+          base: '0000000000000000000000000000000000000000'
+          artifact-name: ''
+          output-directory: ${{ runner.temp }}/zeros
+      - name: Check the bases
+        env:
+          PARENT: ${{ steps.parent.outputs.has-packages }}
+          EXPLICIT_BASE: ${{ steps.explicit-base.outputs.has-packages }}
+          EXPLICIT_BASE_LOCATIONS: ${{ steps.explicit-base.outputs.locations }}
+          ZEROS: ${{ steps.zeros.outputs.has-packages }}
+        run: |
+          failed=0
+
+          # `HEAD^` only sees the last commit, which doesn't bump a version.
+          if [[ "$PARENT" != "false" ]]; then
+            echo "::error::Expected no packages from the parent commit, got has-packages=${PARENT}."
+            failed=1
+          fi
+
+          # An all-zeros base falls back to `HEAD^`.
+          if [[ "$ZEROS" != "false" ]]; then
+            echo "::error::Expected no packages from an all-zeros base, got has-packages=${ZEROS}."
+            failed=1
+          fi
+
+          # The release commit as base sees the bump of `b` in the commit before
+          # the last one.
+          if [[ "$EXPLICIT_BASE" != "true" || "$EXPLICIT_BASE_LOCATIONS" != "packages/b" ]]; then
+            echo "::error::Expected packages/b from the explicit base, got ${EXPLICIT_BASE_LOCATIONS}."
+            failed=1
+          fi
+
+          exit "$failed"
+
   test-pack:
     name: Test pack action
     runs-on: ubuntu-latest
@@ -313,18 +485,36 @@ jobs:
       - name: Pack all packages
         id: pack-all
         uses: ./action-npm-publish/pack
+        with:
+          artifact-name: pack-test-all
+          locations: |
+            packages/first
+            packages/second
       - name: Pack a selected package
         id: pack-selected
         uses: ./action-npm-publish/pack
         with:
           output-directory: ${{ runner.temp }}/selected
           locations: packages/second
+          artifact-name: ''
+      - name: Download the uploaded tarballs
+        uses: actions/download-artifact@v8
+        with:
+          name: pack-test-all
+          path: ${{ runner.temp }}/downloaded
       - name: Check the tarballs
         env:
-          ALL_DIRECTORY: ${{ steps.pack-all.outputs.directory }}
-          SELECTED_DIRECTORY: ${{ steps.pack-selected.outputs.directory }}
+          ALL_DIRECTORY: ${{ runner.temp }}/tarballs
+          SELECTED_DIRECTORY: ${{ runner.temp }}/selected
+          DOWNLOADED_DIRECTORY: ${{ runner.temp }}/downloaded
         run: |
           failed=0
+
+          mapfile -t downloaded < <(ls "$DOWNLOADED_DIRECTORY")
+          if [[ "${downloaded[*]}" != "@pack-test-first-1.2.3.tgz @pack-test-second-1.2.3.tgz" ]]; then
+            echo "::error::Unexpected downloaded tarballs: ${downloaded[*]}"
+            failed=1
+          fi
 
           mapfile -t all < <(ls "$ALL_DIRECTORY")
           if [[ "${all[*]}" != "@pack-test-first-1.2.3.tgz @pack-test-second-1.2.3.tgz" ]]; then
