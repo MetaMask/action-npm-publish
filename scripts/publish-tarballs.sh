@@ -180,13 +180,6 @@ else
   echo "Notice: No packages need publishing."
 fi
 
-# npm reads the token from this file, so it's never passed on the command line.
-# `${NODE_AUTH_TOKEN}` is expanded by npm, and not by the shell.
-npmrc="$(mktemp)"
-trap 'rm -f "$npmrc"' EXIT
-# shellcheck disable=SC2016
-echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' > "$npmrc"
-
 for tarball in "${pending_tarballs[@]}"; do
   name="$(read_manifest "$tarball" '.name')"
   version="$(read_manifest "$tarball" '.version')"
@@ -203,10 +196,10 @@ for tarball in "${pending_tarballs[@]}"; do
   # Determine how to publish. `DRY_RUN` is `true` or `false`, which is
   # validated before this script runs:
   # 1. If `DRY_RUN` is `true`, perform a dry run.
-  # 2. If the package has not been published before, use the provided token for
-  #    the initial publish. Abort with an error if there is no token.
-  # 3. If the package has already been published, use OIDC to publish. Abort
-  #    with an error if OIDC is not available.
+  # 2. If the package has not been published before, abort with an error. OIDC
+  #    can only be configured for a package that exists on npm.
+  # 3. If OIDC is not available, abort with an error. Otherwise, use OIDC to
+  #    publish.
   if [[ "$DRY_RUN" = "true" ]]; then
     echo "Notice: Performing a dry run for ${name}@${version}."
     report_package "$tarball" "$name" "$version"
@@ -214,46 +207,31 @@ for tarball in "${pending_tarballs[@]}"; do
   fi
 
   if [[ -z "$published_version" ]]; then
-    if [[ -z "$NPM_TOKEN" ]]; then
-      echo "::error::'npm-token' not provided for initial publish of ${name}."
-      exit 1
-    fi
-
-    echo "Notice: ${name} not yet published. Using npm token for initial publish."
-    method="token"
-  else
-    if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
-      echo "::error::OIDC is not available to publish ${name}."
-      exit 1
-    fi
-
-    echo "Notice: Initial package version of ${name} already published. Using OIDC to publish."
-    method="oidc"
+    echo "::error::${name} has not been published before. Publish it once manually, and configure OIDC for it."
+    exit 1
   fi
 
+  if [[ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]]; then
+    echo "::error::OIDC is not available to publish ${name}."
+    exit 1
+  fi
+
+  echo "Notice: Using OIDC to publish ${name}."
   echo "::group::Publishing ${name}@${version}"
 
-  if [[ "$method" = "token" ]]; then
-    (
-      cd /tmp
-      NODE_AUTH_TOKEN="$NPM_TOKEN" npm_config_userconfig="$npmrc" \
-        npm publish "$tarball" --tag "$PUBLISH_NPM_TAG" --ignore-scripts --registry "$registry"
-    )
-  else
-    flags=(--tag "$PUBLISH_NPM_TAG" --ignore-scripts --registry "$registry")
-    [[ "$PROVENANCE" = "true" && "$REPOSITORY_VISIBILITY" = "public" ]] && flags+=(--provenance)
+  flags=(--tag "$PUBLISH_NPM_TAG" --ignore-scripts --registry "$registry")
+  [[ "$PROVENANCE" = "true" && "$REPOSITORY_VISIBILITY" = "public" ]] && flags+=(--provenance)
 
-    subcommand=(publish)
-    [[ "$STAGED_PUBLISH" = "true" ]] && subcommand=(stage publish)
+  subcommand=(publish)
+  [[ "$STAGED_PUBLISH" = "true" ]] && subcommand=(stage publish)
 
-    # Unset the auth token and use an empty user configuration, because a token
-    # can interfere with OIDC publishing (see #123).
-    (
-      cd /tmp
-      env -u NODE_AUTH_TOKEN -u NPM_TOKEN npm_config_userconfig=/dev/null \
-        npm "${subcommand[@]}" "$tarball" "${flags[@]}"
-    )
-  fi
+  # Unset the auth token and use an empty user configuration, because a token
+  # can interfere with OIDC publishing (see #123).
+  (
+    cd /tmp
+    env -u NODE_AUTH_TOKEN npm_config_userconfig=/dev/null \
+      npm "${subcommand[@]}" "$tarball" "${flags[@]}"
+  )
 
   echo "::endgroup::"
 done

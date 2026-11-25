@@ -33,7 +33,7 @@ If you're in a hurry, take a look at the [`publish-release` workflow](https://gi
 
 ### Publish with OIDC
 
-After the initial publish, OIDC is the only supported authentication method. Grant the job `id-token: write` permission and no `npm-token` is needed:
+OIDC is the only supported authentication method. Grant the job `id-token: write` permission, and configure each package on npm to trust the workflow:
 
 ```yaml
 jobs:
@@ -48,24 +48,15 @@ jobs:
 
 This uses `--provenance` and (by default) `--staged` for publishing.
 
-### Initial publish with token
+### Initial publish
 
-NPM requires a package to exist on the registry before OIDC can be configured for it, so the very first publish must use a token:
-
-```yaml
-- uses: MetaMask/action-npm-publish@v6
-  with:
-    dry-run: false
-    npm-token: ${{ secrets.NPM_TOKEN }}
-```
-
-Once the package has been published at least once, the token is ignored and OIDC is used exclusively for all subsequent publishes.
+NPM requires a package to exist on the registry before OIDC can be configured for it. The action doesn't support tokens, so it can't do the very first publish: it fails if a package hasn't been published before and `dry-run` is `false`. Publish the package once yourself, configure OIDC for it, and use the action from then on.
 
 ### Dry run mode
 
-The `dry-run` input is required, and must be `true` or `false`. The action doesn't decide it for you, so a missing token or OIDC permission fails the publish instead of silently turning it into a dry run.
+The `dry-run` input is required, and must be `true` or `false`. The action doesn't decide it for you, so a missing OIDC permission fails the publish instead of silently turning it into a dry run.
 
-In dry run mode, packages will be prepared for publishing but no publishing will actually occur. No token or OIDC is necessary.
+In dry run mode, packages will be prepared for publishing but no publishing will actually occur. OIDC is not necessary, and packages that haven't been published before are allowed.
 
 ```yaml
 - uses: MetaMask/action-npm-publish@v6
@@ -188,8 +179,6 @@ You can read more about these option in the [API](#API) section below
 #### Inputs
 
 - **`dry-run`** _(required)_. Whether to do a dry run, which prepares the packages for publishing but does not publish them. Must be `true` or `false`.
-
-- **`npm-token`** _(optional)_. The auth token for the NPM registry. Only used for the initial publish of a package that has not been published before, to allow OIDC to be set up for all subsequent publishes. If omitted, the action uses OIDC. If `dry-run` is `false` and the credentials needed to publish are missing, the action fails.
 
 - **`npm-tag`** _(optional)_. The npm tag to publish to. Defaults to `latest`.
 
