@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `MetaMask/action-npm-publish/pack` action to pack packages into tarballs ([#143](https://github.com/MetaMask/action-npm-publish/pull/143))
+  - The action sanitises the Yarn configuration, removes lifecycle scripts, and runs `yarn pack` for all public workspaces, or for the packages in the `locations` input.
+
 ## [7.0.0]
 
 ### Added

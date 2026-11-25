@@ -259,3 +259,96 @@ jobs:
           test -f "$tarball"
           tar -O -zxf "$tarball" package/package.json \
             | jq --exit-status '.scripts | (has("prepublish") or has("prepack") or has("postpack")) | not'
+
+  test-pack:
+    name: Test pack action
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Create project
+        run: |
+          mkdir -p /tmp/canary
+
+          cat > package.json <<'EOF'
+          {
+            "name": "pack-test",
+            "private": true,
+            "version": "0.0.0",
+            "workspaces": ["packages/*"],
+            "packageManager": "yarn@4.16.0+sha256.ba05224324578801b9cc98170d64aa50b9a36733b440fb0942306da3fbbdc7d1"
+          }
+          EOF
+
+          echo "nodeLinker: node-modules" > .yarnrc.yml
+
+          for name in first second; do
+            mkdir -p "packages/$name"
+            cat > "packages/$name/package.json" <<EOF
+          {
+            "name": "@pack-test/$name",
+            "version": "1.2.3",
+            "scripts": {
+              "prepare": "touch /tmp/canary/$name-prepare",
+              "prepack": "touch /tmp/canary/$name-prepack",
+              "postpack": "touch /tmp/canary/$name-postpack",
+              "test": "echo test"
+            }
+          }
+          EOF
+          done
+
+          mkdir -p packages/private
+          echo '{ "name": "@pack-test/private", "private": true, "version": "1.0.0" }' > packages/private/package.json
+      - name: Install dependencies
+        run: |
+          corepack enable
+          yarn install --no-immutable
+      - name: Pack all packages
+        id: pack-all
+        uses: ./action-npm-publish/pack
+      - name: Pack a selected package
+        id: pack-selected
+        uses: ./action-npm-publish/pack
+        with:
+          output-directory: ${{ runner.temp }}/selected
+          locations: packages/second
+      - name: Check the tarballs
+        env:
+          ALL_DIRECTORY: ${{ steps.pack-all.outputs.directory }}
+          SELECTED_DIRECTORY: ${{ steps.pack-selected.outputs.directory }}
+        run: |
+          failed=0
+
+          mapfile -t all < <(ls "$ALL_DIRECTORY")
+          if [[ "${all[*]}" != "@pack-test-first-1.2.3.tgz @pack-test-second-1.2.3.tgz" ]]; then
+            echo "::error::Unexpected tarballs: ${all[*]}."
+            failed=1
+          fi
+
+          mapfile -t selected < <(ls "$SELECTED_DIRECTORY")
+          if [[ "${selected[*]}" != "@pack-test-second-1.2.3.tgz" ]]; then
+            echo "::error::Unexpected selected tarballs: ${selected[*]}."
+            failed=1
+          fi
+
+          for tarball in "$ALL_DIRECTORY"/*.tgz; do
+            if ! tar -O -zxf "$tarball" package/package.json \
+              | jq --exit-status '.scripts | keys == ["test"]' > /dev/null; then
+              echo "::error::${tarball} contains lifecycle scripts."
+              failed=1
+            fi
+          done
+
+          if compgen -G "/tmp/canary/*" > /dev/null; then
+            echo "::error::Lifecycle scripts ran while packing."
+            failed=1
+          fi
+
+          exit "$failed"

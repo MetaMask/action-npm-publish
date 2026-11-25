@@ -70,6 +70,22 @@ In dry run mode, packages will be prepared for publishing but no publishing will
 
 If neither a token nor OIDC is available, `dry-run` will default to `true`, otherwise it defaults to `false`.
 
+### Pack packages
+
+The `pack` action packs packages into tarballs with `yarn pack`, without running code from the repository. It sanitises the Yarn configuration (see [Security](#security)), removes lifecycle scripts, and packs all public workspaces, or only the ones listed in `locations`. It's meant for workflows that build packages in one job and publish the tarballs in another.
+
+```yaml
+- uses: MetaMask/action-npm-publish/pack@v7
+  id: pack
+  with:
+    output-directory: ${{ runner.temp }}/tarballs
+    locations: |
+      packages/foo
+      packages/bar
+```
+
+The `directory` output is the absolute path of the directory containing the tarballs, which are named `<name>-<version>.tgz`.
+
 ### Slack announce
 
 You can optionally send deployment announcements to Slack by providing a `slack-webhook-url` input:
@@ -124,3 +140,9 @@ You can read more about these option in the [API](#API) section below
 - **`username`** _(optional)_. The name of the bot as it appears on Slack. If not set this defaults to `MetaMask bot`.
 - **`subteam`** _(optional)_. Use this if you want to ping a subteam of individuals on Slack using `@`.
 - **`channel`** _(optional)_. Use this if you want to post to a channel other than the default: `metamask-dev`.
+
+### Pack action inputs and outputs
+
+- **`output-directory`** _(optional)_. The directory to write the tarballs to. Defaults to a `tarballs` directory in the runner temporary directory.
+- **`locations`** _(optional)_. The locations of the packages to pack, one per line. Defaults to all public workspaces.
+- **`directory`** _(output)_. The absolute path of the directory containing the tarballs.

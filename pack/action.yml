@@ -1,0 +1,40 @@
+name: 'Pack packages'
+description: 'Pack packages into tarballs with `yarn pack`, without running code from the repository.'
+
+inputs:
+  output-directory:
+    description: 'The directory to write the tarballs to. Defaults to a "tarballs" directory in the runner temporary directory.'
+    required: false
+  locations:
+    description: 'The locations of the packages to pack, one per line. Defaults to all public workspaces.'
+    required: false
+outputs:
+  directory:
+    description: 'The absolute path of the directory containing the tarballs.'
+    value: ${{ steps.pack.outputs.directory }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Sanitize Yarn configuration
+      shell: bash
+      run: ${{ github.action_path }}/../scripts/sanitize.sh
+      env:
+        YARN_IGNORE_PATH: '1'
+    - name: Pack packages
+      id: pack
+      shell: bash
+      run: |
+        locations=()
+        if [[ -n "$LOCATIONS" ]]; then
+          mapfile -t locations <<< "$LOCATIONS"
+        fi
+
+        "${ACTION_PATH}/../scripts/pack.sh" "$OUTPUT_DIRECTORY" "${locations[@]}"
+
+        echo "directory=$(cd "$OUTPUT_DIRECTORY" && pwd -P)" >> "$GITHUB_OUTPUT"
+      env:
+        YARN_IGNORE_PATH: '1'
+        ACTION_PATH: ${{ github.action_path }}
+        OUTPUT_DIRECTORY: ${{ inputs.output-directory || format('{0}/tarballs', runner.temp) }}
+        LOCATIONS: ${{ inputs.locations }}
