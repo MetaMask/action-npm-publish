@@ -136,9 +136,9 @@ Because the tarballs come from another job, the action only publishes a tarball 
 - Contains exactly one `package/package.json`, with a name and a version, which isn't private.
 - Only sets `access` and `registry` in `publishConfig`, and `registry` is `https://registry.npmjs.org`.
 
-In a dry run, nothing is published. Instead, the log and the job summary show the checksum and the list of files in each tarball, and the summary links to the report with the diffs against the latest published versions, so you can look for files that shouldn't be published before approving the release.
+The job summary starts with the release details: a link to the pull request, if there is one, and the packages that are released. In a dry run, nothing is published. Instead, the log and the job summary show the checksum and the list of files in each tarball, and the summary links to the report with the diffs against the latest published versions, so you can look for files that shouldn't be published before approving the release.
 
-A package whose version is already published, for example because a failed job is re-run, is skipped. The Slack message reads the name and version from the `package.json` in the root of the repository, at the commit being released, using the GitHub API.
+A package whose version is already published, for example because a failed job is re-run, is skipped. The Slack message reads the name and version from the `package.json` in the root of the repository, at the commit being released, using the GitHub API, and its "review deployment" link goes to the job summary with the packages and their files.
 
 ### Slack announce
 
