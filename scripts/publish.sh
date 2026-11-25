@@ -7,6 +7,8 @@ if [ "$RUNNER_DEBUG" = "1" ]; then
   set -x
 fi
 
+script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
 check_requirements() {
   CURRENT_PACKAGE_VERSION=$(jq --raw-output .version package.json)
   if [[ "$CURRENT_PACKAGE_VERSION" = "0.0.0" ]]; then
@@ -97,22 +99,7 @@ report() {
   local slug="${PACKAGE_NAME//\//-}"
   local tarball="/tmp/$slug-$CURRENT_PACKAGE_VERSION.tgz"
 
-  local checksum integrity
-  checksum=$(shasum -a 1 "$tarball" | cut -d' ' -f1)
-  integrity="sha512-$(openssl dgst -sha512 -binary "$tarball" | openssl base64 -A)"
-
-  echo "Checksum: $checksum"
-  echo "Integrity: $integrity"
-
-  if [[ -n "$GITHUB_STEP_SUMMARY" ]]; then
-    {
-      echo "### $PACKAGE_NAME"
-      echo
-      echo "- Checksum: \`$checksum\`"
-      echo "- Integrity: \`$integrity\`"
-      echo
-    } >> "$GITHUB_STEP_SUMMARY"
-  fi
+  "$script_path/checksum.sh" "$tarball" "$PACKAGE_NAME"
 }
 
 main() {

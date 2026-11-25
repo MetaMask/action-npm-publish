@@ -99,6 +99,47 @@ To pack specific packages instead, set `locations`:
 
 If no packages are selected, the action succeeds without packing or uploading anything, and `has-packages` is `false`. Use it to skip later steps and jobs. The tarballs are named `<name>-<version>.tgz`. Set `artifact-name` to an empty string to skip uploading.
 
+### Publish packed tarballs
+
+To keep credentials away from the build, pack the packages in one job, and publish the tarballs in another. The publish job needs no checkout and no Yarn:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      has-packages: ${{ steps.pack.outputs.has-packages }}
+    steps:
+      - uses: actions/checkout@v6
+      - run: yarn install --immutable && yarn build
+      - uses: MetaMask/action-npm-publish/pack@v7
+        id: pack
+
+  publish:
+    needs: build
+    if: needs.build.outputs.has-packages == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: MetaMask/action-npm-publish@v7
+        with:
+          use-pack: true
+```
+
+With `use-pack`, the action downloads the artifact (named by `artifact-name`, `npm-tarballs` by default, as in the pack action) and publishes the tarballs in it, as they are, with `npm publish --ignore-scripts`. It fails if the artifact doesn't exist, and doesn't fall back to packing the checkout. Without `use-pack`, the action packs and publishes the packages in the checkout, as before.
+
+Because the tarballs come from another job, the action only publishes a tarball that:
+
+- Is a valid tarball, which only contains files in a `package/` directory.
+- Contains exactly one `package/package.json`, with a name and a version, which isn't private.
+- Only sets `access` and `registry` in `publishConfig`, and `registry` is `https://registry.npmjs.org`.
+
+In a dry run, nothing is published. Instead, the log and the job summary show the checksum and the list of files in each tarball, and the summary links to the report with the diffs against the latest published versions, so you can look for files that shouldn't be published before approving the release.
+
+A package whose version is already published, for example because a failed job is re-run, is skipped. The Slack message reads the name and version from the `package.json` in the root of the repository, at the commit being released, using the GitHub API.
+
 ### Slack announce
 
 You can optionally send deployment announcements to Slack by providing a `slack-webhook-url` input:
@@ -146,6 +187,10 @@ You can read more about these option in the [API](#API) section below
 - **`npm-tag`** _(optional)_. The npm tag to publish to. Defaults to `latest`.
 
 - **`staged-publish`** _(optional)_. Whether to use staged publishing when publishing via OIDC. Defaults to `true`. If set to `false`, the action will publish directly to NPM without a staging step.
+
+- **`use-pack`** _(optional)_. Whether to publish the tarballs packed by the [`pack` action](#pack-packages) in an earlier job, instead of packing the packages in the checkout. Defaults to `false`. See [Publish packed tarballs](#publish-packed-tarballs).
+
+- **`artifact-name`** _(optional)_. The name of the artifact that contains the tarballs packed by the `pack` action. Only used if `use-pack` is `true`. Defaults to `npm-tarballs`.
 
 - **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to a Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration.
 

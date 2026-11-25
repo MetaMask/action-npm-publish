@@ -12,10 +12,12 @@ script_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 # shellcheck source=scripts/environment.sh
 source "$script_path/environment.sh"
 
-IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$(yarn --version)"
-if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]]; then
-  echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $(yarn --version)."
-  exit 1
+if [[ "$USE_PACK" != "true" ]]; then
+  IFS='.' read -r YARN_MAJOR YARN_MINOR _ <<< "$(yarn --version)"
+  if [[ "$YARN_MAJOR" -lt 4 || ( "$YARN_MAJOR" -eq 4 && "$YARN_MINOR" -lt 16 ) ]]; then
+    echo "::error::Yarn version 4.16.0 or higher is required. Detected version: $(yarn --version)."
+    exit 1
+  fi
 fi
 
 if [[ -z "$PUBLISH_NPM_TAG" ]]; then
@@ -29,6 +31,12 @@ if [[ -n "$GITHUB_SHA" && -n "$GITHUB_REPOSITORY" ]]; then
   if [[ -n "$pr_url" ]]; then
     echo "Notice: Releasing via pull request: $pr_url"
   fi
+fi
+
+if [[ "$USE_PACK" = "true" ]]; then
+  echo "Notice: Publishing the tarballs packed by the pack action."
+  "$script_path/publish-tarballs.sh"
+  exit 0
 fi
 
 publish_monorepo() {

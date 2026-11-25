@@ -466,6 +466,7 @@ jobs:
           {
             "name": "@pack-test/$name",
             "version": "1.2.3",
+            "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
             "scripts": {
               "prepack": "touch /tmp/canary/$name-prepack",
               "postpack": "touch /tmp/canary/$name-postpack",
@@ -564,3 +565,91 @@ jobs:
             echo "::error::Unexpected downloaded tarballs: ${downloaded[*]}"
             exit 1
           fi
+
+  # There is no checkout of a project in this job, as in a job that publishes
+  # the tarballs. The action is only checked out to use it.
+  test-use-pack:
+    name: Test publishing packed tarballs
+    needs: test-pack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Dry run publish
+        uses: ./action-npm-publish
+        with:
+          use-pack: true
+          artifact-name: pack-test-all
+          dry-run: true
+      - name: Check that the tarballs were downloaded
+        run: |
+          mapfile -t tarballs < <(ls "$RUNNER_TEMP/npm-tarballs"/*.tgz)
+          if [[ ${#tarballs[@]} -ne 2 ]]; then
+            echo "::error::Expected two tarballs, got ${#tarballs[@]}."
+            exit 1
+          fi
+
+  test-use-pack-invalid-create:
+    name: Create invalid tarball (${{ matrix.case }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        case: [registry, publish-config, outside-path]
+    steps:
+      - name: Create the tarball
+        env:
+          CASE: ${{ matrix.case }}
+        run: |
+          mkdir -p tarballs build/package
+
+          manifest='{ "name": "@invalid-test/package", "version": "1.0.0" }'
+          paths=(package)
+
+          case "$CASE" in
+            registry)
+              manifest='{ "name": "@invalid-test/package", "version": "1.0.0", "publishConfig": { "registry": "https://registry.example.com/" } }'
+              ;;
+            publish-config)
+              manifest='{ "name": "@invalid-test/package", "version": "1.0.0", "publishConfig": { "access": "public", "@invalid-test:registry": "https://registry.example.com/" } }'
+              ;;
+            outside-path)
+              echo "outside" > build/outside.txt
+              paths=(package outside.txt)
+              ;;
+          esac
+
+          echo "$manifest" > build/package/package.json
+          tar -czf tarballs/invalid.tgz -C build "${paths[@]}"
+      - name: Upload the tarball
+        uses: actions/upload-artifact@v7
+        with:
+          name: invalid-${{ matrix.case }}
+          path: tarballs/invalid.tgz
+
+  test-use-pack-invalid:
+    name: Test rejecting an invalid tarball (${{ matrix.case }})
+    needs: test-use-pack-invalid-create
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        case: [registry, publish-config, outside-path]
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Dry run publish
+        id: publish
+        uses: ./action-npm-publish
+        continue-on-error: true
+        with:
+          use-pack: true
+          artifact-name: invalid-${{ matrix.case }}
+          dry-run: true
+      - name: Check that the tarball was rejected
+        if: steps.publish.outcome != 'failure'
+        run: |
+          echo "::error::Expected the action to reject the invalid tarball."
+          exit 1
