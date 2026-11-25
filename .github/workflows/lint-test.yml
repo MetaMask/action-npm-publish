@@ -219,8 +219,16 @@ jobs:
             "publishConfig": { "registry": "https://registry.npmjs.org/" },
             "scripts": {
               "prepublish": "touch /tmp/canary/prepublish",
+              "prepublishOnly": "touch /tmp/canary/prepublishOnly",
+              "publish": "touch /tmp/canary/publish",
+              "postpublish": "touch /tmp/canary/postpublish",
               "prepack": "touch /tmp/canary/prepack",
-              "postpack": "touch /tmp/canary/postpack"
+              "pack": "touch /tmp/canary/pack",
+              "postpack": "touch /tmp/canary/postpack",
+              "prepare": "touch /tmp/canary/prepare",
+              "preprepare": "touch /tmp/canary/preprepare",
+              "postprepare": "touch /tmp/canary/postprepare",
+              "test": "echo test"
             }
           }
           EOF
@@ -249,7 +257,7 @@ jobs:
       - name: Check that no canaries ran
         run: |
           failed=0
-          for marker in plugin yarnpath prepublish prepack postpack; do
+          for marker in plugin yarnpath prepublish prepublishOnly publish postpublish prepack pack postpack prepare preprepare postprepare; do
             if [[ -e "/tmp/canary/$marker" ]]; then
               echo "::error::Canary '$marker' ran during publish."
               failed=1
@@ -261,4 +269,4 @@ jobs:
           tarball=/tmp/sanitise-test-canary-999.0.0.tgz
           test -f "$tarball"
           tar -O -zxf "$tarball" package/package.json \
-            | jq --exit-status '.scripts | (has("prepublish") or has("prepack") or has("postpack")) | not'
+            | jq --exit-status '.scripts | keys == ["test"]'

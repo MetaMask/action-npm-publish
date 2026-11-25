@@ -61,7 +61,18 @@ while read -r location; do
     exit 1
   fi
 
-  sanitized=$(jq 'del(.scripts.prepublish, .scripts.prepublishOnly, .scripts.prepack, .scripts.postpack)' "$manifest")
+  sanitized=$(jq 'del(
+    .scripts.prepublish,
+    .scripts.prepublishOnly,
+    .scripts.publish,
+    .scripts.postpublish,
+    .scripts.prepack,
+    .scripts.pack,
+    .scripts.postpack,
+    .scripts.prepare,
+    .scripts.preprepare,
+    .scripts.postprepare
+  )' "$manifest")
   echo "$sanitized" > "$manifest"
 done <<< "$locations"
 
