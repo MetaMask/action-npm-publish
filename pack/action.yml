@@ -1,0 +1,93 @@
+name: 'Pack packages'
+description: 'Pack packages into tarballs with `yarn pack`, without running code from the repository.'
+
+inputs:
+  locations:
+    description: 'The locations of the packages to pack, one per line. Use "." for a polyrepo. Defaults to the packages whose version changed compared to the base commit (see "base"). The action fails if it cannot make that selection.'
+    required: false
+  base:
+    description: 'The commit to compare the current commit to, to select the packages to pack. Only used if "locations" is not set. Defaults to the commit before the push (`github.event.before`), or the parent of the current commit if that is not available.'
+    required: false
+  token:
+    description: 'The token used to fetch the base commit if it is not available, which is needed for private repositories. Only used to select packages. Requires the "contents: read" permission. Defaults to the token of the workflow.'
+    required: false
+    default: ${{ github.token }}
+  output-directory:
+    description: 'The directory to write the tarballs to. Must be empty or not exist. Defaults to a "tarballs" directory in the runner temporary directory.'
+    required: false
+  artifact-name:
+    description: 'The name of the artifact to upload the tarballs to. Set to an empty string to skip uploading.'
+    required: false
+    default: 'npm-tarballs'
+  retention-days:
+    description: 'The number of days to retain the artifact. Defaults to 4 days.'
+    required: false
+    default: '4'
+outputs:
+  has-packages:
+    description: 'Whether there were any packages to pack. When "false", nothing was packed or uploaded.'
+    value: ${{ steps.select.outputs.has-packages }}
+  locations:
+    description: 'The locations of the packed packages, one per line.'
+    value: ${{ steps.select.outputs.locations }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Sanitize Yarn configuration
+      shell: bash
+      run: ${{ github.action_path }}/../scripts/sanitize.sh
+      env:
+        YARN_IGNORE_PATH: '1'
+    - name: Select packages to pack
+      id: select
+      shell: bash
+      run: |
+        selected="$(grep -v '^[[:space:]]*$' <<< "$LOCATIONS" || true)"
+        if [[ -z "$selected" ]]; then
+          selected="$("${ACTION_PATH}/../scripts/select.sh")"
+        fi
+
+        has_packages="false"
+        if [[ -n "$selected" ]]; then
+          has_packages="true"
+        else
+          echo "Notice: No packages to pack."
+        fi
+
+        delimiter="EOF_$(openssl rand -hex 16)"
+        {
+          echo "has-packages=${has_packages}"
+          echo "locations<<${delimiter}"
+          echo "${selected}"
+          echo "${delimiter}"
+        } >> "$GITHUB_OUTPUT"
+      env:
+        YARN_IGNORE_PATH: '1'
+        ACTION_PATH: ${{ github.action_path }}
+        LOCATIONS: ${{ inputs.locations }}
+        SELECT_BASE: ${{ inputs.base || github.event.before }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+    - name: Pack packages
+      id: pack
+      if: steps.select.outputs.has-packages == 'true'
+      shell: bash
+      run: |
+        mapfile -t locations <<< "$LOCATIONS"
+
+        "${ACTION_PATH}/../scripts/pack.sh" "$OUTPUT_DIRECTORY" "${locations[@]}"
+
+        echo "directory=${OUTPUT_DIRECTORY}" >> "$GITHUB_OUTPUT"
+      env:
+        YARN_IGNORE_PATH: '1'
+        ACTION_PATH: ${{ github.action_path }}
+        OUTPUT_DIRECTORY: ${{ inputs.output-directory || format('{0}/tarballs', runner.temp) }}
+        LOCATIONS: ${{ steps.select.outputs.locations }}
+    - name: Upload tarballs
+      if: steps.select.outputs.has-packages == 'true' && inputs.artifact-name != ''
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        retention-days: ${{ inputs.retention-days }}
+        path: ${{ steps.pack.outputs.directory }}/*.tgz
+        if-no-files-found: error

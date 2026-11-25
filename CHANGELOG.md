@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `MetaMask/action-npm-publish/pack` action to pack packages into tarballs ([#143](https://github.com/MetaMask/action-npm-publish/pull/143))
+  - The action sanitises the Yarn configuration, removes lifecycle scripts, and runs `yarn pack` for the packages in the `locations` input.
+  - Without `locations`, the action packs the packages whose `version` changed compared to the `base` commit. `base` defaults to `github.event.before`, or the parent commit if that is not available. The action fails if the commit is not available, and never packs all packages as a fallback.
+  - The `has-packages` output is `false` when there is nothing to pack.
+  - The tarballs are uploaded as an artifact, named by the `artifact-name` input (`npm-tarballs` by default).
+
 ## [7.0.0]
 
 ### Added
