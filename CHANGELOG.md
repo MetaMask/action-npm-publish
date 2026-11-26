@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `YARN_NPM_AUTH_TOKEN` is no longer kept when the action unsets the `YARN_*` variables.
 - **BREAKING:** Require the `dry-run` input, which must be `true` or `false` ([#148](https://github.com/MetaMask/action-npm-publish/pull/148))
   - The action no longer performs a dry run when a token or OIDC isn't available. With `dry-run: false`, it fails instead.
+- Remove more lifecycle scripts from packages before publishing ([#145](https://github.com/MetaMask/action-npm-publish/pull/145))
+  - In addition to `prepublish`, `prepublishOnly`, `prepack`, and `postpack`, the `publish`, `postpublish`, `pack`, `prepare`, `preprepare`, and `postprepare` scripts are now removed from the published `package.json`.
 
 ## [7.0.0]
 
