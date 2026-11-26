@@ -34,8 +34,8 @@ inputs:
     description: 'The Slack channel to post in'
     required: false
   dry-run:
-    description: 'Enables dry run mode, which prepares the package for publishing but does not publish it'
-    required: false
+    description: 'Whether to do a dry run, which prepares the packages for publishing but does not publish them. Must be "true" or "false".'
+    required: true
 
 runs:
   using: 'composite'
@@ -60,17 +60,17 @@ runs:
         GITHUB_TOKEN: ${{ github.token }}
     - name: Install `pkdiff`
       id: install-pkdiff
-      if: steps.publish.outputs.dry-run == 'true'
+      if: inputs.dry-run == 'true'
       shell: bash
       run: npm i -g pkdiff@2.0.1
     - name: Generate package diff report
       id: generate-report
       shell: bash
-      if: steps.publish.outputs.dry-run == 'true'
+      if: inputs.dry-run == 'true'
       run: ${{ github.action_path }}/scripts/report.sh
     - name: Upload package report artifact
       id: upload-artifact
-      if: steps.publish.outputs.dry-run == 'true'
+      if: inputs.dry-run == 'true'
       uses: actions/upload-artifact@v4
       with:
         path: |

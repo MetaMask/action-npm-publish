@@ -97,6 +97,7 @@ jobs:
       - name: Setup, build, publish
         env:
           PUBLISH_NPM_TAG: latest
+          DRY_RUN: 'true'
         run: |
           cd snaps
           corepack enable
@@ -130,6 +131,7 @@ jobs:
       - name: Setup, build, publish
         env:
           PUBLISH_NPM_TAG: latest
+          DRY_RUN: 'false'
           ACTIONS_ID_TOKEN_REQUEST_URL: test
         run: |
           cd snaps
@@ -159,6 +161,7 @@ jobs:
         shell: bash
         env:
           PUBLISH_NPM_TAG: latest
+          DRY_RUN: 'true'
         run: |
           cd utils
           corepack enable

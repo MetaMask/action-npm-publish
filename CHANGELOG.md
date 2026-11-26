@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING:** Require the `dry-run` input, which must be `true` or `false` ([#148](https://github.com/MetaMask/action-npm-publish/pull/148))
+  - The action no longer performs a dry run when a token or OIDC isn't available. With `dry-run: false`, it fails instead.
+
 ## [7.0.0]
 
 ### Added
