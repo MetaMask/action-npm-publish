@@ -7,8 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add release details and the files in each tarball to the dry run ([#156](https://github.com/MetaMask/action-npm-publish/pull/156))
+  - The job summary starts with a link to the pull request, if there is one, and the packages that are released.
+  - The log and the job summary list the files in each tarball, next to its checksum and integrity, so they can be reviewed before approving the release.
+  - Packages that have never been published are listed in a warning at the top of the job summary, because the action can't publish them.
+
 ### Changed
 
+- **BREAKING:** Pack in the dry run, and publish the tarballs it packed ([#156](https://github.com/MetaMask/action-npm-publish/pull/156))
+  - With `dry-run: true`, the action packs the packages whose `version` differs from the version in the commit before the push (`github.event.before`, or the parent commit), uploads the tarballs as an artifact, and outputs `checksums`. It fails if no package is released.
+  - With `dry-run: false`, the action downloads that artifact, and publishes the tarballs with `npm stage publish --ignore-scripts`. It needs no checkout and no Yarn.
+  - The new `checksums` input is required with `dry-run: false`. Pass the `checksums` output of the dry run. The action fails if a tarball was added, removed, or replaced since the dry run.
+  - Each tarball is validated before it is published: it may only contain files in `package/`, needs exactly one `package/package.json`, can't be private, and may only set `access` and `registry` in `publishConfig`, with the registry `https://registry.npmjs.org`.
+  - The new `artifact-name` input sets the name of the artifact (`npm-tarballs` by default). The report with the diffs of a dry run is uploaded as `<artifact-name>-report`.
+  - The dry run needs the project to be built, and should run in a job that did not run the build. See the README for an example.
 - **BREAKING:** Remove the `staged-publish` input and always use staged publishing ([#154](https://github.com/MetaMask/action-npm-publish/pull/154))
   - Packages are always published with `--staged`, so they must be approved on npm before they are published.
 - **BREAKING:** Remove the `npm-token` input and only publish with OIDC ([#149](https://github.com/MetaMask/action-npm-publish/pull/149))
