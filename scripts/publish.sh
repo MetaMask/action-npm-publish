@@ -2,25 +2,21 @@
 
 # Publishes the tarballs in `$TARBALLS_DIRECTORY`, which the dry run packed in
 # an earlier job. No checkout and no Yarn is needed, and no code from the
-# repository runs: each tarball is validated, and published as it is with
+# repository runs: the tarballs are published as they are with
 # `npm stage publish --ignore-scripts`.
 #
-# The tarballs come from another job, so they are treated as untrusted input.
-# The tarballs are only published if:
+# The tarballs come from another job, so they are only published if:
 #
 # 1. They are exactly the tarballs that the dry run packed: the output of
 #    `list-tarballs.sh` for the directory is the same as `$CHECKSUMS`, which is
 #    required when publishing. A tarball that was added, removed, or replaced
 #    after the dry run fails the publish.
-#
-# And a tarball is only published if it:
-#
-# 2. Is a valid tarball, which only contains files in a `package/` directory.
-# 3. Contains exactly one `package/package.json`, with a name and a version,
-#    which is not private.
-# 4. Doesn't change where it is published to: `publishConfig` may only set
-#    `access` and `registry`, and `registry` must be
+# 2. They don't change where they are published to: `publishConfig` may only
+#    set `access` and `registry`, and `registry` must be
 #    `https://registry.npmjs.org`.
+#
+# Nothing else is checked. The dry run only packs packages that are not
+# private and have a version, from a checkout with the manifests from Git.
 #
 # Packages that are not published, because of a dry run, are reported for
 # review instead: the checksum and the list of files in each tarball.
@@ -156,35 +152,12 @@ fi
 has_invalid_tarballs="false"
 
 for tarball in "${tarballs[@]}"; do
-  file="$(basename "$tarball")"
-
-  if ! entries="$(tar -tzf "$tarball")"; then
-    echo "::error::${file} isn't a valid tarball."
-    has_invalid_tarballs="true"
-    continue
-  fi
-
-  if grep -qv '^package/' <<< "$entries" || grep -qE '//|(^|/)\.\.?(/|$)' <<< "$entries"; then
-    echo "::error::${file} contains unexpected paths."
-    has_invalid_tarballs="true"
-    continue
-  fi
-
-  if [[ "$(grep -cx 'package/package.json' <<< "$entries")" -ne 1 ]]; then
-    echo "::error::${file} must contain exactly one package/package.json."
-    has_invalid_tarballs="true"
-    continue
-  fi
-
   if ! tar -xzOf "$tarball" package/package.json | jq --exit-status '
-    (.name | type == "string" and length > 0)
-    and (.version | type == "string" and length > 0)
-    and ((.private // false) | not)
-    and ((.publishConfig // {}) | type == "object"
+    (.publishConfig // {}) | type == "object"
       and (keys - ["access", "registry"] | length == 0)
-      and ((.registry // "https://registry.npmjs.org/") | IN("https://registry.npmjs.org", "https://registry.npmjs.org/")))
+      and ((.registry // "https://registry.npmjs.org/") | IN("https://registry.npmjs.org", "https://registry.npmjs.org/"))
   ' > /dev/null; then
-    echo "::error::${file} has an invalid manifest. It needs a name and a version, can't be private, and \"publishConfig\" may only set \"access\" and \"registry\" (to \"https://registry.npmjs.org\")."
+    echo "::error::$(basename "$tarball") can't be published. It needs a \"package/package.json\", and \"publishConfig\" may only set \"access\" and \"registry\" (to \"https://registry.npmjs.org\")."
     has_invalid_tarballs="true"
   fi
 done
@@ -221,11 +194,6 @@ new_packages=()
 for tarball in "${tarballs[@]}"; do
   name="$(read_manifest "$tarball" '.name')"
   version="$(read_manifest "$tarball" '.version')"
-
-  if [[ "$version" = "0.0.0" ]]; then
-    echo "Notice: Invalid version for ${name}: ${version}. Skipping."
-    continue
-  fi
 
   # The version may have been published since the tarball was packed, e.g., by a
   # re-run of a job that failed halfway through, or while this job was waiting

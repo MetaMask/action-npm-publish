@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - With `dry-run: true`, the action packs the packages whose `version` differs from the version in the commit before the push (`github.event.before`, or the parent commit), uploads the tarballs as an artifact, and outputs `checksums`. It fails if no package is released.
   - With `dry-run: false`, the action downloads that artifact, and publishes the tarballs with `npm stage publish --ignore-scripts`. It needs no checkout and no Yarn.
   - The new `checksums` input is required with `dry-run: false`. Pass the `checksums` output of the dry run. The action fails if a tarball was added, removed, or replaced since the dry run.
-  - Each tarball is validated before it is published: it may only contain files in `package/`, needs exactly one `package/package.json`, can't be private, and may only set `access` and `registry` in `publishConfig`, with the registry `https://registry.npmjs.org`.
+  - Each tarball is checked before it is published: it may only set `access` and `registry` in `publishConfig`, with the registry `https://registry.npmjs.org`.
   - The new `artifact-name` input sets the name of the artifact (`npm-tarballs` by default). The report with the diffs of a dry run is uploaded as `<artifact-name>-report`.
   - The dry run needs the project to be built, and should run in a job that did not run the build. See the README for an example.
 - **BREAKING:** Remove the `staged-publish` input and always use staged publishing ([#154](https://github.com/MetaMask/action-npm-publish/pull/154))

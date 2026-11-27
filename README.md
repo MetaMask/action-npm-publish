@@ -35,8 +35,9 @@ Sanitising is not a boundary against code that already ran in the same job: a bu
 The job that publishes runs no code from the repository. It only publishes tarballs that:
 
 - Are exactly the tarballs that the dry run packed. The `checksums` output of the dry run lists the name, version, and SHA-512 of each tarball, and the action fails if a tarball was added, removed, or replaced since.
-- Are valid tarballs, which only contain files in a `package/` directory, and exactly one `package/package.json`, with a name and a version, which isn't private.
 - Only set `access` and `registry` in `publishConfig`, and `registry` is `https://registry.npmjs.org`.
+
+It doesn't check anything else in the tarballs. The dry run only packs packages that aren't private and have a version, and it packs them with the manifests from Git, as long as it runs in a job that did not run the build.
 
 ## Usage
 

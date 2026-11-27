@@ -395,16 +395,10 @@ jobs:
             tar -czf "$RUNNER_TEMP/cases/$1/test.tgz" -C "$RUNNER_TEMP/work/$1" package
           }
 
-          tarball valid '{ "name": "invalid-test-valid", "version": "1.0.0" }'
+          tarball valid '{ "name": "invalid-test-valid", "version": "1.0.0", "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" } }'
           tarball registry '{ "name": "invalid-test-registry", "version": "1.0.0", "publishConfig": { "registry": "https://example.com" } }'
+          tarball registry-lookalike '{ "name": "invalid-test-lookalike", "version": "1.0.0", "publishConfig": { "registry": "https://registry.npmjs.org.example.com/" } }'
           tarball publish-config '{ "name": "invalid-test-config", "version": "1.0.0", "publishConfig": { "tag": "beta" } }'
-          tarball private '{ "name": "invalid-test-private", "version": "1.0.0", "private": true }'
-
-          # A file outside of `package/`.
-          tarball outside-path '{ "name": "invalid-test-outside", "version": "1.0.0" }'
-          mkdir -p "$RUNNER_TEMP/work/outside-path/evil"
-          echo "x" > "$RUNNER_TEMP/work/outside-path/evil/file"
-          tar -czf "$RUNNER_TEMP/cases/outside-path/test.tgz" -C "$RUNNER_TEMP/work/outside-path" package evil
       - name: Check which tarballs are accepted
         env:
           SCRIPT: ${{ github.workspace }}/action-npm-publish/scripts/publish.sh
@@ -422,7 +416,7 @@ jobs:
             failed=1
           fi
 
-          for case in registry publish-config private outside-path; do
+          for case in registry registry-lookalike publish-config; do
             if publish "$case" > /dev/null 2>&1; then
               echo "::error::Expected the ${case} tarball to be rejected."
               failed=1
