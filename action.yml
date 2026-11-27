@@ -131,7 +131,7 @@ runs:
                     {
                       type: "button",
                       text: { type: "plain_text", text: "2. Approve on npm" },
-                      url: "https://www.npmjs.com/"
+                      url: "https://www.npmjs.com/settings/~/staged-packages"
                     }
                   ]
                 },
