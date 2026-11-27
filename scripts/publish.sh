@@ -106,7 +106,22 @@ report_package() {
     printf -- '---\n\n' >> "$GITHUB_STEP_SUMMARY"
   fi
 
-  "$script_path/checksum.sh" "$tarball" "${name}@${version}"
+  local checksum integrity
+  checksum="$(shasum -a 1 "$tarball" | cut -d' ' -f1)"
+  integrity="sha512-$(openssl dgst -sha512 -binary "$tarball" | openssl base64 -A)"
+
+  echo "Checksum: $checksum"
+  echo "Integrity: $integrity"
+
+  if [[ -n "$GITHUB_STEP_SUMMARY" ]]; then
+    {
+      echo "### ${name}@${version}"
+      echo
+      echo "- Checksum: \`$checksum\`"
+      echo "- Integrity: \`$integrity\`"
+      echo
+    } >> "$GITHUB_STEP_SUMMARY"
+  fi
 
   # Directories are left out, and so is the `package/` that every path starts
   # with. `grep` fails if there are no files, which isn't an error here.
