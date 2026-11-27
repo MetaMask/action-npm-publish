@@ -28,8 +28,7 @@ configure_publish() {
   PACK_CMD="yarn pack --out /tmp/%s-%v.tgz"
 
   # Build publish flags for OIDC publishing.
-  PUBLISH_FLAGS=("--tag" "$PUBLISH_NPM_TAG")
-  [[ "$STAGED_PUBLISH" = "true" ]] && PUBLISH_FLAGS+=("--staged")
+  PUBLISH_FLAGS=("--tag" "$PUBLISH_NPM_TAG" "--staged")
   [[ "$PROVENANCE" = "true" && "$REPOSITORY_VISIBILITY" = "public" ]] && PUBLISH_FLAGS+=("--provenance")
 
   # Determine the publish command. `DRY_RUN` is `true` or `false`, which is
