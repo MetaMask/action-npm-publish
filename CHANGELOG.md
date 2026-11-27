@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove more lifecycle scripts from packages before publishing ([#145](https://github.com/MetaMask/action-npm-publish/pull/145))
   - In addition to `prepublish`, `prepublishOnly`, `prepack`, and `postpack`, the `publish`, `postpublish`, `pack`, `prepare`, `preprepare`, and `postprepare` scripts are now removed from the published `package.json`.
 
+### Fixed
+
+- Install `pkdiff` with `--ignore-scripts` in the dry-run report ([#155](https://github.com/MetaMask/action-npm-publish/pull/155))
+
 ## [7.0.0]
 
 ### Added
