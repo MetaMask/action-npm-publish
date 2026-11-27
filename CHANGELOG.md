@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The job summary starts with a link to the pull request, if there is one, and the packages that are released.
   - The log and the job summary list the files in each tarball, next to its checksum and integrity, so they can be reviewed before approving the release.
   - Packages that have never been published are listed in a warning at the top of the job summary, because the action can't publish them.
+  - The "Approve on GitHub" button in the Slack message links to the job summary of the dry run, instead of to the top of the run.
 
 ### Changed
 

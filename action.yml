@@ -136,7 +136,7 @@ runs:
         jq --null-input \
           --arg release "$release" \
           --arg mention "$mention" \
-          --arg run_url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/" \
+          --arg run_url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID#summary-$JOB_ID" \
           --arg instructions_url "https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2" \
           --arg icon_url "$SLACK_ICON_URL" \
           --arg username "$SLACK_USERNAME" \
@@ -199,6 +199,7 @@ runs:
           ' > "$SLACK_PAYLOAD_PATH"
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        JOB_ID: ${{ job.check_run_id }}
         SLACK_SUBTEAM: ${{ inputs.subteam }}
         SLACK_ICON_URL: ${{ inputs.icon-url }}
         SLACK_USERNAME: ${{ inputs.username }}
