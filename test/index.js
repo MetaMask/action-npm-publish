@@ -42,23 +42,19 @@ async function run(script, env = {}, binDirectory = undefined) {
 }
 
 /**
- * Create a directory with a fake `npm`, which the scripts use to look up what
- * is published. The fake only handles `npm view <spec>`.
+ * Get the directory with a fake `npm`, which the scripts use to look up what is
+ * published. The fake only handles `npm view <spec>`.
  *
  * @param {boolean} published - Whether the package has been published before,
  * in version `0.9.0`. If it's not, `npm view` fails for every spec.
- * @returns {Promise<string>} The path of the directory.
+ * @returns {string} The path of the directory.
  */
-async function createFakeNpm(published) {
-  const directory = await mkdtemp(path.join(os.tmpdir(), 'bin-'));
-  const body = published
-    ? 'case "$2" in\n  *@*) exit 1 ;;\n  *) echo \'{"version":"0.9.0"}\' ;;\nesac'
-    : 'exit 1';
-
-  await writeFile(path.join(directory, 'npm'), `#!/bin/sh\n${body}\n`, {
-    mode: 0o755,
-  });
-  return directory;
+function getFakeNpm(published) {
+  return path.join(
+    __dirname,
+    'fixtures',
+    published ? 'npm-published' : 'npm-new',
+  );
 }
 
 /**
@@ -223,7 +219,7 @@ test('warns about new packages at the top of the job summary', async (tapzero) =
       DRY_RUN: 'true',
       PUBLISH_NPM_TAG: 'latest',
     },
-    await createFakeNpm(false),
+    getFakeNpm(false),
   );
 
   const contents = await readFile(summary, 'utf8');
@@ -248,7 +244,7 @@ test('does not warn about packages that have been published before', async (tapz
       DRY_RUN: 'true',
       PUBLISH_NPM_TAG: 'latest',
     },
-    await createFakeNpm(true),
+    getFakeNpm(true),
   );
 
   const contents = await readFile(summary, 'utf8');
