@@ -67,54 +67,99 @@ runs:
         path: |
           /tmp/*.tgz
           /tmp/*.html
-    - name: Generate Slack publish message (1/2)
-      id: name-version
+    - name: Generate Slack message
       shell: bash
       if: inputs.slack-webhook-url != ''
       run: |
-        NAME_VERSION_TEXT=$(jq --raw-output '.name + "@" + .version' package.json )
-        NAME_VERSION_TEXT_STRIPPED="${NAME_VERSION_TEXT#@}"
-        echo "NAME_VERSION=$NAME_VERSION_TEXT_STRIPPED" >> "$GITHUB_OUTPUT"
-    - name: Generate Slack publish message (2/2)
-      id: final-text
-      shell: bash
-      if: inputs.slack-webhook-url != ''
-      env:
-        NAME_VERSION: ${{ steps.name-version.outputs.NAME_VERSION }}
-        SUBTEAM_TEXT: ${{ inputs.subteam }}
-        REPOSITORY: ${{ github.repository }}
-        RUN_ID: ${{ github.run_id }}
-      run: |
-        DEFAULT_TEXT="\`$NAME_VERSION\` is awaiting deployment :rocket: \n <https://github.com/$REPOSITORY/actions/runs/$RUN_ID/|→ Click here to review deployment> \n <https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2|→ See instructions for approving staged packages here>"
-        FINAL_TEXT="$DEFAULT_TEXT"
-        if [[ ! "$SUBTEAM_TEXT" == "" ]]; then
-          FINAL_TEXT="<!subteam^$SUBTEAM_TEXT> $DEFAULT_TEXT"
+        mention=""
+        if [[ -n "$SLACK_SUBTEAM" ]]; then
+          mention="<!subteam^$SLACK_SUBTEAM> "
         fi
-        echo "FINAL_TEXT=$FINAL_TEXT" >> "$GITHUB_OUTPUT"
-    - name: Post to a Slack channel
-      if: ${{ inputs.slack-webhook-url != '' && inputs.channel != '' }}
+
+        release="$GITHUB_REPOSITORY"
+        version=$(gh api "/repos/$GITHUB_REPOSITORY/contents/package.json?ref=$GITHUB_SHA" \
+          --header "Accept: application/vnd.github.raw+json" \
+          --jq '.version // empty' 2>/dev/null) || version=""
+        if [[ -n "$version" ]]; then
+          release="$GITHUB_REPOSITORY@$version"
+        fi
+
+        jq --null-input \
+          --arg release "$release" \
+          --arg mention "$mention" \
+          --arg run_url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/" \
+          --arg instructions_url "https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2" \
+          --arg icon_url "$SLACK_ICON_URL" \
+          --arg username "$SLACK_USERNAME" \
+          --arg channel "$SLACK_CHANNEL" \
+          '
+          {
+              text: ":rocket: A new release of `\($release)` is awaiting deployment.",
+              icon_url: $icon_url,
+              username: $username,
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ":rocket: A new release of `\($release)` *is awaiting deployment.*"
+                  }
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: "\($mention)This release needs approval on *GitHub*, and then on *npm* before it is published."
+                  }
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ":hourglass_flowing_sand: npm runs an automated review first, so the npm approval may not be available right away."
+                  }
+                },
+                {
+                  type: "actions",
+                  elements: [
+                    {
+                      type: "button",
+                      text: { type: "plain_text", text: "1. Approve on GitHub" },
+                      style: "primary",
+                      url: $run_url
+                    },
+                    {
+                      type: "button",
+                      text: { type: "plain_text", text: "2. Approve on npm" },
+                      url: "https://www.npmjs.com/settings/~/staged-packages"
+                    }
+                  ]
+                },
+                {
+                  type: "context",
+                  elements: [
+                    {
+                      type: "mrkdwn",
+                      text: "React with :eyes: when you start reviewing, and :white_check_mark: once both are approved · <\($instructions_url)|How to approve on npm>"
+                    }
+                  ]
+                }
+              ]
+          }
+          | if $channel != "" then .channel = "#\($channel)" else . end
+          ' > "$SLACK_PAYLOAD_PATH"
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        SLACK_SUBTEAM: ${{ inputs.subteam }}
+        SLACK_ICON_URL: ${{ inputs.icon-url }}
+        SLACK_USERNAME: ${{ inputs.username }}
+        SLACK_CHANNEL: ${{ inputs.channel }}
+        SLACK_PAYLOAD_PATH: ${{ runner.temp }}/slack-payload.json
+    - name: Post to Slack
+      if: inputs.slack-webhook-url != ''
       uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c
       with:
         webhook: ${{ inputs.slack-webhook-url }}
         webhook-type: incoming-webhook
-        payload: |
-          {
-            "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
-            "icon_url": "${{ inputs.icon-url }}",
-            "username": "${{ inputs.username }}",
-            "channel": "#${{ inputs.channel }}"
-          }
-      continue-on-error: true
-    - name: Post to a default Slack channel
-      if: ${{ inputs.slack-webhook-url != '' && inputs.channel == '' }}
-      uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c
-      with:
-        webhook: ${{ inputs.slack-webhook-url }}
-        webhook-type: incoming-webhook
-        payload: |
-          {
-            "text": "${{ steps.final-text.outputs.FINAL_TEXT }}",
-            "icon_url": "${{ inputs.icon-url }}",
-            "username": "${{ inputs.username }}"
-          }
+        payload-file-path: ${{ runner.temp }}/slack-payload.json
       continue-on-error: true
