@@ -80,95 +80,6 @@ jobs:
             exit 1
           fi
 
-  test-publish-monorepo:
-    name: Test publish monorepo
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Snaps repository
-        uses: actions/checkout@v6
-        with:
-          repository: MetaMask/snaps
-          ref: cecffa1a851a1fa5d68384c6f46ca1cf739f6d0c
-          path: snaps
-      - name: Checkout action repository
-        uses: actions/checkout@v6
-        with:
-          path: action-npm-publish
-      - name: Setup, build, publish
-        env:
-          PUBLISH_NPM_TAG: latest
-          DRY_RUN: 'true'
-        run: |
-          cd snaps
-          corepack enable
-          yarn install --immutable
-          # Bump a few workspaces to an unpublished version so the
-          # publish/pack path is actually exercised.
-          for pkg in snaps-sdk snaps-utils snaps-controllers; do
-            jq '.version = "999.0.0"' "packages/$pkg/package.json" \
-              > "packages/$pkg/package.json.tmp"
-            mv "packages/$pkg/package.json.tmp" "packages/$pkg/package.json"
-          done
-          ../action-npm-publish/scripts/main.sh
-
-  test-publish-monorepo-skip:
-    name: Test skipping publish of latest version (monorepo)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get latest version from NPM
-        id: latest-release
-        run: echo "release-version=$(npm view MetaMask/snaps version --workspaces=false)" >> "$GITHUB_OUTPUT"
-      - name: Checkout Snaps repository
-        uses: actions/checkout@v6
-        with:
-          repository: MetaMask/snaps
-          ref: v${{ steps.latest-release.outputs.release-version }}
-          path: snaps
-      - name: Checkout action repository
-        uses: actions/checkout@v6
-        with:
-          path: action-npm-publish
-      - name: Setup, build, publish
-        env:
-          PUBLISH_NPM_TAG: latest
-          DRY_RUN: 'false'
-          ACTIONS_ID_TOKEN_REQUEST_URL: test
-        run: |
-          cd snaps
-          corepack enable
-          yarn install --immutable
-          ../action-npm-publish/scripts/main.sh
-
-  test-publish-polyrepo:
-    name: Test publish polyrepo
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout utils repository
-        uses: actions/checkout@v6
-        with:
-          repository: MetaMask/utils
-          ref: 48e4a5a9d4d389c0e0b0a066f3ec4bb90b14e07b
-          path: utils
-      - name: Checkout action repository
-        uses: actions/checkout@v6
-        with:
-          path: action-npm-publish
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Setup, build, publish
-        shell: bash
-        env:
-          PUBLISH_NPM_TAG: latest
-          DRY_RUN: 'true'
-        run: |
-          cd utils
-          corepack enable
-          yarn install --immutable
-          yarn build
-          ../action-npm-publish/scripts/main.sh
-
   test-sanitize:
     name: Test sanitising Yarn configuration
     runs-on: ubuntu-latest
@@ -245,15 +156,32 @@ jobs:
           mkdir -p .yarn/releases
           echo "require('fs').writeFileSync('/tmp/canary/yarnpath', 'ran'); process.exit(1);" > .yarn/releases/canary.cjs
           echo "yarnPath: .yarn/releases/canary.cjs" >> .yarnrc.yml
+      - name: Create Git history
+        # The dry run packs the packages whose version differs from the version
+        # in the previous commit.
+        run: |
+          git init --quiet
+          git config user.name test
+          git config user.email test@example.com
+
+          jq '.version = "998.0.0"' packages/canary/package.json > packages/canary/package.json.tmp
+          mv packages/canary/package.json.tmp packages/canary/package.json
+          git add package.json packages/canary/package.json
+          git commit --quiet --message "Base"
+
+          jq '.version = "999.0.0"' packages/canary/package.json > packages/canary/package.json.tmp
+          mv packages/canary/package.json.tmp packages/canary/package.json
+          git commit --quiet --all --message "Release"
       - name: Dry run publish
         uses: ./action-npm-publish
         # `YARN_*` variables override the action's Yarn configuration. With
-        # `pnp`, Yarn doesn't find the `node-modules` install and the publish
+        # `pnp`, Yarn doesn't find the `node-modules` install and the pack
         # fails, unless the action unsets the variable.
         env:
           YARN_NODE_LINKER: pnp
         with:
           dry-run: true
+          artifact-name: sanitise-test
       - name: Check that no canaries ran
         run: |
           failed=0
@@ -266,7 +194,233 @@ jobs:
           exit "$failed"
       - name: Check that the package was packed without lifecycle scripts
         run: |
-          tarball=/tmp/sanitise-test-canary-999.0.0.tgz
+          tarball="$RUNNER_TEMP/npm-tarballs/sanitise-test-canary-999.0.0.tgz"
           test -f "$tarball"
           tar -O -zxf "$tarball" package/package.json \
             | jq --exit-status '.scripts | keys == ["test"]'
+
+  test-dry-run:
+    name: Test packing in a dry run
+    runs-on: ubuntu-latest
+    outputs:
+      checksums: ${{ steps.dry-run.outputs.checksums }}
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Create base commit
+        run: |
+          corepack enable
+
+          git init --quiet
+          git config user.name test
+          git config user.email test@example.com
+
+          cat > package.json <<'EOF'
+          {
+            "name": "select-test",
+            "private": true,
+            "version": "0.0.0",
+            "workspaces": ["packages/*"],
+            "packageManager": "yarn@4.16.0+sha256.ba05224324578801b9cc98170d64aa50b9a36733b440fb0942306da3fbbdc7d1"
+          }
+          EOF
+          echo "nodeLinker: node-modules" > .yarnrc.yml
+          echo "node_modules" > .gitignore
+
+          for name in a b c; do
+            mkdir -p "packages/$name"
+            version="1.0.0"
+            if [[ "$name" == "c" ]]; then
+              version="0.0.0"
+            fi
+            echo "{ \"name\": \"@select-test/$name\", \"version\": \"$version\" }" > "packages/$name/package.json"
+          done
+
+          yarn install --no-immutable
+
+          git add .gitignore .yarnrc.yml package.json yarn.lock packages
+          git commit --quiet --message "Base"
+      - name: Create release commit
+        # `a` is bumped, `d` is new, `b` changes without a version bump, `c`
+        # stays at `0.0.0`, and `e` is new at `0.0.0`. Only `a` and `d` are
+        # released.
+        run: |
+          echo '{ "name": "@select-test/a", "version": "1.1.0" }' > packages/a/package.json
+          echo '{ "name": "@select-test/b", "version": "1.0.0", "description": "Changed" }' > packages/b/package.json
+
+          mkdir -p packages/d packages/e
+          echo '{ "name": "@select-test/d", "version": "1.0.0" }' > packages/d/package.json
+          echo '{ "name": "@select-test/e", "version": "0.0.0" }' > packages/e/package.json
+
+          git add packages
+          git commit --quiet --message "Release"
+      - name: Dry run publish
+        id: dry-run
+        uses: ./action-npm-publish
+        with:
+          dry-run: true
+          artifact-name: dry-run-test
+      - name: Check the tarballs and the checksums
+        env:
+          CHECKSUMS: ${{ steps.dry-run.outputs.checksums }}
+          DIRECTORY: ${{ runner.temp }}/npm-tarballs
+        run: |
+          failed=0
+
+          tarballs="$(find "$DIRECTORY" -maxdepth 1 -name '*.tgz' -printf '%f\n' | sort | tr '\n' ' ')"
+          if [[ "$tarballs" != "@select-test-a-1.1.0.tgz @select-test-d-1.0.0.tgz " ]]; then
+            echo "::error::Unexpected tarballs: ${tarballs}"
+            failed=1
+          fi
+
+          for package in a:1.1.0 d:1.0.0; do
+            name="${package%%:*}"
+            version="${package##*:}"
+            integrity="sha512-$(openssl dgst -sha512 -binary "$DIRECTORY/@select-test-$name-$version.tgz" | openssl base64 -A)"
+
+            if ! grep -qxF "@select-test/$name@$version $integrity" <<< "$CHECKSUMS"; then
+              echo "::error::The checksums don't have the right line for @select-test/$name@$version: ${CHECKSUMS}"
+              failed=1
+            fi
+          done
+
+          if [[ "$(grep -c . <<< "$CHECKSUMS")" -ne 2 ]]; then
+            echo "::error::Expected two lines in the checksums: ${CHECKSUMS}"
+            failed=1
+          fi
+
+          exit "$failed"
+
+  test-publish:
+    name: Test publishing the tarballs of a dry run
+    needs: test-dry-run
+    runs-on: ubuntu-latest
+    # There is no checkout of a project in this job, as in a job that publishes
+    # the tarballs. The action is only checked out to use it.
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Publish without the checksums
+        id: without-checksums
+        uses: ./action-npm-publish
+        continue-on-error: true
+        with:
+          dry-run: false
+          artifact-name: dry-run-test
+      - name: Check that publishing needs the checksums
+        env:
+          OUTCOME: ${{ steps.without-checksums.outcome }}
+          DIRECTORY: ${{ runner.temp }}/npm-tarballs
+        run: |
+          # The tarballs must have been downloaded, otherwise the action could
+          # have failed for another reason.
+          test "$(find "$DIRECTORY" -maxdepth 1 -name '*.tgz' | wc -l)" -eq 2
+
+          if [[ "$OUTCOME" != "failure" ]]; then
+            echo "::error::Expected the action to fail without checksums, got ${OUTCOME}."
+            exit 1
+          fi
+      - name: Check which tarballs are published
+        env:
+          CHECKSUMS: ${{ needs.test-dry-run.outputs.checksums }}
+          DIRECTORY: ${{ runner.temp }}/npm-tarballs
+          SCRIPT: ${{ github.workspace }}/action-npm-publish/scripts/publish.sh
+        run: |
+          failed=0
+
+          publish() {
+            DRY_RUN=true PUBLISH_NPM_TAG=latest TARBALLS_DIRECTORY="$1" CHECKSUMS="$2" "$SCRIPT"
+          }
+
+          expect_failure() {
+            local description="$1"
+            shift
+
+            if "$@" > /dev/null 2>&1; then
+              echo "::error::Expected publishing to fail: ${description}"
+              failed=1
+            fi
+          }
+
+          # The tarballs from the dry run are accepted.
+          if ! publish "$DIRECTORY" "$CHECKSUMS" > /dev/null; then
+            echo "::error::Expected the tarballs from the dry run to be accepted."
+            failed=1
+          fi
+
+          # A tarball that is missing.
+          cp -r "$DIRECTORY" "$RUNNER_TEMP/missing"
+          rm "$RUNNER_TEMP/missing/@select-test-d-1.0.0.tgz"
+          expect_failure "a missing tarball" publish "$RUNNER_TEMP/missing" "$CHECKSUMS"
+
+          # A tarball that was added.
+          cp -r "$DIRECTORY" "$RUNNER_TEMP/extra"
+          mkdir -p "$RUNNER_TEMP/extra-package/package"
+          echo '{ "name": "extra", "version": "1.0.0" }' > "$RUNNER_TEMP/extra-package/package/package.json"
+          tar -czf "$RUNNER_TEMP/extra/extra-1.0.0.tgz" -C "$RUNNER_TEMP/extra-package" package
+          expect_failure "an extra tarball" publish "$RUNNER_TEMP/extra" "$CHECKSUMS"
+
+          # A tarball that was replaced with one that has the same name and
+          # version, and other contents.
+          cp -r "$DIRECTORY" "$RUNNER_TEMP/replaced"
+          mkdir -p "$RUNNER_TEMP/replaced-package/package"
+          echo '{ "name": "@select-test/a", "version": "1.1.0", "scripts": { "postinstall": "echo hi" } }' > "$RUNNER_TEMP/replaced-package/package/package.json"
+          tar -czf "$RUNNER_TEMP/replaced/@select-test-a-1.1.0.tgz" -C "$RUNNER_TEMP/replaced-package" package
+          expect_failure "a replaced tarball" publish "$RUNNER_TEMP/replaced" "$CHECKSUMS"
+
+          exit "$failed"
+
+  test-publish-invalid:
+    name: Test publishing invalid tarballs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout action repository
+        uses: actions/checkout@v6
+        with:
+          path: action-npm-publish
+      - name: Create tarballs
+        run: |
+          # `tarball <case> <manifest>` creates a tarball with a manifest.
+          tarball() {
+            mkdir -p "$RUNNER_TEMP/work/$1/package" "$RUNNER_TEMP/cases/$1"
+            echo "$2" > "$RUNNER_TEMP/work/$1/package/package.json"
+            tar -czf "$RUNNER_TEMP/cases/$1/test.tgz" -C "$RUNNER_TEMP/work/$1" package
+          }
+
+          tarball valid '{ "name": "invalid-test-valid", "version": "1.0.0", "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" } }'
+          tarball registry '{ "name": "invalid-test-registry", "version": "1.0.0", "publishConfig": { "registry": "https://example.com" } }'
+          tarball registry-lookalike '{ "name": "invalid-test-lookalike", "version": "1.0.0", "publishConfig": { "registry": "https://registry.npmjs.org.example.com/" } }'
+          tarball publish-config '{ "name": "invalid-test-config", "version": "1.0.0", "publishConfig": { "tag": "beta" } }'
+      - name: Check which tarballs are accepted
+        env:
+          SCRIPT: ${{ github.workspace }}/action-npm-publish/scripts/publish.sh
+        run: |
+          failed=0
+
+          publish() {
+            DRY_RUN=true PUBLISH_NPM_TAG=latest TARBALLS_DIRECTORY="$RUNNER_TEMP/cases/$1" "$SCRIPT"
+          }
+
+          # A valid tarball makes sure that the failures below are not caused by
+          # something else.
+          if ! publish valid > /dev/null; then
+            echo "::error::Expected the valid tarball to be accepted."
+            failed=1
+          fi
+
+          for case in registry registry-lookalike publish-config; do
+            if publish "$case" > /dev/null 2>&1; then
+              echo "::error::Expected the ${case} tarball to be rejected."
+              failed=1
+            fi
+          done
+
+          exit "$failed"

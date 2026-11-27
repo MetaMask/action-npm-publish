@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# A fake `npm` for a package that has never been published: `npm view` fails for
+# every spec.
+exit 1

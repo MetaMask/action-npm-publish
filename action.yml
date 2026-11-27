@@ -27,46 +27,95 @@ inputs:
     description: 'The Slack channel to post in'
     required: false
   dry-run:
-    description: 'Whether to do a dry run, which prepares the packages for publishing but does not publish them. Must be "true" or "false".'
+    description: 'Whether to do a dry run. A dry run packs the packages that changed in the commit, uploads the tarballs as an artifact, and reports what would be published. Without a dry run, the action publishes the tarballs from that artifact, and needs no checkout and no Yarn. Must be "true" or "false".'
     required: true
+  checksums:
+    description: 'The `checksums` output of the dry run. Required if `dry-run` is "false": the action only publishes the tarballs that the dry run packed.'
+    required: false
+  artifact-name:
+    description: 'The name of the artifact that the dry run uploads the tarballs to, and that is published without a dry run. Defaults to "npm-tarballs".'
+    required: false
+    default: 'npm-tarballs'
+
+outputs:
+  checksums:
+    description: 'The tarballs that the dry run packed, one per line, as `<name>@<version> <integrity>`. Pass it to the action that publishes, as the `checksums` input.'
+    value: ${{ steps.pack.outputs.checksums }}
 
 runs:
   using: 'composite'
   steps:
     - name: Sanitize Yarn configuration
+      if: inputs.dry-run == 'true'
       shell: bash
       run: ${{ github.action_path }}/scripts/sanitize.sh
       env:
         YARN_IGNORE_PATH: '1'
+
+    - name: Pack packages
+      id: pack
+      if: inputs.dry-run == 'true'
+      shell: bash
+      run: ${{ github.action_path }}/scripts/pack.sh
+      env:
+        YARN_IGNORE_PATH: '1'
+        TARBALLS_DIRECTORY: ${{ runner.temp }}/npm-tarballs
+        SELECT_BASE: ${{ github.event.before }}
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Upload tarballs
+      if: inputs.dry-run == 'true'
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        retention-days: 4
+        path: ${{ runner.temp }}/npm-tarballs/*.tgz
+        if-no-files-found: error
+
+    - name: Download tarballs
+      if: inputs.dry-run != 'true'
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/npm-tarballs
+
     - name: Run main publish script
       id: publish
       shell: bash
       run: ${{ github.action_path }}/scripts/main.sh
       env:
-        YARN_IGNORE_PATH: '1'
+        TARBALLS_DIRECTORY: ${{ runner.temp }}/npm-tarballs
+        CHECKSUMS: ${{ inputs.checksums }}
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
         PROVENANCE: ${{ inputs.provenance }}
         REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
         DRY_RUN: ${{ inputs.dry-run }}
         GITHUB_TOKEN: ${{ github.token }}
+
     - name: Install `pkdiff`
       id: install-pkdiff
       if: inputs.dry-run == 'true'
       shell: bash
       run: npm i -g pkdiff@2.0.1 --ignore-scripts
+
     - name: Generate package diff report
       id: generate-report
       shell: bash
       if: inputs.dry-run == 'true'
       run: ${{ github.action_path }}/scripts/report.sh
+      env:
+        TARBALLS_DIRECTORY: ${{ runner.temp }}/npm-tarballs
+
     - name: Upload package report artifact
       id: upload-artifact
       if: inputs.dry-run == 'true'
       uses: actions/upload-artifact@v4
       with:
+        name: ${{ inputs.artifact-name }}-report
         path: |
-          /tmp/*.tgz
-          /tmp/*.html
+          ${{ runner.temp }}/npm-tarballs/*.tgz
+          ${{ runner.temp }}/npm-tarballs/*.html
+
     - name: Generate Slack message
       shell: bash
       if: inputs.slack-webhook-url != ''
@@ -87,7 +136,7 @@ runs:
         jq --null-input \
           --arg release "$release" \
           --arg mention "$mention" \
-          --arg run_url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/" \
+          --arg run_url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID#summary-$JOB_ID" \
           --arg instructions_url "https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2" \
           --arg icon_url "$SLACK_ICON_URL" \
           --arg username "$SLACK_USERNAME" \
@@ -150,11 +199,13 @@ runs:
           ' > "$SLACK_PAYLOAD_PATH"
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        JOB_ID: ${{ job.check_run_id }}
         SLACK_SUBTEAM: ${{ inputs.subteam }}
         SLACK_ICON_URL: ${{ inputs.icon-url }}
         SLACK_USERNAME: ${{ inputs.username }}
         SLACK_CHANNEL: ${{ inputs.channel }}
         SLACK_PAYLOAD_PATH: ${{ runner.temp }}/slack-payload.json
+
     - name: Post to Slack
       if: inputs.slack-webhook-url != ''
       uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c
