@@ -76,8 +76,16 @@ runs:
           mention="<!subteam^$SLACK_SUBTEAM> "
         fi
 
+        release="$GITHUB_REPOSITORY"
+        version=$(gh api "/repos/$GITHUB_REPOSITORY/contents/package.json?ref=$GITHUB_SHA" \
+          --header "Accept: application/vnd.github.raw+json" \
+          --jq '.version // empty' 2>/dev/null) || version=""
+        if [[ -n "$version" ]]; then
+          release="$GITHUB_REPOSITORY@$version"
+        fi
+
         jq --null-input \
-          --arg repository "$GITHUB_REPOSITORY" \
+          --arg release "$release" \
           --arg mention "$mention" \
           --arg run_url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/" \
           --arg instructions_url "https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2" \
@@ -86,7 +94,7 @@ runs:
           --arg channel "$SLACK_CHANNEL" \
           '
           {
-              text: ":rocket: A new release of `\($repository)` is awaiting deployment.",
+              text: ":rocket: A new release of `\($release)` is awaiting deployment.",
               icon_url: $icon_url,
               username: $username,
               blocks: [
@@ -94,7 +102,7 @@ runs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: ":rocket: A new release of `\($repository)` *is awaiting deployment.*"
+                    text: ":rocket: A new release of `\($release)` *is awaiting deployment.*"
                   }
                 },
                 {
@@ -141,6 +149,7 @@ runs:
           | if $channel != "" then .channel = "#\($channel)" else . end
           ' > "$SLACK_PAYLOAD_PATH"
       env:
+        GITHUB_TOKEN: ${{ github.token }}
         SLACK_SUBTEAM: ${{ inputs.subteam }}
         SLACK_ICON_URL: ${{ inputs.icon-url }}
         SLACK_USERNAME: ${{ inputs.username }}
