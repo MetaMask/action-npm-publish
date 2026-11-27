@@ -5,10 +5,6 @@ inputs:
     description: 'The npm tag to publish to. Defaults to "latest".'
     required: false
     default: 'latest'
-  staged-publish:
-    description: 'Whether to use staged publishing. Defaults to "true". If set to "false", the action will publish directly to NPM without a staging step.'
-    required: false
-    default: 'true'
   provenance:
     description: 'Whether to include provenance information in the package. Must be disabled for private repositories. Defaults to "true".'
     required: false
@@ -49,7 +45,6 @@ runs:
       env:
         YARN_IGNORE_PATH: '1'
         PUBLISH_NPM_TAG: ${{ inputs.npm-tag }}
-        STAGED_PUBLISH: ${{ inputs.staged-publish }}
         PROVENANCE: ${{ inputs.provenance }}
         REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
         DRY_RUN: ${{ inputs.dry-run }}

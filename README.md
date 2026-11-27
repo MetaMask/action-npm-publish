@@ -46,7 +46,7 @@ jobs:
           dry-run: false
 ```
 
-This uses `--provenance` and (by default) `--staged` for publishing.
+This uses `--provenance` and `--staged` for publishing.
 
 ### Initial publish
 
@@ -108,8 +108,6 @@ You can read more about these option in the [API](#API) section below
 - **`dry-run`** _(required)_. Whether to do a dry run, which prepares the packages for publishing but does not publish them. Must be `true` or `false`.
 
 - **`npm-tag`** _(optional)_. The npm tag to publish to. Defaults to `latest`.
-
-- **`staged-publish`** _(optional)_. Whether to use staged publishing when publishing via OIDC. Defaults to `true`. If set to `false`, the action will publish directly to NPM without a staging step.
 
 - **`slack-webhook-url`** _(optional)_. The incoming webhook URL associated with your Slack application for announcing releases to a Slack channel. This can be added under the "Incoming Webhooks" section of your Slack app configuration.
 
