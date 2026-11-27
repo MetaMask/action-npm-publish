@@ -81,17 +81,15 @@ runs:
           --arg mention "$mention" \
           --arg run_url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/" \
           --arg instructions_url "https://www.notion.so/metamask-consensys/NPM-publishing-with-OIDC-374f86d67d68805583e9f824ff5ff18e#374f86d67d68807da68cf75485fd70d2" \
-          --arg staged_publish "$STAGED_PUBLISH" \
           --arg icon_url "$SLACK_ICON_URL" \
           --arg username "$SLACK_USERNAME" \
           --arg channel "$SLACK_CHANNEL" \
           '
-          ($staged_publish == "true") as $staged
-          | {
+          {
               text: ":rocket: A new release of `\($repository)` is awaiting deployment.",
               icon_url: $icon_url,
               username: $username,
-              blocks: ([
+              blocks: [
                 {
                   type: "section",
                   text: {
@@ -103,79 +101,47 @@ runs:
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: (
-                      if $staged
-                      then "\($mention)This release needs approval on *GitHub*, and then on *npm* before it is published."
-                      else "\($mention)This release needs approval on *GitHub* before it is published."
-                      end
-                    )
+                    text: "\($mention)This release needs approval on *GitHub*, and then on *npm* before it is published."
                   }
-                }
-              ]
-              + (
-                if $staged
-                then [
-                  {
-                    type: "section",
-                    text: {
-                      type: "mrkdwn",
-                      text: ":hourglass_flowing_sand: npm runs an automated review first, so the npm approval may not be available right away."
-                    }
+                },
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: ":hourglass_flowing_sand: npm runs an automated review first, so the npm approval may not be available right away."
                   }
-                ]
-                else []
-                end
-              )
-              + [
+                },
                 {
                   type: "actions",
-                  elements: (
-                    [
-                      {
-                        type: "button",
-                        text: {
-                          type: "plain_text",
-                          text: (if $staged then "1. Approve on GitHub" else "Approve on GitHub" end)
-                        },
-                        style: "primary",
-                        url: $run_url
-                      }
-                    ]
-                    + (
-                      if $staged
-                      then [
-                        {
-                          type: "button",
-                          text: { type: "plain_text", text: "2. Approve on npm" },
-                          url: "https://www.npmjs.com/"
-                        }
-                      ]
-                      else []
-                      end
-                    )
-                  )
+                  elements: [
+                    {
+                      type: "button",
+                      text: { type: "plain_text", text: "1. Approve on GitHub" },
+                      style: "primary",
+                      url: $run_url
+                    },
+                    {
+                      type: "button",
+                      text: { type: "plain_text", text: "2. Approve on npm" },
+                      url: "https://www.npmjs.com/"
+                    }
+                  ]
                 },
                 {
                   type: "context",
                   elements: [
                     {
                       type: "mrkdwn",
-                      text: (
-                        if $staged
-                        then "React with :eyes: when you start reviewing, and :white_check_mark: once both are approved · <\($instructions_url)|How to approve on npm>"
-                        else "React with :eyes: when you start reviewing, and :white_check_mark: once approved"
-                        end
-                      )
+                      text: "React with :eyes: when you start reviewing, and :white_check_mark: once both are approved · <\($instructions_url)|How to approve on npm>"
                     }
                   ]
                 }
-              ])
-            }
+              ]
+          }
           | if $channel != "" then .channel = "#\($channel)" else . end
           ' > "$SLACK_PAYLOAD_PATH"
       env:
         SLACK_SUBTEAM: ${{ inputs.subteam }}
-        STAGED_PUBLISH: ${{ inputs.staged-publish }}
         SLACK_ICON_URL: ${{ inputs.icon-url }}
         SLACK_USERNAME: ${{ inputs.username }}
         SLACK_CHANNEL: ${{ inputs.channel }}
