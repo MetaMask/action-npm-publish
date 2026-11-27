@@ -63,6 +63,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: build-output
+          include-hidden-files: true
           path: |
             node_modules/.yarn-state.yml
             packages/*/dist
@@ -80,8 +81,6 @@ jobs:
         with:
           name: build-output
           path: ${{ runner.temp }}/build-output
-      # Only copy what the packages need. Never extract the build output over
-      # the checkout: it could overwrite the manifests.
       - name: Restore the build output
         run: |
           mkdir -p node_modules
